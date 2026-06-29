@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Obss.Performance</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Modules\IAM\Obss.IAM.Domain\Obss.IAM.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Orders\Obss.Orders.Domain\Obss.Orders.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Billing\Obss.Billing.Domain\Obss.Billing.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Shared\Obss.SharedKernel\Obss.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

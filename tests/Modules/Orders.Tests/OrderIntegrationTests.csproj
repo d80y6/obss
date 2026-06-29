@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Testcontainers" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Coverlet.Collector" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Modules\Orders\Obss.Orders.Application\Obss.Orders.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Orders\Obss.Orders.Infrastructure\Obss.Orders.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Orders\Obss.Orders.Domain\Obss.Orders.Domain.csproj" />
+  </ItemGroup>
+</Project>

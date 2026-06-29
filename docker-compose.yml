@@ -1,0 +1,451 @@
+networks:
+  obss-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  rabbitmq_logs:
+    driver: local
+  minio_data:
+    driver: local
+  opensearch_data:
+    driver: local
+  opensearch_dashboards_data:
+    driver: local
+  keycloak_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-healthcheck: &healthcheck-start
+  start_period: 60s
+  interval: 10s
+  timeout: 5s
+  retries: 5
+
+services:
+  # ── PostgreSQL 16 ───────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: obss-postgres
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-obss}
+      POSTGRES_USER: ${POSTGRES_USER:-obss_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-obss_s3cur3_p@ss}
+      POSTGRES_MULTIPLE_DATABASES: obss_keycloak,obss_audit,obss_iam,obss_crm,obss_catalog,obss_orders,obss_subscriptions,obss_rating,obss_billing,obss_invoices,obss_payments,obss_collections,obss_service_inventory,obss_network_inventory,obss_provisioning,obss_workflow,obss_ticketing,obss_notifications,obss_reporting,obss_gateway, obss_number_inventory
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-obss_admin} -d ${POSTGRES_DB:-obss}"]
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+  # ── Redis 7 ─────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: obss-redis
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-obss_r3d1s_p@ss}
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-obss_r3d1s_p@ss}", "ping"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 128M
+
+  # ── RabbitMQ 3.13 ───────────────────────────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: obss-rabbitmq
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-obss_admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-obss_rmq_s3cur3}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_USE_LONGNAME: "false"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 128M
+
+  # ── MinIO ────────────────────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: obss-minio
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-obss_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-obss_m1n10_s3cur3}
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 128M
+
+  # ── OpenSearch 2.x ───────────────────────────────────────────────────────
+  opensearch:
+    image: opensearchproject/opensearch:2
+    container_name: obss-opensearch
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: true
+      DISABLE_INSTALL_DEMO_CONFIG: true
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD:-Obss_0p3nS3@rch!}
+      OPENSEARCH_JAVA_OPTS: -Xms512m -Xmx512m
+      bootstrap.memory_lock: false
+      cluster.name: obss-opensearch
+      node.name: obss-opensearch
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+
+  # ── Keycloak 26.x ────────────────────────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1
+    container_name: obss-keycloak
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-obss_kc_s3cur3}
+      KC_DB: ${KC_DB:-postgres}
+      KC_DB_URL: ${KC_DB_URL:-jdbc:postgresql://postgres:5432/obss_keycloak}
+      KC_DB_USERNAME: ${KC_DB_USERNAME:-obss_admin}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:-obss_s3cur3_p@ss}
+      KC_HOSTNAME: ${KEYCLOAK_HOST:-keycloak}
+      KC_HOSTNAME_PORT: ${KEYCLOAK_PORT:-8080}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: ${KEYCLOAK_PORT:-8080}
+      KC_HTTPS_PORT: ${KEYCLOAK_HTTPS_PORT:-8443}
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      KC_LOG_LEVEL: INFO
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      # Mount the folder containing obss-realm.json to Keycloak's default import path
+      - ./infrastructure/keycloak:/opt/keycloak/data/import:ro
+    command: ["start-dev", "--import-realm"]
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/9000"]
+      start_period: 60s
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+
+  # ── Prometheus ──────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: obss-prometheus
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--web.enable-lifecycle"
+      - "--log.level=info"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:9090/-/ready"]
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 128M
+
+  # ── Grafana ─────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: obss-grafana
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-obss_gr4f_s3cur3}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+      GF_SERVER_ROOT_URL: http://localhost:3000
+      GF_LOG_MODE: console
+      GF_LOG_LEVEL: info
+    volumes:
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    logging: *default-logging
+    healthcheck:
+      <<: *healthcheck-start
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:3000/api/health | grep -q 'ok'"]
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+  # ── OpenTelemetry Collector ─────────────────────────────────────────────
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: obss-otel-collector
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8888:8888"
+      - "8889:8889"
+    command:
+      - "--config=/etc/otel-collector-config.yml"
+    volumes:
+      - ./infrastructure/opentelemetry/otel-collector-config.yml:/etc/otel-collector-config.yml:ro
+    environment:
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    logging: *default-logging
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          cpus: "0.2"
+          memory: 128M
+
+  # ── .NET OBSS Host (Modular Monolith) ─────────────────────────────────
+  obss-host:
+    image: ${DOCKER_REGISTRY:-obss}/host:${DOCKER_TAG:-latest}
+    container_name: obss-host
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "5020:8080"
+    build:
+      context: .
+      dockerfile: src/Host/Obss.Host/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://0.0.0.0:8080}
+      DOTNET_ENVIRONMENT: ${DOTNET_ENVIRONMENT:-Development}
+      ConnectionStrings__DefaultConnection: Host=${POSTGRES_HOST};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      ConnectionStrings__Redis: ${REDIS_CONNECTION_STRING},abortConnect=false
+      ConnectionStrings__RabbitMQ: ${RABBITMQ_CONNECTION_STRING}
+      RabbitMq__Host: ${RABBITMQ_HOST}
+      RabbitMq__Port: ${RABBITMQ_PORT}
+      RabbitMq__Username: ${RABBITMQ_USER}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD}
+      Keycloak__Authority: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/realms/${KEYCLOAK_REALM}
+      Keycloak__ClientId: ${KEYCLOAK_CLIENT_ID}
+      Keycloak__Audience: obss-api
+      Keycloak__RequireHttpsMetadata: "false"
+      Cors__AllowedOrigins__0: ${Cors__AllowedOrigins__0}
+      Cors__AllowedOrigins__1: ${Cors__AllowedOrigins__1}
+      Cors__AllowedOrigins__2: ${Cors__AllowedOrigins__2}
+      Cors__AllowedOrigins__3: ${Cors__AllowedOrigins__3}
+      Cors__AllowedOrigins__4: ${Cors__AllowedOrigins__4}
+      Cors__AllowedOrigins__5: ${Cors__AllowedOrigins__5}
+      Redis__InstanceName: Obss
+      Redis__DefaultExpirationMinutes: "60"
+      OpenTelemetry__Endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-obss-host}
+    logging: *default-logging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
+  # ── Frontend (Next.js) ────────────────────────────────────────────────
+  obss-frontend:
+    image: ${DOCKER_REGISTRY:-obss}/frontend:${DOCKER_TAG:-latest}
+    container_name: obss-frontend
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "3080:3000"
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL}
+        NEXT_PUBLIC_KEYCLOAK_REALM: ${NEXT_PUBLIC_KEYCLOAK_REALM}
+        NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID}
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_KEYCLOAK_URL: ${NEXT_PUBLIC_KEYCLOAK_URL}
+      NEXT_PUBLIC_KEYCLOAK_REALM: ${NEXT_PUBLIC_KEYCLOAK_REALM}
+      NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: ${NEXT_PUBLIC_KEYCLOAK_CLIENT_ID}
+    logging: *default-logging
+    depends_on:
+      obss-host:
+        condition: service_started
+      keycloak:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.2"
+          memory: 128M

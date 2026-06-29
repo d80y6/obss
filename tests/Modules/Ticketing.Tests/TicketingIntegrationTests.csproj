@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="Testcontainers" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Coverlet.Collector" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Modules\Ticketing\Obss.Ticketing.Application\Obss.Ticketing.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Ticketing\Obss.Ticketing.Infrastructure\Obss.Ticketing.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Ticketing\Obss.Ticketing.Domain\Obss.Ticketing.Domain.csproj" />
+  </ItemGroup>
+</Project>

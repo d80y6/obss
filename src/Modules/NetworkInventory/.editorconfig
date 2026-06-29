@@ -1,0 +1,5 @@
+[*.cs]
+dotnet_diagnostic.S101.severity = none
+dotnet_diagnostic.RCS1194.severity = none
+dotnet_diagnostic.S3925.severity = none
+dotnet_diagnostic.SYSLIB0051.severity = none

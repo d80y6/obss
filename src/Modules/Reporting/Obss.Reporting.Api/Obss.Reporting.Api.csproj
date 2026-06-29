@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.Reporting.Application\Obss.Reporting.Application.csproj" />
+    <ProjectReference Include="..\Obss.Reporting.Infrastructure\Obss.Reporting.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

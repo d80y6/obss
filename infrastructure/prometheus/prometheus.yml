@@ -1,0 +1,294 @@
+# =============================================================================
+# OBSS Platform - Prometheus Configuration
+# Telecom OSS/BSS Platform
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+  external_labels:
+    cluster: obss
+    environment: production
+
+# Rule files
+rule_files:
+  - "alerting-rules.yml"
+  - "recording-rules.yml"
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Scrape configurations
+scrape_configs:
+  # ── Prometheus self-monitoring ─────────────────────────────────────────
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          service: prometheus
+          component: monitoring
+
+  # ── OpenTelemetry Collector ────────────────────────────────────────────
+  - job_name: "otel-collector"
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["otel-collector:8888"]
+        labels:
+          service: otel-collector
+          component: telemetry
+      - targets: ["otel-collector:8889"]
+        labels:
+          service: otel-collector
+          component: telemetry
+
+  # ── API Gateway ────────────────────────────────────────────────────────
+  - job_name: "obss-api-gateway"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-api-gateway:8080"
+        labels:
+          service: api-gateway
+          module: gateway
+          tier: gateway
+
+  # ── IAM Module ─────────────────────────────────────────────────────────
+  - job_name: "obss-iam"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-iam:8080"
+        labels:
+          service: iam
+          module: iam
+          tier: core
+
+  # ── CRM Module ─────────────────────────────────────────────────────────
+  - job_name: "obss-crm"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-crm:8080"
+        labels:
+          service: crm
+          module: crm
+          tier: core
+
+  # ── Billing Module ─────────────────────────────────────────────────────
+  - job_name: "obss-billing"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-billing:8080"
+        labels:
+          service: billing
+          module: billing
+          tier: finance
+
+  # ── Orders Module ──────────────────────────────────────────────────────
+  - job_name: "obss-orders"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-orders:8080"
+        labels:
+          service: orders
+          module: orders
+          tier: core
+
+  # ── Payments Module ────────────────────────────────────────────────────
+  - job_name: "obss-payments"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-payments:8080"
+        labels:
+          service: payments
+          module: payments
+          tier: finance
+
+  # ── Invoices Module ────────────────────────────────────────────────────
+  - job_name: "obss-invoices"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-invoices:8080"
+        labels:
+          service: invoices
+          module: invoices
+          tier: finance
+
+  # ── Notifications Module ───────────────────────────────────────────────
+  - job_name: "obss-notifications"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-notifications:8080"
+        labels:
+          service: notifications
+          module: notifications
+          tier: core
+
+  # ── Product Catalog Module ─────────────────────────────────────────────
+  - job_name: "obss-product-catalog"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-product-catalog:8080"
+        labels:
+          service: product-catalog
+          module: catalog
+          tier: core
+
+  # ── Subscriptions Module ───────────────────────────────────────────────
+  - job_name: "obss-subscriptions"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-subscriptions:8080"
+        labels:
+          service: subscriptions
+          module: subscriptions
+          tier: core
+
+  # ── Provisioning Module ────────────────────────────────────────────────
+  - job_name: "obss-provisioning"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-provisioning:8080"
+        labels:
+          service: provisioning
+          module: provisioning
+          tier: operations
+
+  # ── Rating Module ──────────────────────────────────────────────────────
+  - job_name: "obss-rating"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-rating:8080"
+        labels:
+          service: rating
+          module: rating
+          tier: finance
+
+  # ── Network Inventory Module ───────────────────────────────────────────
+  - job_name: "obss-network-inventory"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-network-inventory:8080"
+        labels:
+          service: network-inventory
+          module: network
+          tier: operations
+
+  # ── Service Inventory Module ───────────────────────────────────────────
+  - job_name: "obss-service-inventory"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-service-inventory:8080"
+        labels:
+          service: service-inventory
+          module: inventory
+          tier: operations
+
+  # ── Collections Module ─────────────────────────────────────────────────
+  - job_name: "obss-collections"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-collections:8080"
+        labels:
+          service: collections
+          module: collections
+          tier: finance
+
+  # ── Reporting Module ───────────────────────────────────────────────────
+  - job_name: "obss-reporting"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-reporting:8080"
+        labels:
+          service: reporting
+          module: reporting
+          tier: analytics
+
+  # ── Workflow Module ────────────────────────────────────────────────────
+  - job_name: "obss-workflow"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-workflow:8080"
+        labels:
+          service: workflow
+          module: workflow
+          tier: operations
+
+  # ── Ticketing Module ───────────────────────────────────────────────────
+  - job_name: "obss-ticketing"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-ticketing:8080"
+        labels:
+          service: ticketing
+          module: ticketing
+          tier: core
+
+  # ── Audit Module ───────────────────────────────────────────────────────
+  - job_name: "obss-audit"
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scheme: http
+    static_configs:
+      - targets:
+          - "obss-audit:8080"
+        labels:
+          service: audit
+          module: audit
+          tier: security

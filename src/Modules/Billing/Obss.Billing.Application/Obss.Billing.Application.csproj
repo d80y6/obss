@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.Billing.Domain\Obss.Billing.Domain.csproj" />
+    <ProjectReference Include="..\..\Subscriptions\Obss.Subscriptions.Application\Obss.Subscriptions.Application.csproj" />
+    <ProjectReference Include="..\..\Rating\Obss.Rating.Application\Obss.Rating.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Mapster" />
+  </ItemGroup>
+
+</Project>

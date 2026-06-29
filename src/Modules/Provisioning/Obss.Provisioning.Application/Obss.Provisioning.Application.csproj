@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.Provisioning.Domain\Obss.Provisioning.Domain.csproj" />
+    <ProjectReference Include="..\..\Orders\Obss.Orders.Application\Obss.Orders.Application.csproj" />
+    <ProjectReference Include="..\..\ServiceInventory\Obss.ServiceInventory.Application\Obss.ServiceInventory.Application.csproj" />
+    <ProjectReference Include="..\..\Workflow\Obss.Workflow.Application\Obss.Workflow.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+  </ItemGroup>
+
+</Project>

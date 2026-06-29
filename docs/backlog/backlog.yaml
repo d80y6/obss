@@ -1,0 +1,1410 @@
+metadata:
+  title: Telecom OSS/BSS Platform — Phase 1 Foundation Backlog
+  description: >
+    Detailed task-level backlog for Phase 1 (Foundation) of the Telecom OSS/BSS Platform.
+    Covers repository setup, shared kernel, DevSecOps, observability, IAM module,
+    database infrastructure, and module scaffolding. Tasks follow the implementation
+    order: Database Design → Domain Layer → Application Layer → Infrastructure Layer →
+    API Layer → Frontend Layer → Testing Layer where applicable.
+  version: "1.0"
+  generated_from: master-roadmap.yaml (Phase 1)
+  total_tasks: 82
+  status: Completed
+
+tasks:
+  # ==============================================================================
+  # CATEGORY A: REPOSITORY & SOLUTION SETUP
+  # These are foundational scaffolding tasks. No DB/Domain/App layers needed.
+  # ==============================================================================
+
+  - id: T-001
+    description: Create .NET solution with Clean Architecture multi-project structure
+    priority: Critical
+    dependencies: []
+    phase: P1
+    epic: E1.1
+    feature: F-001
+    acceptance_criteria:
+      - Solution created using `dotnet new sln` with name TelcoOssBss
+      - Projects created: SharedKernel.Domain, SharedKernel.Application, SharedKernel.Infrastructure
+      - Per-module project folders under src/Modules/IAM/ (Domain, Application, Infrastructure, Api)
+      - Cross-cutting folders under src/BuildingBlocks/
+      - Test projects under tests/ with UnitTests and IntegrationTests folders
+      - Directory structure matches Clean Architecture conventions
+      - No circular dependencies exist between projects
+      - Domain projects have zero external NuGet dependencies
+    status: Completed
+
+  - id: T-002
+    description: Configure project references and dependency graph for the solution
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.1
+    feature: F-001
+    acceptance_criteria:
+      - IAM.API references IAM.Application and IAM.Infrastructure
+      - IAM.Application references IAM.Domain
+      - IAM.Infrastructure references IAM.Application
+      - SharedKernel.Domain has zero project references
+      - SharedKernel.Application references SharedKernel.Domain only
+      - SharedKernel.Infrastructure references SharedKernel.Application
+      - No module-level Domain project references other modules
+      - All test projects reference the correct source projects
+    status: Completed
+
+  - id: T-003
+    description: Set up solution-wide build configuration with Directory.Build.props and Directory.Build.targets
+    priority: High
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.1
+    feature: F-003
+    acceptance_criteria:
+      - Directory.Build.props at solution root sets common properties (TargetFramework, Nullable, ImplicitUsings)
+      - Central package management enabled with Directory.Packages.props
+      - Directory.Build.targets for common import files
+      - Solution builds with `dotnet build` from any directory
+      - Build output is deterministic (Deterministic=true)
+      - SourceLink enabled for debugging
+    status: Completed
+
+  - id: T-004
+    description: Configure NuGet package management with centralized versioning and private feed
+    priority: High
+    dependencies: [T-003]
+    phase: P1
+    epic: E1.1
+    feature: F-003
+    acceptance_criteria:
+      - Directory.Packages.props defines all external package versions in one place
+      - NuGet.config configured for nuget.org and private GitHub Packages feed
+      - Package version strategy follows SemVer 2.0
+      - VersionOverride feature used for exceptions only
+      - NuGet audit enabled for vulnerability detection
+      - Package reference analysis runs in CI
+    status: Completed
+
+  - id: T-005
+    description: Create .editorconfig, style rules, and Roslyn analyzer configuration
+    priority: High
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.1
+    feature: F-001
+    acceptance_criteria:
+      - .editorconfig at solution root with C# formatting rules
+      - Rules for indentation, line endings, file encoding configured
+      - Naming conventions enforced (PascalCase for public, _camelCase for private fields)
+      - IDE analyzers configured with severity levels
+      - Build warnings treated as errors for configured rules
+      - Banned API analysis for forbidden patterns (e.g., DateTime.Now)
+    status: Completed
+
+  - id: T-006
+    description: Initialize Git repository with .gitignore and branch protection rules
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.1
+    feature: F-002
+    acceptance_criteria:
+      - git init executed in solution root
+      - .gitignore covers .NET, IDE, OS, Docker files
+      - Branch protection on main requires PR approvals
+      - No secrets or build artifacts committed
+      - Repository setup script documented
+    status: Completed
+
+  - id: T-007
+    description: Create branching strategy documentation and trunk-based development guide
+    priority: Medium
+    dependencies: [T-006]
+    phase: P1
+    epic: E1.1
+    feature: F-002
+    acceptance_criteria:
+      - Branch strategy documented in CONTRIBUTING.md
+      - Trunk-based development with short-lived feature branches
+      - Branch naming convention defined (feature/*, bugfix/*, hotfix/*)
+      - Release branching strategy documented
+      - Commit message convention follows Conventional Commits spec
+    status: Completed
+
+  - id: T-008
+    description: Create PR template and contribution guidelines
+    priority: Medium
+    dependencies: [T-006]
+    phase: P1
+    epic: E1.1
+    feature: F-002
+    acceptance_criteria:
+      - PULL_REQUEST_TEMPLATE.md with description, checklist, and testing notes
+      - CONTRIBUTING.md with setup, build, test, and PR process
+      - CODE_OF_CONDUCT.md in repository root
+      - Issue templates for bug reports and feature requests
+    status: Completed
+
+  - id: T-009
+    description: Set up commit hooks with Husky.NET and enforce commit message convention
+    priority: Medium
+    dependencies: [T-005, T-008]
+    phase: P1
+    epic: E1.1
+    feature: F-002
+    acceptance_criteria:
+      - Husky.NET configured for pre-commit hooks
+      - Linting runs on pre-commit for changed files
+      - Commit message validation enforces Conventional Commits format
+      - Hooks installed via `dotnet husky install`
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY B: SHARED KERNEL — DOMAIN LAYER
+  # ==============================================================================
+
+  - id: T-010
+    description: Implement base Entity class with typed identity, equality, and domain event collection
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.2
+    feature: F-004
+    acceptance_criteria:
+      - Entity<TId> abstract class with public TId Id property
+      - Equality based on Id for same entity type (reference equality for transient)
+      - Domain event collection with AddDomainEvent, RemoveDomainEvent, ClearDomainEvents
+      - Override GetHashCode using Id
+      - Operator == and != overloads using Equals
+      - IEquatable<Entity<TId>> implemented
+      - NotEquals comparison returns true for different types even with same Id
+    status: Completed
+
+  - id: T-011
+    description: Implement ValueObject base class with structural equality
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.2
+    feature: F-004
+    acceptance_criteria:
+      - ValueObject abstract class with structural equality
+      - GetAllEqualityComponents abstract method returns IEnumerable<object>
+      - Equality compares all components using sequence equality
+      - Operator == and != overloads
+      - No Identity (Id) property — value objects are immutable
+      - Required derived classes to implement GetAllEqualityComponents
+    status: Completed
+
+  - id: T-012
+    description: Implement AggregateRoot base class with consistency boundary enforcement
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.2
+    feature: F-004
+    acceptance_criteria:
+      - AggregateRoot<TId> inherits from Entity<TId>
+      - Version property for optimistic concurrency
+      - Concurrency check in infrastructure layer
+      - Aggregate boundary rule documented in XML comments
+      - No direct reference to child entities outside aggregate
+    status: Completed
+
+  - id: T-013
+    description: Implement DomainEvent base class, IDomainEvent interface, and event envelope
+    priority: Critical
+    dependencies: [T-012]
+    phase: P1
+    epic: E1.2
+    feature: F-004
+    acceptance_criteria:
+      - IDomainEvent marker interface
+      - DomainEvent base class with OccurredOn (DateTimeOffset), EventId (Guid), CorrelationId, CausationId
+      - Event envelope class with metadata and serialized payload
+      - Immutable after creation
+      - JSON serialization support for event sourcing
+    status: Completed
+
+  - id: T-014
+    description: Implement Result type and error handling pattern (Result, Result<T>, Error)
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.2
+    feature: F-005
+    acceptance_criteria:
+      - Result class with IsSuccess, IsFailure, Error properties
+      - Result<T> generic class with Value property
+      - Error record type with Code, Message, and optional Details
+      - Implicit conversion from Error to Result
+      - Result.Ok() and Result.Fail() factory methods
+      - Result<T>.Ok(value) and Result<T>.Fail(error) factory methods
+      - Match method for pattern matching on success/failure
+      - OnSuccess/OnFailure continuation methods
+      - Swallowing exceptions is not possible — explicit error handling
+    status: Completed
+
+  - id: T-015
+    description: Implement Guard clause utilities and domain validation
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.2
+    feature: F-005
+    acceptance_criteria:
+      - Guard.Against.Null, Guard.Against.NullOrEmpty, Guard.Against.NullOrWhiteSpace
+      - Guard.Against.OutOfRange for numeric, date, and length validation
+      - Guard.Against.EnumOutOfRange for invalid enum values
+      - Custom guard clause extension method support
+      - Domain validation pattern with DomainError class
+      - Validation result aggregates multiple errors
+      - ThrowIf pattern for exception-based validation
+    status: Completed
+
+  - id: T-016
+    description: Implement domain primitives (Money, Email, PhoneNumber, Percentage)
+    priority: Critical
+    dependencies: [T-011]
+    phase: P1
+    epic: E1.2
+    feature: F-005
+    acceptance_criteria:
+      - Money value object with Amount (decimal) and Currency (ISO 4217)
+      - Money operations: Add, Subtract, Multiply, comparison operators
+      - Money prevents mixing currencies in operations
+      - Email value object validates format via regex
+      - Email provides canonical lowercase form
+      - PhoneNumber value object validates with E.164 format
+      - PhoneNumber provides country code extraction
+      - Percentage value object with Value (0-100) and conversion to decimal factor
+    status: Completed
+
+  - id: T-017
+    description: Implement telecom-specific value objects (Bandwidth, MacAddress, IPv4Address, IPv6Address)
+    priority: High
+    dependencies: [T-011]
+    phase: P1
+    epic: E1.2
+    feature: F-007
+    acceptance_criteria:
+      - Bandwidth value object with Value (long) and Unit (Mbps, Gbps, Kbps)
+      - Bandwidth conversion between units
+      - MacAddress value object validates colon/hex format
+      - IPv4Address validates dotted-decimal format
+      - IPv6Address validates RFC 4291 format
+      - SubnetMask with CIDR notation support
+      - All telecom VOs implement IComparable for sorting
+    status: Completed
+
+  - id: T-018
+    description: Implement domain event dispatcher and publish mechanism via MediatR
+    priority: High
+    dependencies: [T-013, T-014]
+    phase: P1
+    epic: E1.2
+    feature: F-007
+    acceptance_criteria:
+      - IDomainEventDispatcher interface with DispatchAsync
+      - Dispatcher implementation uses MediatR to publish events
+      - Events dispatched after successful unit of work commit
+      - Event handler base class with error handling
+      - Retry mechanism for transient failures in event handlers
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY C: SHARED KERNEL — APPLICATION LAYER
+  # ==============================================================================
+
+  - id: T-019
+    description: Create base CQRS abstractions (ICommand, IQuery, ICommandHandler, IQueryHandler)
+    priority: Critical
+    dependencies: [T-012, T-014]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - ICommand<TResponse> and IQuery<TResponse> interfaces
+      - ICommandHandler<TCommand, TResponse> with Handle method
+      - IQueryHandler<TQuery, TResponse> with Handle method
+      - Command and Query base records
+      - ICommand<Unit> for void commands
+      - MediatR configured as mediator
+      - All commands return Result<TResponse> or Result
+    status: Completed
+
+  - id: T-020
+    description: Create IRepository and ISpecification pattern interfaces
+    priority: Critical
+    dependencies: [T-019]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - IRepository<TAggregate> interface with GetById, Add, Update, Delete
+      - ISpecification<T> with Criteria, Includes, OrderBy, Pagination
+      - IReadRepository<T> for read-only operations (query-only)
+      - Specification evaluator that compiles to LINQ expressions
+      - Including related entities via Include/ThenInclude specification
+      - Pagination support (Skip, Take)
+    status: Completed
+
+  - id: T-021
+    description: Create IUnitOfWork abstraction for atomic transaction management
+    priority: Critical
+    dependencies: [T-020]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - IUnitOfWork interface with SaveChangesAsync and IDbContext reference
+      - BeginTransaction/CommitTransaction/RollbackTransaction for distributed transactions
+      - Domain events dispatched automatically before commit
+      - Outbox pattern support for reliable event publishing
+    status: Completed
+
+  - id: T-022
+    description: Implement pipeline behaviors for logging, validation, and transaction management
+    priority: High
+    dependencies: [T-019]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - LoggingBehavior logs command/query name, execution time, and result
+      - ValidationBehavior runs FluentValidation validators before handler
+      - TransactionBehavior wraps command execution in database transaction
+      - ExceptionBehavior catches unhandled exceptions and returns failure Result
+      - PerformanceBehavior warns on commands exceeding threshold (500ms)
+      - Behaviors registered in correct order via DI
+    status: Completed
+
+  - id: T-023
+    description: Create base DTOs, mapping extensions, and pagination utilities
+    priority: High
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - PagedResult<T> with Items, TotalCount, Page, PageSize, TotalPages
+      - PagedRequest with Page, PageSize, and optional SortBy/SortDirection
+      - IMapFrom<T> interface for AutoMapper or manual mapping convention
+      - Mapping extension methods on IQueryable for ProjectTo
+      - DTO base class with common audit fields
+    status: Completed
+
+  - id: T-024
+    description: Create validation infrastructure with FluentValidation
+    priority: High
+    dependencies: [T-015, T-019]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - FluentValidation NuGet package configured
+      - AbstractValidator<T> for all command and query validators
+      - Validation result maps to domain Result pattern
+      - Custom validators for domain primitives (Email, Money, PhoneNumber)
+      - Collection validator support for nested validation
+      - Validator auto-discovery via assembly scanning
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY D: SHARED KERNEL — INFRASTRUCTURE LAYER
+  # ==============================================================================
+
+  - id: T-025
+    description: Configure EF Core with custom conventions for auditable entities and soft delete
+    priority: Critical
+    dependencies: [T-010, T-011, T-012]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - Custom EF Core convention adds CreatedAt, UpdatedAt, CreatedBy, UpdatedBy shadow properties
+      - Soft delete convention adds IsDeleted property and global query filter
+      - Value converter convention for domain primitives (Money, Email, PhoneNumber)
+      - TenantId query filter convention for multi-tenant data isolation
+      - Conventions apply to all entity configurations automatically
+    status: Completed
+
+  - id: T-026
+    description: Implement generic EF Core repository
+    priority: High
+    dependencies: [T-020, T-025]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - EfRepository<TAggregate> implements IRepository<TAggregate>
+      - Specification evaluator compiles include expressions
+      - GetById returns null if not found
+      - Add returns the entity with generated Id
+      - Update marks entity as modified
+      - Delete performs soft delete if entity supports it
+      - Pagination returns PagedResult
+    status: Completed
+
+  - id: T-027
+    description: Implement Unit of Work with domain event dispatch coordination
+    priority: High
+    dependencies: [T-021, T-025, T-018]
+    phase: P1
+    epic: E1.2
+    feature: F-006
+    acceptance_criteria:
+      - UnitOfWork implementation wraps DbContext
+      - SaveChangesAsync dispatches domain events after successful save
+      - Events dispatched even if multiple aggregates have events
+      - Transaction support for Begin/Commit/Rollback
+      - IDisposable for clean-up
+    status: Completed
+
+  - id: T-028
+    description: Create specification evaluator and Include expression builder
+    priority: Medium
+    dependencies: [T-020, T-025]
+    phase: P1
+    epic: E1.2
+    feature: F-007
+    acceptance_criteria:
+      - SpecificationEvaluator<T> applies criteria (Where), includes, ordering, and pagination
+      - Evaluator returns IQueryable<T> for further composition
+      - Multiple includes via Include/ThenInclude work correctly
+      - OrderBy and ThenBy with descending support
+      - Pagination applied last in query chain
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY E: DATABASE INFRASTRUCTURE
+  # ==============================================================================
+
+  - id: T-029
+    description: Design and implement ApplicationDbContext with shared kernel conventions
+    priority: Critical
+    dependencies: [T-025]
+    phase: P1
+    epic: E1.6
+    feature: F-024
+    acceptance_criteria:
+      - ApplicationDbContext inherits from DbContext
+      - DbContext registers all entity configurations from assembly
+      - Custom SaveChangesAsync overrides for audit fields population
+      - Soft delete query filter applied globally
+      - Tenant filter applied when tenant ID available in current context
+      - IDbContextFactory registered for design-time migrations
+    status: Completed
+
+  - id: T-030
+    description: Create EF Core migration infrastructure with design-time factory
+    priority: Critical
+    dependencies: [T-029]
+    phase: P1
+    epic: E1.6
+    feature: F-023
+    acceptance_criteria:
+      - DesignTimeDbContextFactory for migration tooling
+      - Initial migration creates all shared tables
+      - Migrations configurable per module (modular migrations)
+      - Migration history table named __EFMigrationsHistory
+      - Idempotent migration scripts generated for production deployments
+      - Rollback migration supported (down script)
+    status: Completed
+
+  - id: T-031
+    description: Create base EntityTypeConfiguration conventions and helper extensions
+    priority: High
+    dependencies: [T-029]
+    phase: P1
+    epic: E1.6
+    feature: F-024
+    acceptance_criteria:
+      - IEntityTypeConfiguration<T> applied via assembly scanning
+      - ConfigureTable helper sets schema, pluralization, and naming conventions
+      - ConfigureAudit helper adds audit shadow properties
+      - ConfigureSoftDelete helper adds IsDeleted and query filter
+      - ConfigureId helper sets primary key convention
+      - All table names use lowercase with underscores (PostgreSQL convention)
+    status: Completed
+
+  - id: T-032
+    description: Create seed data infrastructure with development and reference data
+    priority: High
+    dependencies: [T-029]
+    phase: P1
+    epic: E1.6
+    feature: F-024
+    acceptance_criteria:
+      - ISeedDataProvider interface for modular seed data
+      - Seed data applied in development environment only
+      - Reference data (countries, currencies, tax codes) seeded
+      - Admin user and roles seeded for IAM
+      - Idempotent seeding (skips if data exists)
+    status: Completed
+
+  - id: T-033
+    description: Implement database health check
+    priority: Medium
+    dependencies: [T-029]
+    phase: P1
+    epic: E1.6
+    feature: F-024
+    acceptance_criteria:
+      - DbContext health check verifies database connectivity
+      - Migration health check verifies all migrations applied
+      - Connection pool health check with timeout
+      - Health check returns degradation details on failure
+    status: Completed
+
+  - id: T-034
+    description: Configure database connection management with resilience policies
+    priority: Medium
+    dependencies: [T-029]
+    phase: P1
+    epic: E1.6
+    feature: F-024
+    acceptance_criteria:
+      - Connection string from environment/configuration with fallback
+      - Polly retry policy for transient failures (3 retries with exponential backoff)
+      - Circuit breaker for catastrophic database failures
+      - Connection pooling configured (min/max pool size)
+      - Connection resiliency for Azure SQL / PostgreSQL
+    status: Completed
+
+  - id: T-035
+    description: Create multi-tenancy EF Core infrastructure
+    priority: High
+    dependencies: [T-029]
+    phase: P1
+    epic: E1.6
+    feature: F-024
+    acceptance_criteria:
+      - ITenantContext interface provides current TenantId
+      - TenantId resolved from authenticated user's claim
+      - Global query filter applies TenantId to all tenant-scoped entities
+      - Shared database or schema-per-tenant strategy supported
+      - Tenant migration isolation
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY F: DEVSECOPS
+  # ==============================================================================
+
+  - id: T-036
+    description: Create Docker Compose configuration for local development environment
+    priority: Critical
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.3
+    feature: F-008
+    acceptance_criteria:
+      - docker-compose.yml with PostgreSQL 16, Redis 7, RabbitMQ 3
+      - Keycloak 22+ with pre-configured realm export
+      - Prometheus and Grafana with auto-configuration
+      - Jaeger for distributed tracing
+      - Elasticsearch or Loki for log aggregation
+      - Health checks on all services
+      - Persistent volumes for database and message queue data
+      - Environment variable defaults with .env file
+    status: Completed
+
+  - id: T-037
+    description: Create Dockerfiles for each service target (development and production)
+    priority: High
+    dependencies: [T-036]
+    phase: P1
+    epic: E1.3
+    feature: F-008
+    acceptance_criteria:
+      - Multi-stage Dockerfiles (build, publish, runtime)
+      - Development Dockerfile with hot-reload (dotnet watch)
+      - Production Dockerfile with AOT/trimming optimization
+      - Dockerfile per API project in the solution
+      - Dockerignore file excludes build artifacts and packages
+      - Images use non-root user in production
+    status: Completed
+
+  - id: T-038
+    description: Create GitHub Actions CI pipeline for build, test, and code analysis
+    priority: Critical
+    dependencies: [T-001, T-003]
+    phase: P1
+    epic: E1.3
+    feature: F-009
+    acceptance_criteria:
+      - CI workflow triggers on PR and push to main
+      - Build step runs dotnet build with Release configuration
+      - Unit tests run with dotnet test and coverage collection
+      - Integration tests run with Docker Compose services
+      - Code coverage report published (minimum 80%)
+      - Pipeline completes in under 10 minutes
+      - Cache NuGet packages between runs
+      - Status check required for PR merge
+    status: Completed
+
+  - id: T-039
+    description: Configure Roslyn analyzers and StyleCop ruleset
+    priority: High
+    dependencies: [T-005]
+    phase: P1
+    epic: E1.3
+    feature: F-010
+    acceptance_criteria:
+      - StyleCop.Analyzers NuGet package configured solution-wide
+      - stylecop.json ruleset file in solution root
+      - Custom rule overrides in .editorconfig
+      - Build breaks on StyleCop errors
+      - Rule documentation in contributing guide
+      - XML documentation required for all public APIs
+    status: Completed
+
+  - id: T-040
+    description: Set up SonarQube analysis in CI pipeline
+    priority: High
+    dependencies: [T-038]
+    phase: P1
+    epic: E1.3
+    feature: F-010
+    acceptance_criteria:
+      - SonarQube scanner integrated into GitHub Actions workflow
+      - Quality gate defined (coverage, duplication, maintainability, reliability)
+      - PR decoration with SonarQube analysis results
+      - Security hotspots tracked
+      - Technical debt ratio reported
+    status: Completed
+
+  - id: T-041
+    description: Configure Trivy/OWASP DependencyCheck for dependency vulnerability scanning
+    priority: High
+    dependencies: [T-038]
+    phase: P1
+    epic: E1.3
+    feature: F-011
+    acceptance_criteria:
+      - Trivy scans NuGet dependencies for CVEs
+      - Scan runs on every PR and scheduled weekly
+      - Critical and High severity findings block pipeline
+      - False positive suppression mechanism
+      - SBOM generated for dependency inventory
+    status: Completed
+
+  - id: T-042
+    description: Configure Semgrep/CodeQL SAST analysis for code security scanning
+    priority: High
+    dependencies: [T-038]
+    phase: P1
+    epic: E1.3
+    feature: F-011
+    acceptance_criteria:
+      - CodeQL analysis enabled in GitHub Actions
+      - Semgrep rules for OWASP Top 10 C# patterns
+      - Custom rules for business logic vulnerabilities
+      - SAST results block PR on critical findings
+      - Scan covers all C# and infrastructure-as-code files
+    status: Completed
+
+  - id: T-043
+    description: Create GitHub Actions CD pipeline for staging deployment
+    priority: High
+    dependencies: [T-038, T-036]
+    phase: P1
+    epic: E1.3
+    feature: F-009
+    acceptance_criteria:
+      - CD triggers on successful main branch merge
+      - Container images built and pushed to registry
+      - Helm chart or docker-compose deployment to staging
+      - Smoke tests run after deployment
+      - Rollback on failed smoke tests
+      - Deployment notification via Slack/Teams
+    status: Completed
+
+  - id: T-044
+    description: Configure container registry (GitHub Container Registry) and artifact publishing
+    priority: Medium
+    dependencies: [T-037, T-043]
+    phase: P1
+    epic: E1.3
+    feature: F-012
+    acceptance_criteria:
+      - Images tagged with semantic version and Git SHA
+      - Latest tag updated on main merge
+      - Retention policy keeps last 50 images
+      - Image signing for supply chain security
+      - NuGet packages published to GitHub Packages feed
+    status: Completed
+
+  - id: T-045
+    description: Create PR quality gates and automated status checks
+    priority: Medium
+    dependencies: [T-038]
+    phase: P1
+    epic: E1.3
+    feature: F-009
+    acceptance_criteria:
+      - Required status checks: build, tests, SonarQube, dependency scan, SAST
+      - Minimum PR approval count of 1
+      - Branch must be up to date with main
+      - Merge queue for orderly merging
+      - PR label enforcement (size, type)
+    status: Completed
+
+  - id: T-046
+    description: Configure linting and formatting enforcement in CI
+    priority: Medium
+    dependencies: [T-039]
+    phase: P1
+    epic: E1.3
+    feature: F-010
+    acceptance_criteria:
+      - dotnet format runs in CI and fails on violations
+      - Format check task in pipeline
+      - Editorconfig rules enforced automatically
+      - PowerShell/Bash script linting included for devops scripts
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY G: OBSERVABILITY
+  # ==============================================================================
+
+  - id: T-047
+    description: Configure OpenTelemetry SDK with exporters for tracing, metrics, and logs
+    priority: Critical
+    dependencies: [T-001, T-004]
+    phase: P1
+    epic: E1.4
+    feature: F-013
+    acceptance_criteria:
+      - OpenTelemetry.Extensions.Hosting NuGet package configured
+      - OTLP exporter configured for traces
+      - Prometheus exporter configured for metrics
+      - ASP.NET Core instrumentation auto-registered
+      - EF Core instrumentation auto-registered
+      - HTTP client instrumentation auto-registered
+      - Resource attributes set for service.name, service.version, environment
+      - SDK configuration loaded from environment variables
+    status: Completed
+
+  - id: T-048
+    description: Configure structured logging with Serilog
+    priority: Critical
+    dependencies: [T-001, T-004]
+    phase: P1
+    epic: E1.4
+    feature: F-014
+    acceptance_criteria:
+      - Serilog configured as logging provider via Serilog.AspNetCore
+      - Log output as structured JSON to console
+      - Enrichers for CorrelationId, TenantId, UserId, MachineName
+      - Minimum level configurable per namespace via configuration
+      - Sink for Elasticsearch or Loki configured
+      - File sink with rolling file policy for audit trail
+      - Destructuring for complex objects (no ToString)
+      - Seq sink for development log viewing
+    status: Completed
+
+  - id: T-049
+    description: Create ASP.NET Core logging middleware for request/response logging
+    priority: High
+    dependencies: [T-048]
+    phase: P1
+    epic: E1.4
+    feature: F-014
+    acceptance_criteria:
+      - Middleware logs HTTP method, path, status code, duration
+      - Request body logged at Debug level (with size limit)
+      - Response body logged at Debug level
+      - Exceptions logged with full stack trace
+      - Correlation ID generated for each request
+      - PII fields masked in logs (passwords, credit cards)
+    status: Completed
+
+  - id: T-050
+    description: Set up OpenTelemetry metrics collection and custom business metrics
+    priority: High
+    dependencies: [T-047]
+    phase: P1
+    epic: E1.4
+    feature: F-015
+    acceptance_criteria:
+      - MeterProvider configured with HTTP server, ASP.NET Core meters
+      - Custom meters defined for business KPIs (active subscriptions, orders per minute)
+      - Histogram for request duration with latency buckets
+      - Counter for total requests, errors, successes
+      - Prometheus endpoint exposed via OpenTelemetry
+      - Metrics available at /metrics endpoint
+    status: Completed
+
+  - id: T-051
+    description: Configure distributed tracing with OpenTelemetry and Jaeger
+    priority: High
+    dependencies: [T-047]
+    phase: P1
+    epic: E1.4
+    feature: F-016
+    acceptance_criteria:
+      - TraceIdProvider generates and propagates trace context
+      - W3C TraceContext propagation via HTTP headers
+      - RabbitMQ instrumentation for trace propagation across messages
+      - Exemplar recording for trace-to-metrics correlation
+      - Sampling configuration (parent-based, rate-limiting for production)
+      - Jaeger endpoint configured as OTLP trace exporter
+    status: Completed
+
+  - id: T-052
+    description: Implement ASP.NET Core health checks for all dependencies
+    priority: Medium
+    dependencies: [T-033]
+    phase: P1
+    epic: E1.4
+    feature: F-017
+    acceptance_criteria:
+      - Health checks for: Database, Redis, RabbitMQ, Keycloak, Prometheus
+      - Liveness endpoint (simple process check)
+      - Readiness endpoint (dependency check)
+      - Startup endpoint (slow startup check)
+      - Custom health check for Business Health (critical business flows)
+      - Health check UI for development
+      - Degraded vs Healthy vs Unhealthy status reporting
+    status: Completed
+
+  - id: T-053
+    description: Configure Prometheus scraping targets and AlertManager rules
+    priority: High
+    dependencies: [T-050, T-036]
+    phase: P1
+    epic: E1.4
+    feature: F-015
+    acceptance_criteria:
+      - Prometheus configuration with scrape jobs for all services
+      - Scrape interval of 15 seconds
+      - AlertManager configured with notification receiver
+      - Alert rules for: service down, high error rate, P99 latency > 500ms
+      - Recording rules for common aggregations
+    status: Completed
+
+  - id: T-054
+    description: Create Grafana dashboards for platform health and business KPIs
+    priority: Medium
+    dependencies: [T-053, T-036]
+    phase: P1
+    epic: E1.4
+    feature: F-015
+    acceptance_criteria:
+      - Grafana provisioning with datasource (Prometheus, Loki)
+      - Dashboard: Service Health (CPU, memory, request rate, error rate, latency)
+      - Dashboard: Business KPIs (active users, orders, subscriptions)
+      - Dashboard: Database performance (connection pool, query timing)
+      - Dashboard templates exported and version-controlled
+      - Alert dashboard for active alerts
+    status: Completed
+
+  - id: T-055
+    description: Set up log aggregation with Loki/Grafana or Elasticsearch/Kibana
+    priority: Medium
+    dependencies: [T-048, T-036]
+    phase: P1
+    epic: E1.4
+    feature: F-014
+    acceptance_criteria:
+      - Log shipper configured to forward logs to Loki/Elasticsearch
+      - Log labels for service, environment, level
+      - Log retention policy (30 days hot, 90 days warm, 1 year cold)
+      - Dashboard for log exploration in Grafana/Kibana
+      - Structured log query capabilities (filter by correlation ID)
+    status: Completed
+
+  - id: T-056
+    description: Configure alerting rules and notification channels
+    priority: Medium
+    dependencies: [T-053, T-052]
+    phase: P1
+    epic: E1.4
+    feature: F-017
+    acceptance_criteria:
+      - Alert rules for: disk space > 80%, memory > 90%, pod restarts
+      - Alert rules for: API error rate > 5%, P99 latency > 1s
+      - Notification channel to Slack/Teams/PagerDuty
+      - Alert severity levels: Warning, Critical
+      - Silence mechanism for maintenance windows
+      - Alert acknowledgement workflow
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY H: IAM — DATABASE DESIGN
+  # ==============================================================================
+
+  - id: T-057
+    description: Design IAM database schema (users, roles, permissions, tenants tables)
+    priority: Critical
+    dependencies: [T-029, T-030]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - EF Core migration creates Users, Roles, Permissions, UserRoles, RolePermissions tables
+      - Users table: Id, Username, Email, FirstName, LastName, IsActive, ExternalId (Keycloak ref)
+      - Roles table: Id, Name, Description, IsSystem, TenantId
+      - Permissions table: Id, Name, Description, Category, Resource, Action
+      - UserRoles: composite PK with UserId, RoleId
+      - RolePermissions: composite PK with RoleId, PermissionId
+      - TenantId filter on tenant-scoped tables
+      - Audit shadow properties on all tables
+    status: Completed
+
+  - id: T-058
+    description: Create IAM entity configurations and value converters
+    priority: High
+    dependencies: [T-057]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - UserEntityTypeConfiguration with indexes on Username, Email
+      - RoleEntityTypeConfiguration with unique Name index
+      - PermissionEntityTypeConfiguration with unique composite index (Name, Resource)
+      - Many-to-many relationship configuration for UserRoles and RolePermissions
+      - Value converter for domain primitives used in IAM
+      - Seed data for admin user, admin role, and base permissions
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY I: IAM — DOMAIN LAYER
+  # ==============================================================================
+
+  - id: T-059
+    description: Create IAM domain entities (User, Role, Permission, Tenant)
+    priority: Critical
+    dependencies: [T-010, T-011, T-012, T-016]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - User aggregate root with properties: Username, Email, FirstName, LastName, IsActive, ExternalId
+      - User.AddRole, User.RemoveRole, User.HasPermission domain methods
+      - Role entity: Name, Description, IsSystem (system roles cannot be deleted)
+      - Role.AddPermission, Role.RemovePermission methods
+      - Permission value object: Name, Description, Category, Resource, Action
+      - Tenant entity: Name, Slug, IsActive, Settings collection
+      - Domain invariants enforced: username unique, email valid, role names unique
+      - Domain events: UserCreatedEvent, UserDeactivatedEvent, RoleAssignedEvent
+    status: Completed
+
+  - id: T-060
+    description: Create IAM domain services (UserService, RoleService, PermissionService)
+    priority: High
+    dependencies: [T-059]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - UserService: RegisterUser, ActivateUser, SuspendUser, ChangePassword
+      - RoleService: CreateRole, UpdateRole, DeleteRole, AssignRoleToUser, RemoveRoleFromUser
+      - PermissionService: CreatePermission, AssignPermissionToRole, RemovePermissionFromRole
+      - All services return Result types
+      - Business rules validated before state changes
+      - Services dispatch domain events on state changes
+    status: Completed
+
+  - id: T-061
+    description: Create IAM domain specifications and query logic
+    priority: Medium
+    dependencies: [T-060]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - UserByUsernameSpecification
+      - UserByEmailSpecification
+      - ActiveUsersSpecification
+      - UsersInRoleSpecification
+      - PermissionsForUserSpecification (computed from role assignments)
+      - RoleWithPermissionsSpecification (eager loading)
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY J: IAM — APPLICATION LAYER
+  # ==============================================================================
+
+  - id: T-062
+    description: Create IAM commands and command handlers
+    priority: Critical
+    dependencies: [T-019, T-059]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - RegisterUserCommand with handler
+      - UpdateUserCommand with handler
+      - ActivateUserCommand / DeactivateUserCommand with handlers
+      - AssignRoleCommand / RemoveRoleCommand with handlers
+      - CreateRoleCommand, UpdateRoleCommand, DeleteRoleCommand with handlers
+      - CreatePermissionCommand with handler
+      - All commands return Result<T> where T is the relevant DTO
+      - Command validators for all commands
+    status: Completed
+
+  - id: T-063
+    description: Create IAM queries and query handlers
+    priority: Critical
+    dependencies: [T-019, T-059]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - GetUserByIdQuery, GetUserByUsernameQuery with handlers
+      - SearchUsersQuery with paginated results and filters (status, role, name)
+      - GetRoleByIdQuery with handler
+      - GetAllRolesQuery with pagination
+      - GetPermissionsForUserQuery (resolved through role hierarchy)
+      - GetAllPermissionsQuery with pagination
+      - GetTenantByIdQuery with handler
+      - All queries return Result<T>
+    status: Completed
+
+  - id: T-064
+    description: Create IAM DTOs, mapping profiles, and request/response models
+    priority: High
+    dependencies: [T-062, T-063]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - UserDto with Id, Username, Email, FirstName, LastName, IsActive, CreatedAt
+      - UserDetailDto extends UserDto with assigned roles
+      - RoleDto with Id, Name, Description, IsSystem, PermissionCount
+      - PermissionDto with Id, Name, Description, Category, Resource, Action
+      - AutoMapper profile for User→UserDto mapping
+      - AutoMapper profile for Role→RoleDto mapping
+      - AutoMapper profile for Permission→PermissionDto mapping
+      - Paginated response wrapper for list endpoints
+    status: Completed
+
+  - id: T-065
+    description: Create IAM command validators with FluentValidation
+    priority: High
+    dependencies: [T-024, T-062]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - RegisterUserCommandValidator: username length, email format, password strength
+      - UpdateUserCommandValidator: valid fields, at least one field to update
+      - CreateRoleCommandValidator: name required and unique, description max length
+      - AssignRoleCommandValidator: valid userId, valid roleId
+      - CreatePermissionCommandValidator: name required, valid resource/action pair
+      - Password strength rules: min length, complexity requirements
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY K: IAM — INFRASTRUCTURE LAYER
+  # ==============================================================================
+
+  - id: T-066
+    description: Create Keycloak admin client for identity management integration
+    priority: Critical
+    dependencies: [T-059]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - KeycloakAdminClientService using Keycloak REST API
+      - CreateUserInKeycloak creates user and returns Keycloak ID
+      - UpdateUserInKeycloak syncs profile changes
+      - DeleteUserInKeycloak handles user removal
+      - AssignRoleInKeycloak maps platform roles to Keycloak roles
+      - Handle Keycloak connection failures with retry
+      - Map Keycloak exceptions to domain errors
+      - Service registered as singleton with token management
+    status: Completed
+
+  - id: T-067
+    description: Create IAM EF Core repositories (UserRepository, RoleRepository)
+    priority: High
+    dependencies: [T-026, T-058, T-059]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - UserRepository implements IRepository<User> + IUserRepository
+      - RoleRepository implements IRepository<Role> + IRoleRepository
+      - IUserRepository: GetByUsername, GetByEmail, GetWithRoles, SearchUsers
+      - IRoleRepository: GetWithPermissions, GetByName, GetByUser
+      - Repositories use specification pattern for queries
+      - Include chains for eager loading of role-permission relationships
+    status: Completed
+
+  - id: T-068
+    description: Create IAM unit of work and authentication context providers
+    priority: High
+    dependencies: [T-027, T-067]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - IamUnitOfWork coordinates UserRepository and RoleRepository
+      - Domain events dispatched after IAM state changes
+      - ICurrentUser service resolves current user from HTTP context
+      - ITokenGenerator creates JWT tokens with claims
+      - IPasswordHasher wraps BCrypt/Argon2 for password hashing
+      - IAuthenticationProvider interface for Keycloak OIDC
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY L: IAM — API LAYER
+  # ==============================================================================
+
+  - id: T-069
+    description: Create IAM authentication API endpoints (login, logout, refresh, MFA)
+    priority: Critical
+    dependencies: [T-062, T-066, T-068]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - POST /api/v1/auth/login accepts username/password, returns JWT and refresh token
+      - POST /api/v1/auth/refresh accepts refresh token, returns new JWT
+      - POST /api/v1/auth/logout invalidates current session
+      - POST /api/v1/auth/mfa/setup enables MFA for current user
+      - POST /api/v1/auth/mfa/verify verifies MFA code
+      - Token response includes expires_in, token_type, refresh_token
+      - All endpoints return proper HTTP status codes and error responses
+      - Rate limiting on login endpoint (5 attempts per minute)
+    status: Completed
+
+  - id: T-070
+    description: Create authorization middleware (JWT validation, RBAC, permission checks)
+    priority: Critical
+    dependencies: [T-062, T-066, T-068]
+    phase: P1
+    epic: E1.5
+    feature: F-020
+    acceptance_criteria:
+      - JWT bearer token validation middleware configured
+      - Token validation: signature, expiry, issuer, audience
+      - RequireRole("Admin") policy attribute for role-based authorization
+      - RequirePermission("users:write") custom authorization policy
+      - AuthorizationPolicyProvider resolves permission-based policies
+      - Resource-based authorization with IAuthorizationService
+      - Claims transformation enriches identity with roles and permissions
+      - Unauthorized returns 401, Forbidden returns 403 with proper body
+    status: Completed
+
+  - id: T-071
+    description: Create user management API endpoints
+    priority: High
+    dependencies: [T-062, T-067]
+    phase: P1
+    epic: E1.5
+    feature: F-021
+    acceptance_criteria:
+      - GET /api/v1/users — list/search users (paginated, filtered)
+      - GET /api/v1/users/{id} — get user detail with roles
+      - POST /api/v1/users — create user
+      - PUT /api/v1/users/{id} — update user
+      - DELETE /api/v1/users/{id} — soft delete user
+      - POST /api/v1/users/{id}/activate — activate user
+      - POST /api/v1/users/{id}/deactivate — deactivate user
+      - All endpoints authorized with appropriate permissions
+      - Input validation returns 422 with validation details
+    status: Completed
+
+  - id: T-072
+    description: Create role and permission management API endpoints
+    priority: High
+    dependencies: [T-062, T-067]
+    phase: P1
+    epic: E1.5
+    feature: F-022
+    acceptance_criteria:
+      - GET /api/v1/roles — list roles
+      - GET /api/v1/roles/{id} — get role with permissions
+      - POST /api/v1/roles — create role
+      - PUT /api/v1/roles/{id} — update role
+      - DELETE /api/v1/roles/{id} — delete role (non-system only)
+      - PUT /api/v1/roles/{id}/permissions — assign permissions to role
+      - GET /api/v1/permissions — list all permissions (grouped by category)
+      - PUT /api/v1/users/{id}/roles — assign roles to user
+      - All endpoints authorized with admin permissions
+    status: Completed
+
+  - id: T-073
+    description: Create IAM API error handling and API specification middleware
+    priority: Medium
+    dependencies: [T-069, T-070]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - Global exception middleware catches unhandled exceptions
+      - ProblemDetails response format for all errors (RFC 7807)
+      - Validation error response with field-level details
+      - Swagger/OpenAPI configuration with JWT bearer auth
+      - API versioning via URL path (/api/v1/)
+      - CORS configuration for SPA and mobile clients
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY M: IAM — TESTING LAYER
+  # ==============================================================================
+
+  - id: T-074
+    description: Write IAM domain layer unit tests
+    priority: High
+    dependencies: [T-059, T-060]
+    phase: P1
+    epic: E1.5
+    feature: F-018
+    acceptance_criteria:
+      - User aggregate tests: creation, role assignment/removal, activation/deactivation
+      - User invariants: username required, valid email, unique role assignment
+      - Role tests: creation, permission assignment, system role protection
+      - Permission value object tests: equality, validation
+      - Tenant tests: creation, settings management
+      - Domain event tests: events raised on state changes
+      - All tests use xUnit and FluentAssertions
+      - Test coverage above 90% for domain layer
+    status: Completed
+
+  - id: T-075
+    description: Write IAM application layer unit tests (commands, queries, validators)
+    priority: High
+    dependencies: [T-062, T-063, T-064, T-065]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - Command handler tests: successful execution, validation failure, domain error
+      - Query handler tests: correct data returned, pagination, filtering
+      - Validator tests: all validation rules covered
+      - Mapping profile tests: AutoMapper configuration valid
+      - All dependencies mocked using NSubstitute/Moq
+      - Test coverage above 85% for application layer
+    status: Completed
+
+  - id: T-076
+    description: Write IAM integration tests (API endpoints, Keycloak integration, database)
+    priority: High
+    dependencies: [T-066, T-069, T-070, T-071, T-072]
+    phase: P1
+    epic: E1.5
+    feature: F-019
+    acceptance_criteria:
+      - Integration tests use TestContainer for PostgreSQL and Keycloak
+      - Test fixture sets up database, applies migrations, seeds data
+      - Authentication flow tests: login, token refresh, logout
+      - Authorization tests: RBAC middleware, permission checks
+      - User CRUD API tests: create, read, update, delete via HTTP
+      - Role management API tests: CRUD, permission assignment
+      - Error scenario tests: invalid credentials, insufficient permissions, not found
+      - Tests clean up data between runs
+      - All tests idempotent and parallel-safe
+    status: Completed
+
+  # ==============================================================================
+  # CATEGORY N: MODULE SCAFFOLDING
+  # ==============================================================================
+
+  - id: T-077
+    description: Create module template structure and dotnet new template
+    priority: High
+    dependencies: [T-001]
+    phase: P1
+    epic: E1.7
+    feature: F-026
+    acceptance_criteria:
+      - dotnet new template for module creation: dotnet new tmodule -n IAM
+      - Template creates 4 projects: Domain, Application, Infrastructure, Api
+      - Template adds project references to Shared Kernel
+      - Template creates module registration extension
+      - Template creates sample entity, command, query, handler, controller
+      - Template configures correct namespaces and folder structure
+      - Template includes .csproj with correct target framework
+      - Template README with module conventions
+    status: Completed
+
+  - id: T-078
+    description: Create module auto-discovery and registration system
+    priority: High
+    dependencies: [T-077]
+    phase: P1
+    epic: E1.7
+    feature: F-027
+    acceptance_criteria:
+      - IModule interface for module initialization
+      - Assembly scanning discovers all IModule implementations
+      - Module registration adds services to IServiceCollection
+      - Module registers MediatR handlers from its assembly
+      - Module registers EF Core entity configurations from its assembly
+      - Module endpoint mapping extension method
+      - Module health check aggregation
+      - Module configuration section auto-loaded
+    status: Completed
+
+  - id: T-079
+    description: Scaffold Phase 2 Commercial Core module structures using template
+    priority: High
+    dependencies: [T-078]
+    phase: P1
+    epic: E1.7
+    feature: F-028
+    acceptance_criteria:
+      - CRM module scaffolded with Domain, Application, Infrastructure, API projects
+      - ProductCatalog module scaffolded
+      - OrderManagement module scaffolded
+      - SubscriptionManagement module scaffolded
+      - All modules compile after scaffolding
+      - Module registration entries created for each module
+      - Module README with bounded context description
+    status: Completed
+
+  - id: T-080
+    description: Scaffold Phase 3 Revenue Core module structures using template
+    priority: High
+    dependencies: [T-078]
+    phase: P1
+    epic: E1.7
+    feature: F-028
+    acceptance_criteria:
+      - RatingEngine module scaffolded
+      - BillingEngine module scaffolded
+      - InvoiceManagement module scaffolded
+      - PaymentProcessing module scaffolded
+      - Collections module scaffolded
+      - All modules compile after scaffolding
+      - Module registration entries created
+    status: Completed
+
+  - id: T-081
+    description: Scaffold Phase 4 Operations Core module structures using template
+    priority: High
+    dependencies: [T-078]
+    phase: P1
+    epic: E1.7
+    feature: F-028
+    acceptance_criteria:
+      - ResourceInventory module scaffolded
+      - NetworkInventory module scaffolded
+      - Provisioning module scaffolded
+      - WorkflowEngine module scaffolded
+      - All modules compile after scaffolding
+      - Module registration entries created
+    status: Completed
+
+  - id: T-082
+    description: Scaffold Phase 5 Service Assurance module structures using template
+    priority: High
+    dependencies: [T-078]
+    phase: P1
+    epic: E1.7
+    feature: F-028
+    acceptance_criteria:
+      - Ticketing module scaffolded
+      - Notifications module scaffolded
+      - Reporting module scaffolded
+      - Audit module scaffolded
+      - All modules compile after scaffolding
+      - Module registration entries created
+      - Solution builds successfully with all 19 modules
+    status: Completed

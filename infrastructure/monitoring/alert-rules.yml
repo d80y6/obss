@@ -1,0 +1,428 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Prometheus Alerting Rules — Telecom OSS/BSS Platform
+#
+# Combined with prometheus.yml via:
+#   rule_files:
+#     - /etc/prometheus/alert-rules.yml
+#
+# Alert routing should be configured in Alertmanager or the notification
+# channel of choice (PagerDuty, Slack, OpsGenie).
+# ═══════════════════════════════════════════════════════════════════════════════
+
+groups:
+  - name: obss-service-health
+    interval: 30s
+    rules:
+      # ── Service Down ────────────────────────────────────────────────────────
+      - alert: ServiceDown
+        expr: |
+          up == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: >
+            Service {{ $labels.job }} (instance: {{ $labels.instance }}) has been
+            unreachable for more than 1 minute. Immediate investigation required.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: ServiceDownPaging
+        expr: |
+          up == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          pagerduty: "true"
+        annotations:
+          summary: "[PAGING] Service {{ $labels.job }} down for 5+ minutes"
+          description: >
+            Service {{ $labels.job }} (instance: {{ $labels.instance }}) has been
+            down for more than 5 minutes. Escalating to on-call team.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+  - name: obss-resource-usage
+    interval: 30s
+    rules:
+      # ── High CPU Usage ─────────────────────────────────────────────────────
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by(container_label_com_docker_compose_service, instance)
+          (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage on {{ $labels.container_label_com_docker_compose_service }}"
+          description: >
+            CPU usage is above 80% for 5 minutes
+            (current value: {{ $value | humanizePercentage }})
+            on service {{ $labels.container_label_com_docker_compose_service }}.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: CriticalCPUUsage
+        expr: |
+          100 - (avg by(container_label_com_docker_compose_service, instance)
+          (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical CPU usage on {{ $labels.container_label_com_docker_compose_service }}"
+          description: >
+            CPU usage is above 95% for 2 minutes
+            (current value: {{ $value | humanizePercentage }})
+            on service {{ $labels.container_label_com_docker_compose_service }}.
+            Immediate scaling or investigation required.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── High Memory Usage ──────────────────────────────────────────────────
+      - alert: HighMemoryUsage
+        expr: |
+          (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage on {{ $labels.container_label_com_docker_compose_service }}"
+          description: >
+            Memory usage is above 85% for 5 minutes
+            (current value: {{ $value | humanizePercentage }})
+            on service {{ $labels.container_label_com_docker_compose_service }}.
+            Container: {{ $labels.name }}
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 95
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical memory usage on {{ $labels.container_label_com_docker_compose_service }}"
+          description: >
+            Memory usage is above 95% (current value: {{ $value | humanizePercentage }})
+            on service {{ $labels.container_label_com_docker_compose_service }}.
+            Immediate investigation or scaling required.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Disk Space Low ─────────────────────────────────────────────────────
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: >
+            Disk space is below 10% on {{ $labels.instance }}
+            (mountpoint: {{ $labels.mountpoint }},
+            available: {{ $value | humanizePercentage }}).
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: DiskSpaceCritical
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 5
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical disk space on {{ $labels.instance }}"
+          description: >
+            Disk space is below 5% on {{ $labels.instance }}
+            (mountpoint: {{ $labels.mountpoint }},
+            available: {{ $value | humanizePercentage }}).
+            Immediate cleanup or volume expansion required.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Docker Volume Disk Space ───────────────────────────────────────────
+      - alert: DockerDiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{mountpoint=~"/var/lib/docker/.*|/var/lib/containerd/.*"} /
+          node_filesystem_size_bytes{mountpoint=~"/var/lib/docker/.*|/var/lib/containerd/.*"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low disk space on Docker storage ({{ $labels.mountpoint }})"
+          description: >
+            Docker storage volume {{ $labels.mountpoint }} is below 10% free space
+            (available: {{ $value | humanizePercentage }}).
+            Consider pruning unused images and volumes.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+  - name: obss-database-health
+    interval: 30s
+    rules:
+      # ── Database Connection Pool Exhausted ─────────────────────────────────
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          pg_stat_activity_count{datname!~"template.*|postgres"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Database connection pool nearing exhaustion on {{ $labels.datname }}"
+          description: >
+            Database {{ $labels.datname }} has {{ $value }} active connections.
+            Connection pool may be exhausted. Consider increasing pool size
+            or investigating connection leaks.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: DatabaseConnectionPoolExhaustedCritical
+        expr: |
+          pg_stat_activity_count{datname!~"template.*|postgres"} > 95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Database connection pool exhausted on {{ $labels.datname }}"
+          description: >
+            Database {{ $labels.datname }} has {{ $value }} active connections.
+            Connection pool is exhausted. New connections will be rejected.
+            Immediate investigation required.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Database Replication Lag ───────────────────────────────────────────
+      - alert: DatabaseReplicationLag
+        expr: |
+          pg_replication_lag_seconds > 60
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "PostgreSQL replication lag > 60s"
+          description: >
+            Replication lag is {{ $value }} seconds.
+            Data loss risk increases with lag duration.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Database Deadlocks ─────────────────────────────────────────────────
+      - alert: DatabaseDeadlocks
+        expr: |
+          rate(pg_stat_database_deadlocks[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Database deadlocks detected on {{ $labels.datname }}"
+          description: >
+            Deadlocks are occurring at a rate of {{ $value }} per second
+            on database {{ $labels.datname }}. Review application transaction
+            ordering and contention patterns.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+  - name: obss-api-health
+    interval: 30s
+    rules:
+      # ── High Error Rate ────────────────────────────────────────────────────
+      - alert: HighErrorRate
+        expr: |
+          (sum by(service, route) (rate(http_requests_duration_seconds_count{status_code=~"5.."}[5m])) /
+           sum by(service, route) (rate(http_requests_duration_seconds_count[5m]))) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate on {{ $labels.service }} ({{ $labels.route }})"
+          description: >
+            HTTP 5xx error rate is {{ $value | humanizePercentage }} on
+            {{ $labels.service }} (route: {{ $labels.route }}),
+            which exceeds the 5% threshold for 5 minutes.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Slow Requests ──────────────────────────────────────────────────────
+      - alert: SlowRequests
+        expr: |
+          histogram_quantile(0.95,
+            sum by(service, route, le) (
+              rate(http_requests_duration_seconds_bucket[5m])
+            )
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "P95 latency > 1s on {{ $labels.service }} ({{ $labels.route }})"
+          description: >
+            P95 request latency is {{ $value }}s on {{ $labels.service }}
+            (route: {{ $labels.route }}), exceeding 1s threshold for 5 minutes.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: SlowRequestsCritical
+        expr: |
+          histogram_quantile(0.95,
+            sum by(service, route, le) (
+              rate(http_requests_duration_seconds_bucket[5m])
+            )
+          ) > 3
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "P95 latency > 3s on {{ $labels.service }} ({{ $labels.route }})"
+          description: >
+            P95 request latency is {{ $value }}s on {{ $labels.service }}
+            (route: {{ $labels.route }}), exceeding 3s critical threshold.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Request Surge ──────────────────────────────────────────────────────
+      - alert: RequestSurge
+        expr: |
+          (rate(http_requests_duration_seconds_count[5m]) /
+           rate(http_requests_duration_seconds_count[30m])) > 3
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Request surge detected on {{ $labels.service }}"
+          description: >
+            Request rate has increased {{ $value }}x compared to the 30-minute
+            average on {{ $labels.service }}. May indicate traffic spike or
+            retry storm.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Zero Traffic ───────────────────────────────────────────────────────
+      - alert: ZeroTraffic
+        expr: |
+          rate(http_requests_duration_seconds_count[5m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "No traffic to {{ $labels.service }} in 10 minutes"
+          description: >
+            Service {{ $labels.service }} has received zero requests in the
+            last 10 minutes. This may indicate routing or upstream issues.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+  - name: obss-infrastructure
+    interval: 1h
+    rules:
+      # ── Certificate Expiring ───────────────────────────────────────────────
+      - alert: CertificateExpiring
+        expr: |
+          probe_ssl_earliest_cert_expiry{job=~".+"} - time() < 2592000
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "SSL certificate expiring soon for {{ $labels.instance }}"
+          description: >
+            SSL certificate for {{ $labels.instance }} will expire in
+            {{ $value | humanizeDuration }}. Renew before it expires.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: CertificateExpiringCritical
+        expr: |
+          probe_ssl_earliest_cert_expiry{job=~".+"} - time() < 604800
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "SSL certificate expiring within 7 days for {{ $labels.instance }}"
+          description: >
+            SSL certificate for {{ $labels.instance }} will expire in
+            {{ $value | humanizeDuration }}. Immediate renewal required.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── Docker Daemon Down ─────────────────────────────────────────────────
+      - alert: DockerDaemonDown
+        expr: |
+          time() - node_boot_time_seconds > 300 and docker_info{job=~".+"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Docker daemon is down on {{ $labels.instance }}"
+          description: >
+            Docker daemon is not responding on {{ $labels.instance }}.
+            All containers on this host are affected.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      # ── OOM Killer Events ──────────────────────────────────────────────────
+      - alert: OOMKillsDetected
+        expr: |
+          increase(container_oom_events_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "OOM kill detected on {{ $labels.name }}"
+          description: >
+            Out-of-memory kill detected in container {{ $labels.name }}.
+            The container was terminated due to memory limit exhaustion.
+            Consider increasing memory limits or investigating memory leak.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+  - name: obss-backup-health
+    interval: 5m
+    rules:
+      # ── Backup Failure ─────────────────────────────────────────────────────
+      - alert: BackupFailure
+        expr: |
+          time() - backup_last_success_timestamp > 90000
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Backup has not completed successfully"
+          description: >
+            The last successful backup was {{ $value | humanizeDuration }} ago.
+            Scheduled backups may be failing. Check backup logs and scripts.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+      - alert: BackupFailureCritical
+        expr: |
+          time() - backup_last_success_timestamp > 172800
+        for: 10m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "No successful backup in 48+ hours"
+          description: >
+            No successful backup in {{ $value | humanizeDuration }}.
+            Data loss risk is increasing. Investigate immediately.
+          runbook: "docs/runbooks/disaster-recovery.md"
+
+  - name: obss-heartbeat
+    interval: 1m
+    rules:
+      # ── Dead Man's Switch ──────────────────────────────────────────────────
+      - alert: DeadMansSwitch
+        expr: |
+          vector(1)
+        labels:
+          severity: none
+          team: platform
+        annotations:
+          summary: "Dead Man's Switch — Alertmanager is alive"
+          description: >
+            This is a Dead Man's Switch alert. It fires continuously to ensure
+            the entire alerting pipeline is operational. If this alert stops
+            firing, the monitoring system itself may be down.

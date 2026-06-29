@@ -1,0 +1,71 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,vb}]
+indent_size = 4
+
+[*.{cs,vb}]
+dotnet_naming_style.pascal_case.required_prefix =
+dotnet_naming_style.pascal_case.required_suffix =
+dotnet_naming_style.pascal_case.word_separator =
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style._camel_case.required_prefix = _
+dotnet_naming_style._camel_case.required_suffix =
+dotnet_naming_style._camel_case.word_separator =
+dotnet_naming_style._camel_case.capitalization = camel_case
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.required_modifiers =
+
+dotnet_naming_rule.private_fields_rule.symbols = private_fields
+dotnet_naming_rule.private_fields_rule.style = _camel_case
+dotnet_naming_rule.private_fields_rule.severity = error
+
+[*.{cs,vb}]
+dotnet_naming_rule.private_static_fields_rule.symbols = private_static_fields
+dotnet_naming_rule.private_static_fields_rule.style = _camel_case
+dotnet_naming_rule.private_static_fields_rule.severity = error
+
+dotnet_naming_symbols.private_static_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_fields.required_modifiers = static
+
+dotnet_naming_rule.public_fields_rule.symbols = public_fields
+dotnet_naming_rule.public_fields_rule.style = pascal_case
+dotnet_naming_rule.public_fields_rule.severity = error
+
+dotnet_naming_symbols.public_fields.applicable_kinds = field
+dotnet_naming_symbols.public_fields.applicable_accessibilities = public, internal, protected, protected_internal
+
+dotnet_naming_rule.parameters_rule.symbols = parameters
+dotnet_naming_rule.parameters_rule.style = camel_case
+dotnet_naming_rule.parameters_rule.severity = error
+
+dotnet_naming_symbols.parameters.applicable_kinds = parameter
+
+dotnet_naming_rule.locals_rule.symbols = locals
+dotnet_naming_rule.locals_rule.style = camel_case
+dotnet_naming_rule.locals_rule.severity = error
+
+dotnet_naming_symbols.locals.applicable_kinds = local
+
+dotnet_code_quality.CA2007.analysis_level = none
+
+[*.{xml,config,props,targets}]
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+insert_final_newline = false
+trim_trailing_whitespace = false

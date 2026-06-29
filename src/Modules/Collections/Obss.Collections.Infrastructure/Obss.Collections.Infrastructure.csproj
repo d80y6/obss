@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.Collections.Application\Obss.Collections.Application.csproj" />
+    <ProjectReference Include="..\..\..\Shared\Obss.SharedKernel\Obss.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\Invoices\Obss.Invoices.Application\Obss.Invoices.Application.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,47 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+*.userprefs
+packages/
+*.nupkg
+**/[Rr]elease/
+**/[Dd]ebug/
+
+## Node / frontend
+node_modules/
+frontend/.next/
+frontend/out/
+
+## IDE
+.dockerignore
+.opencode/
+opencode.json
+AGENTS.md
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Build
+**/build/
+**/artifacts/
+
+## Secrets
+**/appsettings.*.local.*
+**/secrets.json
+**/appsettings.Local*
+
+## Testing coverage
+**/coverage/
+**/TestResults/
+**/*.trx
+**/*.coverage

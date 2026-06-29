@@ -1,0 +1,121 @@
+# Trivy Configuration
+# Telecom OSS/BSS Platform
+# https://aquasecurity.github.io/trivy/
+
+severity:
+  - CRITICAL
+  - HIGH
+
+# Exit with non-zero code only when vulnerabilities
+# of the specified severity are found
+exit-code: 1
+
+# Scan configuration
+scan:
+  # Skip filesystem scan directories
+  skip-dirs:
+    - /node_modules
+    - /frontend/node_modules
+    - /frontend/dist
+    - /tests
+    - /docs
+    - /.git
+    - /bin
+    - /obj
+
+  # Skip specific files
+  skip-files:
+    - "*.min.js"
+    - "*.map"
+    - "package-lock.json"
+    - "yarn.lock"
+
+  # Scan for vulnerabilities and secrets
+  scanners:
+    - vuln
+    - secret
+    - misconfig
+
+# Vulnerability configuration
+vulnerability:
+  # Ignore unmaintained/unknown severity
+  ignore-unfixed: false
+
+  # Types of vulnerabilities to scan
+  type:
+    - os
+    - library
+
+# Secret detection configuration
+secret:
+  # Allow rules to detect generic secrets
+  allow-rule: []
+  # Exclude specific paths from secret scanning
+  exclude-paths:
+    - "**/*_test.go"
+    - "**/tests/**"
+    - "**/Migrations/**"
+
+# Misconfiguration scanning
+misconfiguration:
+  # Scan for cloud misconfigurations
+  scanners:
+    - dockerfile
+    - kubernetes
+    - terraform
+
+# Ignore list - False positives and accepted risks
+# Each entry: vulnerability ID or path pattern
+ignore:
+  # .NET runtime CVEs that are OS-managed
+  - CVE-2023-33126  # False positive: GDI+ not used on Linux
+  - CVE-2023-33127  # False positive: WPF not used on Linux
+  - CVE-2023-33128  # False positive: Windows Forms not used on Linux
+  - CVE-2023-24936  # False positive: .NET tooling CVE, not exploitable in runtime image
+
+  # Accepted risks (reviewed and approved by Security Team)
+  # These are documented in docs/decisions/accepted-security-risks.md
+  - id: CVE-2024-XXXXX
+    statement: "Rate limited API endpoint behind WAF; risk accepted per Security Team review 2026-01-15"
+
+# Timeout configuration
+timeout: 10m
+
+# Output configuration
+format: sarif
+
+# Cache settings
+cache:
+  # Cache directory for vulnerability database
+  dir: /tmp/trivy/.cache
+  # Keep the cache for 24 hours
+  ttl: 24h
+
+# Database configuration
+db:
+  # Always update the vulnerability database
+  no-progress: true
+  # Repository mirrors
+  repository:
+    - https://ghcr.io/aquasecurity/trivy-db:2
+
+# Package configuration
+package:
+  # Exclude packages from scanning by name
+  # Use when vendor-provided packages have known but unavoidable vulnerabilities
+  exclude:
+    - libc6       # Base OS package, mitigated by OS vendor
+    - openssl     # Base OS package, mitigated by OS vendor
+
+# Report configuration
+report:
+  # Show only the top N vulnerabilities
+  # 0 means show all
+  show-suppressed: true
+  # Group by severity
+  group-by: severity
+
+# Server mode (for persistent scanning)
+server:
+  # Listen address
+  listen: localhost:4954

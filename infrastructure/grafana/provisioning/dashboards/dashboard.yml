@@ -1,0 +1,17 @@
+# =============================================================================
+# OBSS Platform - Grafana Dashboards Provisioning
+# Telecom OSS/BSS Platform
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: "OBSS Platform Dashboards"
+    orgId: 1
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/definitions
+      foldersFromFilesStructure: true

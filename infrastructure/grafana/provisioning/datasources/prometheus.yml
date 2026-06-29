@@ -1,0 +1,62 @@
+# =============================================================================
+# OBSS Platform - Grafana Datasources
+# Telecom OSS/BSS Platform
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: 15s
+      queryTimeout: 60s
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.x
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: opensearch
+
+  - name: OpenSearch
+    type: grafana-opensearch-datasource
+    access: proxy
+    url: http://opensearch:9200
+    isDefault: false
+    editable: true
+    jsonData:
+      database: obss-logs
+      flavor: opensearch
+      timeField: "@timestamp"
+      tlsAuth: false
+      tlsSkipVerify: true
+      esVersion: 2.x
+      logLevelField: severity
+      logMessageField: body
+
+  - name: Loki (Tempo)
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    isDefault: false
+    editable: true
+    jsonData:
+      tracesToLogs:
+        datasourceUid: prometheus
+        tags: ["service.name", "service.namespace"]
+        mappedTags: [{ key: "service.name", value: "service_name" }]
+        spanStartTimeShift: "-1h"
+        spanEndTimeShift: "1h"
+        filterByTraceID: true
+        filterBySpanID: false
+      serviceMap:
+        datasourceUid: prometheus
+      search:
+        hide: false
+      nodeGraph:
+        enabled: true

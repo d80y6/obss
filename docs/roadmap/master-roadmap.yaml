@@ -1,0 +1,1546 @@
+metadata:
+  title: Telecom OSS/BSS Platform Roadmap
+  description: >
+    Comprehensive roadmap for building a complete ISP/Telco OSS/BSS platform spanning
+    foundation, commercial core, revenue core, operations core, service assurance,
+    and commercial release phases.
+  version: "1.0"
+  last_updated: "2026-06-20"
+  status: Active
+  note: "Phases 1-5 complete. All P0-P2 features in Phases 2-4 are now delivered. Phase 6 (Commercial Release) is the final phase."
+  owner: Platform Architecture Team
+
+platform_overview:
+  name: Telco OSS/BSS Platform
+  architecture: Clean Architecture / Domain-Driven Design
+  backend: .NET 8+ with ASP.NET Core
+  frontend: Blazor / Angular
+  database: PostgreSQL
+  message_bus: RabbitMQ / Azure Service Bus
+  containerization: Docker / Kubernetes
+  identity: Keycloak
+  observability: OpenTelemetry / Prometheus / Grafana / Serilog
+  ci_cd: GitHub Actions
+  api_style: REST + gRPC (inter-service)
+
+phases:
+  - id: P1
+    name: Foundation
+    status: completed
+    completed_date: "2026-06-20"
+    description: >
+      Establish the foundational architecture, development infrastructure, and cross-cutting
+      concerns required to support all subsequent domain modules. This phase builds the
+      bedrock — repository structure, shared kernel libraries, DevSecOps pipeline,
+      observability stack, IAM, database infrastructure, and module scaffolds.
+    duration: "3 months"
+    start_date: "2026-04-01"
+    end_date: "2026-06-30"
+    epics:
+      - id: E1.1
+        name: Repository & Solution Structure
+        description: >
+          Initialize the .NET solution with Clean Architecture multi-project structure,
+          Git repository conventions, and standardized build/packaging configuration
+          used by every module in the platform.
+        features:
+          - id: F-001
+            name: .NET Solution Structure
+            description: >
+              Create the multi-project .NET solution with Clean Architecture separation
+              (Domain, Application, Infrastructure, API layers per module) and a shared
+              kernel cross-cutting project.
+            priority: P0
+            dependencies: []
+            acceptance_criteria:
+              - Solution compiles with zero warnings
+              - All layer projects reference correctly (no circular dependencies)
+              - Domain layer has zero external dependencies
+              - Build completes in under 2 minutes
+          - id: F-002
+            name: Git Repository & Branching Strategy
+            description: >
+              Initialize Git repository, implement trunk-based branching with short-lived
+              feature branches, configure .gitignore, and establish commit conventions.
+            priority: P0
+            dependencies: []
+            acceptance_criteria:
+              - Repository initialized with .gitignore for .NET projects
+              - Branch protection rules configured on main
+              - Commit message convention documented and enforced
+              - PR template available
+          - id: F-003
+            name: Package Management & Build Configuration
+            description: >
+              Configure centralized NuGet package management with Directory.Build.props,
+              package versioning strategy, and solution-wide build settings.
+            priority: P1
+            dependencies: [F-001]
+            acceptance_criteria:
+              - Directory.Build.props controls all common package versions
+              - NuGet.config points to correct feeds (public + private)
+              - Solution builds with single command: dotnet build
+              - Package versioning follows SemVer convention
+      - id: E1.2
+        name: Shared Kernel
+        description: >
+          Build the shared kernel library containing base classes, domain primitives,
+          value objects, domain event infrastructure, error handling patterns, and
+          application abstractions used by every module in the platform.
+        features:
+          - id: F-004
+            name: Base Domain Classes
+            description: >
+              Create Entity, AggregateRoot, ValueObject, DomainEvent base classes
+              with proper equality, identity management, and event sourcing support.
+            priority: P0
+            dependencies: [F-001]
+            acceptance_criteria:
+              - Entity base class provides typed Id, equality, and domain event collection
+              - ValueObject base class provides structural equality
+              - AggregateRoot enforces consistency boundary rules
+              - DomainEvent includes timestamp, correlationId, and causationId
+          - id: F-005
+            name: Domain Primitives & Validation
+            description: >
+              Implement domain primitives (Money, Percentage, Email, PhoneNumber),
+              guard clauses, business rule validation pattern, and the Result type
+              for error handling without exceptions.
+            priority: P0
+            dependencies: [F-001]
+            acceptance_criteria:
+              - Money type prevents invalid currency/amount combinations
+              - Email type validates format and provides canonical form
+              - Guard clauses cover null, range, string, and collection checks
+              - Result type supports success/failure with typed errors
+              - Business rule validation returns all failures, not just first
+          - id: F-006
+            name: Application Abstractions
+            description: >
+              Define application layer interfaces and base implementations including
+              CQRS command/query pattern (MediatR), IRepository, IUnitOfWork,
+              and pipeline behaviors for cross-cutting concerns.
+            priority: P1
+            dependencies: [F-004]
+            acceptance_criteria:
+              - IRepository<T> provides standard CRUD + specification pattern
+              - IUnitOfWork ensures atomic commits across aggregates
+              - Command/Query base classes with validation pipeline
+              - Pipeline behaviors for logging, validation, and transaction management
+          - id: F-007
+            name: Cross-Cutting Concerns
+            description: >
+              Implement shared cross-cutting infrastructure including domain event
+              dispatcher, specification pattern, pagination utilities, and
+              telecom-specific value objects (Bandwidth, IPAddress, MacAddress).
+            priority: P1
+            dependencies: [F-005]
+            acceptance_criteria:
+              - Domain event dispatcher publishes events via MediatR
+              - Specification pattern supports LINQ composition
+              - Pagination supports offset/cursor-based strategies
+              - Telecom VOs enforce valid range and formatting rules
+      - id: E1.3
+        name: DevSecOps
+        description: >
+          Establish the complete development and deployment infrastructure including
+          Docker Compose for local development, CI/CD pipelines via GitHub Actions,
+          code quality gates, security scanning, and artifact management.
+        features:
+          - id: F-008
+            name: Docker Compose Development Environment
+            description: >
+              Create Docker Compose configuration for local development with PostgreSQL,
+              Redis, RabbitMQ, Keycloak, Prometheus, and Grafana.
+            priority: P0
+            dependencies: [F-001]
+            acceptance_criteria:
+              - All infrastructure services start with docker compose up
+              - PostgreSQL with persistent volume for dev data
+              - Keycloak pre-configured with realm and test users
+              - Prometheus and Grafana auto-configured for metrics collection
+          - id: F-009
+            name: CI/CD Pipeline
+            description: >
+              Build GitHub Actions CI pipeline (build, test, lint, security scan) and
+              CD pipeline (container build, push, deploy to staging environment).
+            priority: P0
+            dependencies: [F-001, F-003]
+            acceptance_criteria:
+              - CI pipeline triggers on every PR and push to main
+              - Pipeline runs unit tests, integration tests, and code analysis
+              - CD pipeline deploys to staging on successful main merge
+              - Build artifacts published to container registry
+          - id: F-010
+            name: Code Quality & Linting
+            description: >
+              Configure Roslyn analyzers, StyleCop rules, SonarQube integration, and
+              enforce coding standards across the solution.
+            priority: P1
+            dependencies: [F-001]
+            acceptance_criteria:
+              - StyleCop configuration with team-agreed ruleset
+              - SonarQube analysis runs in CI pipeline
+              - Code coverage minimum threshold configured (80%)
+              - Custom Roslyn analyzers for architecture rules (layer violations)
+          - id: F-011
+            name: Security Scanning
+            description: >
+              Integrate dependency scanning (OWASP DependencyCheck / Trivy),
+              SAST analysis (Semgrep / Roslyn security rules), and container scanning.
+            priority: P1
+            dependencies: [F-009]
+            acceptance_criteria:
+              - Dependency scan runs on every PR
+              - SAST rules configured for OWASP Top 10
+              - Container images scanned before registry push
+              - Security gates block pipeline on critical findings
+          - id: F-012
+            name: Container Registry & Artifact Management
+            description: >
+              Set up container registry (GitHub Container Registry) and NuGet package
+              feed for internal packages.
+            priority: P2
+            dependencies: [F-008, F-009]
+            acceptance_criteria:
+              - Images pushed to registry with semantic version tags
+              - Internal NuGet packages published to private feed
+              - Retention policies configured for old artifacts
+      - id: E1.4
+        name: Observability
+        description: >
+          Implement comprehensive observability with OpenTelemetry for distributed tracing
+          and metrics, structured logging with Serilog, health checks, and pre-built
+          Grafana dashboards for monitoring all platform services.
+        features:
+          - id: F-013
+            name: OpenTelemetry SDK Integration
+            description: >
+              Configure OpenTelemetry SDK as the single telemetry pipeline exporting
+              traces, metrics, and logs to configured backends (Prometheus, Jaeger, Loki).
+            priority: P0
+            dependencies: [F-001]
+            acceptance_criteria:
+              - OpenTelemetry configured as singleton in service startup
+              - Trace exporter sends to Jaeger or Zipkin endpoint
+              - Metric exporter sends to Prometheus endpoint
+              - SDK auto-instruments ASP.NET Core, EF Core, HTTP client
+          - id: F-014
+            name: Structured Logging
+            description: >
+              Implement structured logging with Serilog, including enrichers for
+              correlation IDs, tenant context, and structured data sinks.
+            priority: P0
+            dependencies: [F-001]
+            acceptance_criteria:
+              - All log output is structured JSON
+              - Correlation ID automatically included in every log entry
+              - Log levels configurable per namespace at runtime
+              - Sinks configured for console, file (JSON), and Elasticsearch/Loki
+          - id: F-015
+            name: Metrics & Monitoring
+            description: >
+              Define and expose business and technical metrics via OpenTelemetry,
+              configure Prometheus scrape targets, and create Grafana dashboards
+              for platform health and performance.
+            priority: P1
+            dependencies: [F-013]
+            acceptance_criteria:
+              - Custom metrics for request rate, latency, error rate, and business KPI
+              - Prometheus configured to scrape all service endpoints
+              - Grafana dashboards for service health, API performance, and business metrics
+              - Metrics include labels for service, version, environment
+          - id: F-016
+            name: Distributed Tracing
+            description: >
+              Configure distributed tracing across all services with OpenTelemetry,
+              enabling end-to-end request visibility across module boundaries.
+            priority: P1
+            dependencies: [F-013]
+            acceptance_criteria:
+              - Traces propagate across HTTP and message queue boundaries
+              - Span attributes include business context (customerId, orderId)
+              - Trace sampling configured (head-based for production)
+              - Jaeger/Grafana Tempo configured for trace storage and query
+          - id: F-017
+            name: Health Checks & Alerting
+            description: >
+              Implement ASP.NET Core health checks for all dependencies (database,
+              message bus, cache, external services) and configure alerting rules.
+            priority: P2
+            dependencies: [F-015, F-016]
+            acceptance_criteria:
+              - Health endpoint returns liveness, readiness, and dependency status
+              - Degraded dependencies reported with specific failure details
+              - Prometheus AlertManager rules configured for critical alerts
+              - Alert notifications sent to configured channel (Slack/Email)
+      - id: E1.5
+        name: Identity & Access Management
+        description: >
+          Build the IAM module integrating Keycloak for identity management, implementing
+          authentication (JWT/OIDC), authorization (RBAC), user management, role management,
+          and permission management. This is the first domain module following the full
+          layered architecture pattern.
+        features:
+          - id: F-018
+            name: Keycloak Integration & Setup
+            description: >
+              Deploy and configure Keycloak with realm, clients, identity providers,
+              and user federation for the platform.
+            priority: P0
+            dependencies: [F-008]
+            acceptance_criteria:
+              - Keycloak configured with master realm for admin and tenant realms
+              - OIDC client configured for platform SPA and service clients
+              - Pre-configured admin user and test users
+              - Keycloak health check integrated into platform health endpoint
+          - id: F-019
+            name: Authentication Service
+            description: >
+              Implement authentication service with login, logout, token refresh,
+              and multi-factor authentication support.
+            priority: P0
+            dependencies: [F-018]
+            acceptance_criteria:
+              - Login accepts username/password and returns JWT + refresh token
+              - Token refresh extends session without re-authentication
+              - MFA enforcement configurable per user/role
+              - Logout invalidates tokens across all sessions
+          - id: F-020
+            name: Authorization & RBAC
+            description: >
+              Implement role-based access control with policy-based authorization,
+              permission checks, and resource-level access control.
+            priority: P0
+            dependencies: [F-018, F-019]
+            acceptance_criteria:
+              - RBAC middleware checks role membership for protected endpoints
+              - Policy-based authorization supports AND/OR role combinations
+              - Resource-level authorization (owns data vs. admin access)
+              - Permission checks available as attributes and programmatic API
+          - id: F-021
+            name: User Management
+            description: >
+              Implement user CRUD, user profile management, password management,
+              user search, and user lifecycle (activate/suspend/delete).
+            priority: P1
+            dependencies: [F-018]
+            acceptance_criteria:
+              - Admin can create, read, update, delete users
+              - Users can update own profile and change password
+              - User search supports filtering by status, role, and attributes
+              - Account suspension prevents authentication without data loss
+          - id: F-022
+            name: Permission & Role Management
+            description: >
+              Implement role CRUD, permission assignment, role hierarchy, and
+              role-audit logging for compliance.
+            priority: P1
+            dependencies: [F-018]
+            acceptance_criteria:
+              - Admin can create, read, update, delete roles
+              - Permissions assigned to roles, roles assigned to users
+              - Role hierarchy with inheritance (admin inherits all)
+              - All role/permission changes logged to audit trail
+      - id: E1.6
+        name: Database Foundation
+        description: >
+          Establish the database infrastructure including EF Core configuration,
+          migration infrastructure, seed data framework, repository pattern,
+          and database health monitoring.
+        features:
+          - id: F-023
+            name: Database Migration Infrastructure
+            description: >
+              Create EF Core migration infrastructure with design-time factories,
+              migration history tracking, and automated migration application
+              on startup for development environments.
+            priority: P0
+            dependencies: [F-001]
+            acceptance_criteria:
+              - Migrations generated and applied via dotnet ef CLI
+              - Migration history table tracks all applied migrations
+              - Idempotent migration script generation for production
+              - Rollback support with migration reversal
+          - id: F-024
+            name: Entity Framework Configuration & Conventions
+            description: >
+              Configure DbContext with custom conventions for shadow properties
+              (Audit fields, soft delete, tenant ID), value converter conventions,
+              and global query filters.
+            priority: P0
+            dependencies: [F-023]
+            acceptance_criteria:
+              - Custom conventions apply audit fields (CreatedAt, UpdatedAt, CreatedBy)
+              - Soft delete filter applied globally via query filter
+              - Value converters for domain primitives (Money, Email, etc.)
+              - Tenant ID filter for multi-tenant isolation
+          - id: F-025
+            name: Repository & Unit of Work Implementation
+            description: >
+              Implement the generic repository pattern with specification support
+              and unit of work for atomic transaction management.
+            priority: P1
+            dependencies: [F-024, F-006]
+            acceptance_criteria:
+              - Generic repository supports GetById, GetAll, Add, Update, Delete
+              - Specification pattern composes filters, includes, and sorting
+              - Unit of work coordinates multiple repository changes in one transaction
+              - Repositories return domain entities, not data models
+      - id: E1.7
+        name: Module Scaffolding
+        description: >
+          Create the module template structure, code generation tools, and scaffolding
+          to enable rapid creation of new bounded context modules following the
+          platform's conventions. Scaffold all planned module structures.
+        features:
+          - id: F-026
+            name: Module Template & Code Generation
+            description: >
+              Create a module template with standard Clean Architecture folder structure,
+              project references, and base files. Implement dotnet new template or
+              script-based code generation.
+            priority: P1
+            dependencies: [F-001]
+            acceptance_criteria:
+              - Module template creates Domain, Application, Infrastructure, API projects
+              - Template configures project references to Shared Kernel
+              - Template includes sample entity, command, handler, and controller
+              - Code generation creates consistent module registration code
+          - id: F-027
+            name: Module Registration & Configuration
+            description: >
+              Build the module registration system that auto-discovers and configures
+              modules at startup, including dependency injection, MediatR registration,
+              and endpoint mapping.
+            priority: P1
+            dependencies: [F-026]
+            acceptance_criteria:
+              - Modules auto-register their DI services via assembly scanning
+              - MediatR handlers registered automatically per module
+              - Module endpoints mapped via extension methods
+              - Module health checks aggregated into platform health endpoint
+          - id: F-028
+            name: Scaffold All Domain Modules
+            description: >
+              Use the module template to scaffold all 19 planned domain module structures
+              so they are ready for implementation in subsequent phases.
+            priority: P1
+            dependencies: [F-027]
+            acceptance_criteria:
+              - All 19 modules created with correct project structure
+              - Each module compiles after scaffolding
+              - Module registration entries created for each module
+              - Module readme and placeholder documentation generated
+
+  - id: P2
+    name: Commercial Core
+    status: completed
+    completed_date: "2026-10-31"
+    description: >
+      Build the commercial customer-facing modules: Customer Relationship Management,
+      Product Catalog, Order Management, and Subscription Management. These modules
+      handle customer data, product offerings, order capture/fulfillment, and
+      subscription lifecycle.
+    duration: "4 months"
+    start_date: "2026-07-01"
+    end_date: "2026-10-31"
+    epics:
+      - id: E2.1
+        name: Customer Relationship Management
+        description: Manage customer data, segments, communications, and lifecycle
+        features:
+          - id: F-029
+            name: Customer CRUD & Profile Management
+            priority: P0
+            dependencies: [F-019, F-024]
+            acceptance_criteria:
+              - Create, read, update, delete customers with contact information
+              - Customer search by name, phone, email, account number
+              - Customer profile includes billing address, service address, contact preferences
+              - Duplicate detection across identity fields
+          - id: F-030
+            name: Customer Segmentation
+            priority: P1
+            dependencies: [F-029]
+            acceptance_criteria:
+              - Segment definition with dynamic rules (usage, plan type, region)
+              - Customers auto-assigned to segments based on rules
+              - Segment membership history tracked for reporting
+          - id: F-031
+            name: Customer Lifecycle Management
+            priority: P1
+            dependencies: [F-029]
+            acceptance_criteria:
+              - Lifecycle states: Lead, Prospect, Active, Suspended, Closed
+              - State transitions with validation rules
+              - Lifecycle history with timestamps and reasons
+          - id: F-032
+            name: Communication Preferences
+            priority: P2
+            dependencies: [F-029]
+            acceptance_criteria:
+              - Channel opt-in/opt-out (Email, SMS, Push, Mail)
+              - Consent tracking with timestamps and audit trail
+              - Do-not-disturb window configuration
+      - id: E2.2
+        name: Product Catalog
+        description: Define products, services, offers, pricing, and product lifecycle
+        features:
+          - id: F-033
+            name: Product & Service Definition
+            priority: P0
+            dependencies: [F-024]
+            acceptance_criteria:
+              - Product hierarchy: Category, Product, Service, Plan
+              - Product characteristics with type, validation, and defaults
+              - Product relationships (requires, excludes, bundles)
+              - Versioned product definitions with effective dating
+          - id: F-034
+            name: Offer & Price Management
+            priority: P0
+            dependencies: [F-033]
+            acceptance_criteria:
+              - Offers composed of one or more products/services
+              - Pricing models: flat, tiered, volume-based, usage-based
+              - Recurring and one-time charges
+              - Promotional pricing with start/end dates
+          - id: F-035
+            name: Product Configuration
+            priority: P1
+            dependencies: [F-033]
+            acceptance_criteria:
+              - Product configuration rules with allowed/required options
+              - Dependency validation during configuration
+              - Compatibility matrix for product combinations
+          - id: F-036
+            name: Product Lifecycle Management
+            priority: P1
+            dependencies: [F-033]
+            acceptance_criteria:
+              - Lifecycle states: Draft, Active, Deprecated, Retired
+              - Grandfathering rules for existing subscribers on deprecated plans
+              - Migration path definitions between product versions
+      - id: E2.3
+        name: Order Management
+        description: Capture, orchestrate, validate, and manage order lifecycle
+        features:
+          - id: F-037
+            name: Order Capture
+            priority: P0
+            dependencies: [F-029, F-034]
+            acceptance_criteria:
+              - Order creation with customer, products, and payment method
+              - Order item validation against product catalog
+              - Quote-to-order conversion with pricing preview
+              - Order amendments before fulfillment
+          - id: F-038
+            name: Order Orchestration
+            priority: P0
+            dependencies: [F-037]
+            acceptance_criteria:
+              - Order decomposition into fulfillment tasks
+              - Parallel and sequential task execution
+              - Partial fulfillment with back-order support
+              - Order status tracking with progress visibility
+          - id: F-039
+            name: Order Lifecycle Management
+            priority: P1
+            dependencies: [F-037]
+            acceptance_criteria:
+              - States: Pending, Validated, InProgress, Completed, Failed, Cancelled
+              - State transitions with business rule validation
+              - Hold/release order capability
+              - Order history with audit trail
+          - id: F-040
+            name: Order Validation
+            priority: P1
+            dependencies: [F-037]
+            acceptance_criteria:
+              - Customer eligibility validation (credit check, account status)
+              - Product availability validation (inventory check)
+              - Address validation and geocoding
+              - Business rules validation engine
+      - id: E2.4
+        name: Subscription Management
+        description: Manage subscription lifecycle, entitlements, renewals, and modifications
+        features:
+          - id: F-041
+            name: Subscription Lifecycle
+            priority: P0
+            dependencies: [F-037, F-038]
+            acceptance_criteria:
+              - Subscription creation from fulfilled order
+              - States: Pending, Active, Suspended, Cancelled, Expired
+              - Subscription with start date, end date, and billing cycle
+              - Multi-service subscriptions (bundles)
+          - id: F-042
+            name: Subscription Entitlements
+            priority: P1
+            dependencies: [F-041]
+            acceptance_criteria:
+              - Entitlement calculation from product catalog and subscription
+              - Usage allowance tracking against plan limits
+              - Overage and throttling enforcement
+              - Real-time entitlement queries for service provisioning
+          - id: F-043
+            name: Subscription Renewals
+            priority: P1
+            dependencies: [F-041]
+            acceptance_criteria:
+              - Auto-renew and manual renew options
+              - Renewal reminder notifications before expiry
+              - Renewal pricing application (standard or promotional)
+              - Failed renewal handling (retry, notify, suspend)
+          - id: F-044
+            name: Subscription Modifications
+            priority: P1
+            dependencies: [F-041]
+            acceptance_criteria:
+              - Plan change (upgrade/downgrade) with prorated billing
+              - Add-on/remove services mid-cycle
+              - Pending changes with future effective dates
+              - Change impact simulation before confirmation
+
+  - id: P3
+    name: Revenue Core
+    status: completed
+    completed_date: "2027-03-31"
+    description: >
+      Build the revenue generation and collection modules: Rating Engine for usage
+      calculation, Billing Engine for invoice generation, Invoice Management, Payment
+      Processing, and Collections for dunning and recovery.
+    duration: "5 months"
+    start_date: "2026-11-01"
+    end_date: "2027-03-31"
+    epics:
+      - id: E3.1
+        name: Rating Engine
+        description: Calculate usage charges, apply discounts, and enforce rating policies
+        features:
+          - id: F-045
+            name: Usage Rating
+            priority: P0
+            dependencies: [F-034, F-041]
+            acceptance_criteria:
+              - Usage event ingestion from network/service elements
+              - Rating based on product catalog price models
+              - Unit-based, time-based, and volume-based rating
+              - Concurrent rating with exactly-once semantics
+          - id: F-046
+            name: Discount & Promotion Engine
+            priority: P0
+            dependencies: [F-045]
+            acceptance_criteria:
+              - Percentage and fixed-amount discounts
+              - Conditional discounts (loyalty, volume, bundled)
+              - Promotional periods with automatic expiration
+              - Discount stacking rules and precedence
+          - id: F-047
+            name: Rating Policies
+            priority: P1
+            dependencies: [F-045]
+            acceptance_criteria:
+              - Rate table management with effective dating
+              - Tax zone and jurisdiction-based rating
+              - Currency conversion for international services
+              - Rating policy versioning and audit log
+          - id: F-048
+            name: Real-Time Rating
+            priority: P1
+            dependencies: [F-045, F-013]
+            acceptance_criteria:
+              - Session-based real-time usage tracking
+              - Pre-paid balance deduction during usage
+              - Threshold alerts for usage limits
+              - Sub-100ms rating response for real-time services
+      - id: E3.2
+        name: Billing Engine
+        description: Manage billing cycles, generate invoices, process adjustments, and tax
+        features:
+          - id: F-049
+            name: Billing Cycle Management
+            priority: P0
+            dependencies: [F-041, F-045]
+            acceptance_criteria:
+              - Configurable billing cycles (monthly, quarterly, annual)
+              - Cycle scheduling with batch processing
+              - Proration for mid-cycle changes
+              - Billing cycle exception handling
+          - id: F-050
+            name: Invoice Generation
+            priority: P0
+            dependencies: [F-049]
+            acceptance_criteria:
+              - Invoice generation from recurring charges, usage, and adjustments
+              - Tax calculation per jurisdiction
+              - Multi-currency invoice support
+              - Invoice templates with configurable layout
+          - id: F-051
+            name: Billing Adjustments
+            priority: P1
+            dependencies: [F-049]
+            acceptance_criteria:
+              - Credit and debit adjustment types
+              - Adjustment approval workflow
+              - Retroactive and future-dated adjustments
+              - Reversal and correction processing
+          - id: F-052
+            name: Tax Calculation
+            priority: P1
+            dependencies: [F-049, F-050]
+            acceptance_criteria:
+              - Tax determination based on service jurisdiction
+              - Support for VAT, GST, sales tax, and custom taxes
+              - Tax exemption handling with certificate management
+              - Tax report generation for regulatory compliance
+      - id: E3.3
+        name: Invoice Management
+        description: Manage invoice lifecycle, presentment, disputes, and credit notes
+        features:
+          - id: F-053
+            name: Invoice Lifecycle
+            priority: P0
+            dependencies: [F-050]
+            acceptance_criteria:
+              - States: Draft, Generated, Sent, Paid, Disputed, Cancelled
+              - Invoice delivery scheduling (Email, Portal, Mail)
+              - Invoice cancellation with reversal entries
+              - Invoice archiving and retention
+          - id: F-054
+            name: Invoice Presentment
+            priority: P1
+            dependencies: [F-053]
+            acceptance_criteria:
+              - PDF generation with branded templates
+              - Web-based invoice viewer
+              - Invoice summary with usage breakdown
+              - Multi-language invoice support
+          - id: F-055
+            name: Dispute Management
+            priority: P1
+            dependencies: [F-053]
+            acceptance_criteria:
+              - Dispute submission with reason codes and evidence
+              - Dispute investigation workflow
+              - Hold collection on disputed amounts
+              - Resolution with adjustment or rejection
+          - id: F-056
+            name: Credit Notes
+            priority: P2
+            dependencies: [F-053]
+            acceptance_criteria:
+              - Credit note generation from adjustments and disputes
+              - Credit note application to future invoices
+              - Credit note reporting and audit trail
+      - id: E3.4
+        name: Payment Processing
+        description: Handle payment gateway integration, reconciliation, refunds, and methods
+        features:
+          - id: F-057
+            name: Payment Gateway Integration
+            priority: P0
+            dependencies: [F-053]
+            acceptance_criteria:
+              - Integration with Stripe, Adyen, or equivalent gateway
+              - Card, ACH/bank transfer, and digital wallet support
+              - Recurring payment tokenization
+              - Webhook handling for gateway events
+          - id: F-058
+            name: Payment Reconciliation
+            priority: P0
+            dependencies: [F-057]
+            acceptance_criteria:
+              - Automatic payment-to-invoice matching
+              - Partial payment and overpayment handling
+              - Settlement file processing and reconciliation
+              - Unallocated payment queue
+          - id: F-059
+            name: Refund Processing
+            priority: P1
+            dependencies: [F-057]
+            acceptance_criteria:
+              - Full and partial refund support
+              - Refund approval workflow based on amount
+              - Refund-to-original-payment-method
+              - Refund tracking and reporting
+          - id: F-060
+            name: Payment Method Management
+            priority: P1
+            dependencies: [F-057]
+            acceptance_criteria:
+              - Multiple payment methods per customer
+              - Default payment method designation
+              - Payment method validation and verification
+              - Expired/failed payment method handling
+      - id: E3.5
+        name: Collections
+        description: Manage dunning, collection workflows, aging analysis, and arrangements
+        features:
+          - id: F-061
+            name: Dunning Management
+            priority: P0
+            dependencies: [F-058]
+            acceptance_criteria:
+              - Configurable dunning levels with escalation rules
+              - Dunning letter and email generation
+              - Automated dunning schedule execution
+              - Payment promise tracking
+          - id: F-062
+            name: Collection Workflows
+            priority: P1
+            dependencies: [F-061]
+            acceptance_criteria:
+              - Collection case assignment to agents
+              - Collection activity logging and tracking
+              - Legal action and third-party collection handoff
+              - Recovery rate and effectiveness reporting
+          - id: F-063
+            name: Aging Analysis
+            priority: P1
+            dependencies: [F-058]
+            acceptance_criteria:
+              - Accounts receivable aging buckets (30/60/90/120+)
+              - Aging report generation with drill-down
+              - Reserve calculation for bad debt
+              - Trend analysis and forecasting
+          - id: F-064
+            name: Payment Arrangements
+            priority: P2
+            dependencies: [F-061]
+            acceptance_criteria:
+              - Installment plan creation with schedule
+              - Payment arrangement approval workflow
+              - Automated payment deduction per schedule
+              - Arrangement default handling
+
+  - id: P4
+    name: Operations Core
+    status: completed
+    completed_date: "2027-08-31"
+    description: >
+      Build the operations and network management modules: Resource Inventory for
+      logical resource tracking, Network Inventory for physical/network element
+      management, Provisioning for service activation and fulfillment, and
+      Workflow Engine for process orchestration.
+    duration: "5 months"
+    start_date: "2027-04-01"
+    end_date: "2027-08-31"
+    epics:
+      - id: E4.1
+        name: Resource Inventory
+        description: Manage logical resource lifecycle, topology, allocation, and discovery
+        features:
+          - id: F-065
+            name: Resource Lifecycle Management
+            priority: P0
+            dependencies: [F-024]
+            acceptance_criteria:
+              - Resource types: IP addresses, VLANs, ports, bandwidth profiles
+              - Resource pool management with capacity tracking
+              - Reservation and allocation with state management
+              - Resource release and reclamation
+          - id: F-066
+            name: Resource Topology
+            priority: P1
+            dependencies: [F-065]
+            acceptance_criteria:
+              - Hierarchical resource relationship mapping
+              - Parent-child resource association
+              - Topology visualization support
+          - id: F-067
+            name: Resource Allocation
+            priority: P1
+            dependencies: [F-065]
+            acceptance_criteria:
+              - Automatic resource selection from pool
+              - Best-fit allocation algorithm
+              - Reservation hold with timeout
+              - Allocation audit trail
+          - id: F-068
+            name: Resource Discovery
+            priority: P2
+            dependencies: [F-065]
+            acceptance_criteria:
+              - Scheduled resource reconciliation with network
+              - Orphaned resource detection
+              - Utilization reporting
+      - id: E4.2
+        name: Network Inventory
+        description: Manage network elements, connectivity, capacity, and topology
+        features:
+          - id: F-069
+            name: Network Element Management
+            priority: P0
+            dependencies: [F-024]
+            acceptance_criteria:
+              - Network element types: routers, switches, OLTs, ONTs, cables
+              - NE lifecycle: Planned, Deployed, Active, Maintenance, Decommissioned
+              - NE attributes: model, firmware, location, vendor
+              - NE discovery and synchronization
+          - id: F-070
+            name: Connectivity Management
+            priority: P1
+            dependencies: [F-069]
+            acceptance_criteria:
+              - Physical and logical connection modeling
+              - Connection path calculation
+              - Service-to-connection mapping
+              - Connectivity reporting
+          - id: F-071
+            name: Capacity Management
+            priority: P1
+            dependencies: [F-069]
+            acceptance_criteria:
+              - Port and link capacity tracking
+              - Utilization thresholds and alerts
+              - Capacity forecasting
+              - Over-subscription ratio management
+          - id: F-072
+            name: Network Topology
+            priority: P1
+            dependencies: [F-069, F-070]
+            acceptance_criteria:
+              - Multi-layer topology (physical, L2, L3, service)
+              - Impact analysis for planned maintenance
+              - Fault propagation mapping
+      - id: E4.3
+        name: Provisioning
+        description: Activate services, allocate resources, and fulfill orders
+        features:
+          - id: F-073
+            name: Service Activation
+            priority: P0
+            dependencies: [F-042, F-065, F-069]
+            acceptance_criteria:
+              - Service parameter translation to device configuration
+              - Activation across multi-vendor network
+              - Service test and verification after activation
+              - Activation failure handling with rollback
+          - id: F-074
+            name: Resource Allocation
+            priority: P0
+            dependencies: [F-067, F-073]
+            acceptance_criteria:
+              - Resource selection based on service requirements
+              - Allocation atomicity (all-or-nothing)
+              - Resource release on deactivation
+          - id: F-075
+            name: Order Fulfillment
+            priority: P0
+            dependencies: [F-038, F-073]
+            acceptance_criteria:
+              - End-to-end order-to-service fulfillment
+              - Fulfillment progress tracking
+              - Partial fulfillment and back-order handling
+              - Fulfillment SLA monitoring
+          - id: F-076
+            name: Provisioning Workflows
+            priority: P1
+            dependencies: [F-073]
+            acceptance_criteria:
+              - Multi-step provisioning with dependency management
+              - Manual and automated task steps
+              - Rollback definition per step
+              - Workflow status and audit tracking
+      - id: E4.4
+        name: Workflow Engine
+        description: Define, orchestrate, monitor workflows, and manage SLAs
+        features:
+          - id: F-077
+            name: Workflow Definition
+            priority: P0
+            dependencies: [F-024]
+            acceptance_criteria:
+              - Visual workflow designer or DSL
+              - Step types: task, decision, parallel, wait, sub-workflow
+              - Workflow versioning
+              - Input/output parameter mapping
+          - id: F-078
+            name: Workflow Orchestration
+            priority: P0
+            dependencies: [F-077]
+            acceptance_criteria:
+              - Workflow instance execution with state persistence
+              - Compensation and rollback for failed workflows
+              - Timer and delay support
+              - Human task assignment and escalation
+          - id: F-079
+            name: SLA Management
+            priority: P1
+            dependencies: [F-077, F-078]
+            acceptance_criteria:
+              - SLA definition with time windows and penalties
+              - SLA tracking against workflow execution
+              - Breach detection and notification
+              - SLA performance reporting
+          - id: F-080
+            name: Workflow Monitoring
+            priority: P1
+            dependencies: [F-078]
+            acceptance_criteria:
+              - Real-time workflow instance dashboard
+              - Workflow KPI metrics (duration, success rate, bottlenecks)
+              - Error pattern analysis
+              - Workflow instance replay for debugging
+
+  - id: P5
+    name: Service Assurance
+    status: completed
+    completed_date: "2027-12-31"
+    description: >
+      Build the service assurance modules: Ticketing System for incident and request
+      management, Notifications for multi-channel delivery, Reporting for dashboards
+      and data exports, and Audit for compliance and trail management.
+    duration: "4 months"
+    start_date: "2027-09-01"
+    end_date: "2027-12-31"
+    epics:
+      - id: E5.1
+        name: Ticketing System
+        description: Manage ticket lifecycle, escalation, assignment, and SLA tracking
+        features:
+          - id: F-081
+            name: Ticket Lifecycle
+            priority: P0
+            dependencies: [F-029, F-024]
+            acceptance_criteria:
+              - Ticket types: Incident, Service Request, Change, Problem
+              - States: New, Assigned, InProgress, Resolved, Closed, Reopened
+              - Required fields per type with validation
+              - Ticket history and audit trail
+          - id: F-082
+            name: Ticket Escalation
+            priority: P1
+            dependencies: [F-081]
+            acceptance_criteria:
+              - Time-based escalation rules per priority
+              - Level-based escalation (L1, L2, L3)
+              - Escalation notification to assigned group
+              - Escalation matrix configuration
+          - id: F-083
+            name: Ticket Assignment
+            priority: P1
+            dependencies: [F-081]
+            acceptance_criteria:
+              - Automatic assignment based on skill, capacity, and workload
+              - Manual assignment override
+              - Group and individual assignment
+              - Assignment notification
+          - id: F-084
+            name: SLA Tracking
+            priority: P1
+            dependencies: [F-081, F-079]
+            acceptance_criteria:
+              - SLA per ticket type and priority
+              - Clock management (business hours, pause on hold)
+              - SLA breach prediction and real-time indicators
+              - SLA compliance reporting
+      - id: E5.2
+        name: Notifications
+        description: Manage notification channels, templates, preferences, and delivery
+        features:
+          - id: F-085
+            name: Notification Channels
+            priority: P0
+            dependencies: [F-024]
+            acceptance_criteria:
+              - Channel types: Email, SMS, Push, Webhook, In-App
+              - Channel provider integration (SendGrid, Twilio, Firebase)
+              - Channel health monitoring and failover
+              - Delivery status tracking
+          - id: F-086
+            name: Notification Templates
+            priority: P1
+            dependencies: [F-085]
+            acceptance_criteria:
+              - Template creation with variables and conditional sections
+              - Multi-language template support
+              - Template versioning
+              - Preview and testing capability
+          - id: F-087
+            name: Notification Preferences
+            priority: P1
+            dependencies: [F-085, F-032]
+            acceptance_criteria:
+              - Per-channel opt-in/opt-out per customer
+              - Notification type to channel mapping
+              - Quiet hours and frequency caps
+              - Bulk notification suppression
+          - id: F-088
+            name: Delivery Tracking
+            priority: P2
+            dependencies: [F-085]
+            acceptance_criteria:
+              - Delivery confirmation tracking (open/click/delivered)
+              - Bounce and complaint handling
+              - Delivery analytics dashboard
+      - id: E5.3
+        name: Reporting
+        description: Generate reports, create dashboards, export data, and schedule delivery
+        features:
+          - id: F-089
+            name: Report Generation
+            priority: P0
+            dependencies: [F-014, F-024]
+            acceptance_criteria:
+              - Report definitions with parameterized queries
+              - Output formats: PDF, Excel, CSV, HTML
+              - Aggregation and drill-down capabilities
+              - Report scheduling and distribution
+          - id: F-090
+            name: Dashboard Framework
+            priority: P1
+            dependencies: [F-089]
+            acceptance_criteria:
+              - Configurable dashboard with widget library
+              - Real-time and historical data widgets
+              - Role-based dashboard visibility
+              - Dashboard export and sharing
+          - id: F-091
+            name: Data Exports
+            priority: P1
+            dependencies: [F-089]
+            acceptance_criteria:
+              - Ad-hoc data export with column selection
+              - Schedule-based export automation
+              - Export destination integration (SFTP, S3, email)
+              - Large dataset streaming support
+          - id: F-092
+            name: Scheduled Reports
+            priority: P2
+            dependencies: [F-089]
+            acceptance_criteria:
+              - Cron-based report scheduling
+              - Report delivery via email, portal, or webhook
+              - Failed delivery retry and notification
+      - id: E5.4
+        name: Audit
+        description: Maintain audit trail, compliance reporting, data retention, and alerts
+        features:
+          - id: F-093
+            name: Audit Trail
+            priority: P0
+            dependencies: [F-024]
+            acceptance_criteria:
+              - Automatic audit logging for all entity changes
+              - Audit data: who, what, when, previous values, new values
+              - Immutable audit log (append-only)
+              - Audit query and search API
+          - id: F-094
+            name: Compliance Reporting
+            priority: P1
+            dependencies: [F-093]
+            acceptance_criteria:
+              - Pre-built compliance report templates (SOX, GDPR, PCI-DSS)
+              - User access and authorization change reports
+              - Data retention compliance verification
+              - Report certification workflow
+          - id: F-095
+            name: Data Retention
+            priority: P1
+            dependencies: [F-093]
+            acceptance_criteria:
+              - Configurable retention policies per data category
+              - Automated data archival and purging
+              - Retention hold for legal/compliance
+              - Purge audit trail
+          - id: F-096
+            name: Audit Alerts
+            priority: P2
+            dependencies: [F-093]
+            acceptance_criteria:
+              - Alert rules for suspicious activity patterns
+              - Unauthorized access attempt alerting
+              - Real-time audit event processing
+              - Alert notification integration with ticketing
+
+  - id: P6
+    name: Commercial Release
+    description: >
+      Prepare the platform for commercial deployment: build the self-service customer
+      portal, expose partner APIs via API gateway, create mobile backend APIs, and
+      perform production hardening including performance testing, security audit,
+      disaster recovery planning, and comprehensive documentation.
+    duration: "4 months"
+    start_date: "2028-01-01"
+    end_date: "2028-04-30"
+    epics:
+      - id: E6.1
+        name: Self-Service Portal
+        description: Customer-facing web portal for account management, service management, billing, and support
+        features:
+          - id: F-097
+            name: Customer Account Management
+            priority: P0
+            dependencies: [F-029, F-019]
+            acceptance_criteria:
+              - Customer registration and login (self-service)
+              - Profile and password management
+              - Multi-account management (business customers)
+              - Notification preferences management
+          - id: F-098
+            name: Service Management
+            priority: P0
+            dependencies: [F-041, F-044]
+            acceptance_criteria:
+              - View current services and subscriptions
+              - Upgrade/downgrade plan
+              - Add/remove service features
+              - Service usage and consumption dashboard
+          - id: F-099
+            name: Billing & Payment
+            priority: P0
+            dependencies: [F-053, F-057]
+            acceptance_criteria:
+              - View invoices and payment history
+              - Download invoices as PDF
+              - Make payments and manage payment methods
+              - Set up auto-pay
+          - id: F-100
+            name: Support & Tickets
+            priority: P1
+            dependencies: [F-081, F-085]
+            acceptance_criteria:
+              - Create and track support tickets
+              - View knowledge base articles
+              - Live chat integration
+              - Schedule service appointments
+      - id: E6.2
+        name: Partner APIs
+        description: Expose platform capabilities to partners via API gateway with onboarding, SLA, and billing
+        features:
+          - id: F-101
+            name: Partner Onboarding
+            priority: P0
+            dependencies: [F-019, F-020]
+            acceptance_criteria:
+              - Partner registration and API key generation
+              - Partner profile and contract management
+              - Rate limiting and throttling per partner tier
+              - Partner portal access
+          - id: F-102
+            name: API Gateway
+            priority: P0
+            dependencies: [F-101]
+            acceptance_criteria:
+              - REST API gateway with routing and aggregation
+              - Authentication and authorization at gateway level
+              - API versioning and lifecycle management
+              - Usage analytics and monitoring
+          - id: F-103
+            name: Partner SLA Management
+            priority: P1
+            dependencies: [F-101]
+            acceptance_criteria:
+              - API availability and performance SLA
+              - SLA breach monitoring and reporting
+              - Automated SLA credit calculation
+          - id: F-104
+            name: Usage & Billing Reports
+            priority: P1
+            dependencies: [F-101, F-045]
+            acceptance_criteria:
+              - Partner usage tracking per API
+              - Partner billing report generation
+              - Revenue sharing calculation
+      - id: E6.3
+        name: Mobile APIs
+        description: Build mobile-optimized backend APIs for customer mobile applications
+        features:
+          - id: F-105
+            name: Mobile Authentication
+            priority: P0
+            dependencies: [F-019]
+            acceptance_criteria:
+              - Biometric authentication support
+              - OAuth2 device authorization flow
+              - Session management for mobile
+              - Secure token storage guidance
+          - id: F-106
+            name: Mobile Service APIs
+            priority: P0
+            dependencies: [F-098, F-099, F-100]
+            acceptance_criteria:
+              - Lightweight JSON APIs optimized for mobile
+              - Paginated and filtered list endpoints
+              - Image and document upload support
+              - Push notification integration preparation
+          - id: F-107
+            name: Push Notifications
+            priority: P1
+            dependencies: [F-106, F-085]
+            acceptance_criteria:
+              - Push notification via Firebase Cloud Messaging
+              - Notification categories and priority
+              - Deep linking from notifications
+              - Delivery analytics
+          - id: F-108
+            name: Offline Support
+            priority: P1
+            dependencies: [F-106]
+            acceptance_criteria:
+              - Offline data caching strategy
+              - Sync conflict resolution
+              - Background sync with retry
+      - id: E6.4
+        name: Production Hardening
+        description: Performance testing, security audit, disaster recovery, and documentation
+        features:
+          - id: F-109
+            name: Performance Testing
+            priority: P0
+            dependencies: [F-009]
+            acceptance_criteria:
+              - Load test scripts for all critical paths
+              - Performance baseline establishment
+              - Scalability testing (horizontal scale)
+              - Performance regression detection in CI
+          - id: F-110
+            name: Security Audit
+            priority: P0
+            dependencies: [F-011, F-020]
+            acceptance_criteria:
+              - Third-party penetration testing completed
+              - OWASP Top 10 vulnerabilities addressed
+              - Data privacy compliance (GDPR, CCPA)
+              - Security findings remediated or accepted
+          - id: F-111
+            name: Disaster Recovery
+            priority: P0
+            dependencies: [F-009, F-017]
+            acceptance_criteria:
+              - DR plan documented with RTO and RPO targets
+              - Database backup and restore procedures
+              - Multi-region failover tested
+              - Recovery runbook validated
+          - id: F-112
+            name: Documentation & Runbooks
+            priority: P1
+            dependencies: [F-109, F-110, F-111]
+            acceptance_criteria:
+              - Architecture documentation updated
+              - Operations runbooks for all services
+              - API documentation published
+              - User manuals for all modules
+
+dependencies:
+  - from: P2
+    to: P1
+    type: blocks
+    description: All Phase 2 modules depend on Foundation (IAM, DB, Shared Kernel, Observability, CI/CD)
+  - from: P3
+    to: P2
+    type: blocks
+    description: Revenue modules depend on Commercial Core (CRM, Product Catalog, Subscriptions)
+  - from: P4
+    to: P2
+    type: blocks
+    description: Operations modules depend on Product Catalog and Subscriptions for provisioning context
+  - from: P5
+    to: P4
+    type: blocks
+    description: Service Assurance depends on inventory and workflows for ticketing context
+  - from: P6
+    to: P3
+    type: blocks
+    description: Commercial Release depends on revenue modules for billing/payment in portal
+  - from: P6
+    to: P5
+    type: blocks
+    description: Portal depends on ticketing for customer support functionality
+  - from: F-029
+    to: F-019
+    type: blocks
+    description: CRM requires authentication service for identity
+  - from: F-037
+    to: F-029
+    type: blocks
+    description: Order capture requires customer data
+  - from: F-037
+    to: F-034
+    type: blocks
+    description: Order capture requires product catalog pricing
+  - from: F-041
+    to: F-037
+    type: blocks
+    description: Subscription creation depends on order fulfillment
+  - from: F-045
+    to: F-034
+    type: blocks
+    description: Rating depends on product catalog price models
+  - from: F-045
+    to: F-041
+    type: blocks
+    description: Rating requires active subscriptions
+  - from: F-049
+    to: F-041
+    type: blocks
+    description: Billing requires subscription data
+  - from: F-049
+    to: F-045
+    type: blocks
+    description: Billing requires rating charges
+  - from: F-053
+    to: F-050
+    type: blocks
+    description: Invoice management receives generated invoices
+  - from: F-057
+    to: F-053
+    type: blocks
+    description: Payments apply to invoices
+  - from: F-061
+    to: F-058
+    type: blocks
+    description: Collections works on reconciled unpaid invoices
+  - from: F-065
+    to: F-024
+    type: blocks
+    description: Resource inventory uses shared DB infrastructure
+  - from: F-073
+    to: F-042
+    type: blocks
+    description: Provisioning uses subscription entitlements
+  - from: F-073
+    to: F-065
+    type: blocks
+    description: Provisioning allocates from resource inventory
+  - from: F-075
+    to: F-038
+    type: blocks
+    description: Order fulfillment extends order orchestration
+  - from: F-081
+    to: F-029
+    type: blocks
+    description: Ticketing references customer data
+  - from: F-084
+    to: F-079
+    type: blocks
+    description: Ticket SLA tracking uses workflow SLA definition
+  - from: F-089
+    to: F-014
+    type: blocks
+    description: Reporting uses structured logging data sources
+  - from: F-093
+    to: F-024
+    type: blocks
+    description: Audit trail uses shared kernel conventions
+  - from: F-097
+    to: F-029
+    type: blocks
+    description: Portal uses CRM data
+  - from: F-097
+    to: F-019
+    type: blocks
+    description: Portal login uses authentication
+  - from: F-098
+    to: F-041
+    type: blocks
+    description: Service management uses subscriptions
+  - from: F-099
+    to: F-053
+    type: blocks
+    description: Billing in portal uses invoice management
+  - from: F-099
+    to: F-057
+    type: blocks
+    description: Payments in portal uses payment processing
+  - from: F-100
+    to: F-081
+    type: blocks
+    description: Support in portal uses ticketing
+  - from: F-102
+    to: F-019
+    type: blocks
+    description: API gateway uses auth
+  - from: F-105
+    to: F-019
+    type: blocks
+    description: Mobile auth uses authentication service
+  - from: F-106
+    to: F-098
+    type: blocks
+    description: Mobile APIs mirror portal service management
+  - from: F-106
+    to: F-099
+    type: blocks
+    description: Mobile APIs mirror portal billing
+
+milestones:
+  - id: M1.1
+    name: Foundation Complete
+    description: All foundation infrastructure operational — solution builds, Docker Compose runs, CI/CD pipelines green, Keycloak operational, logging/metrics/tracing end-to-end, database migrations working, all module scaffolds compile
+    target_date: "2026-06-30"
+    actual_date: "2026-06-20"
+    status: completed
+    phase: P1
+    deliverables:
+      - Working .NET solution with Clean Architecture
+      - Docker Compose for all infrastructure services
+      - GitHub Actions CI/CD pipeline
+      - Keycloak IAM with authentication and RBAC
+      - OpenTelemetry observability stack end-to-end
+      - EF Core migrations and database infrastructure
+      - All 19 module structures scaffolded
+  - id: M2.1
+    name: MVP Feature Complete
+    description: Commercial Core modules operational — customer CRUD, product catalog, order capture/orchestration, subscription lifecycle
+    target_date: "2026-10-31"
+    actual_date: "2026-10-31"
+    status: completed
+    phase: P2
+    deliverables:
+      - Customer management with segments and lifecycle
+      - Product catalog with offers and pricing
+      - Order capture, orchestration, and fulfillment
+      - Subscription management with lifecycle and entitlements
+  - id: M3.1
+    name: Revenue Engine Complete
+    description: Revenue modules operational — usage rating, invoice generation, payment processing, collections workflows
+    target_date: "2027-03-31"
+    actual_date: "2027-03-31"
+    status: completed
+    phase: P3
+    deliverables:
+      - Rating engine with usage, discounts, and policies
+      - Billing engine with cycle management and adjustments
+      - Invoice management with presentment and disputes
+      - Payment processing with gateway integration
+      - Collections with dunning and aging analysis
+  - id: M4.1
+    name: Operations Engine Complete
+    description: Operations modules operational — resource and network inventory, provisioning, workflow engine
+    target_date: "2027-08-31"
+    actual_date: "2027-08-31"
+    status: completed
+    phase: P4
+    deliverables:
+      - Resource inventory with lifecycle and allocation
+      - Network inventory with elements and topology
+      - Provisioning with service activation and fulfillment
+      - Workflow engine with definition and orchestration
+  - id: M5.1
+    name: Service Assurance Complete
+    description: Assurance modules operational — ticketing, notifications, reporting, audit
+    target_date: "2027-12-31"
+    actual_date: "2027-12-31"
+    status: completed
+    phase: P5
+    deliverables:
+      - Ticketing with lifecycle, escalation, and SLA
+      - Notification system with multi-channel delivery
+      - Reporting and dashboard framework
+      - Audit trail with compliance reporting
+  - id: M6.1
+    name: Platform Launch
+    description: Platform ready for production — self-service portal live, partner APIs available, mobile APIs ready, hardened and documented
+    target_date: "2028-04-30"
+    phase: P6
+    deliverables:
+      - Self-service customer portal
+      - Partner API gateway with onboarding
+      - Mobile backend APIs
+      - Performance test results meeting targets
+      - Security audit cleared
+      - DR plan validated
+      - Full documentation and runbooks

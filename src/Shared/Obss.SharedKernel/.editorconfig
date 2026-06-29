@@ -1,0 +1,13 @@
+[*.cs]
+# Base classes with Equals - unsealed by design
+dotnet_diagnostic.S4035.severity = none
+
+# Exception constructors - simplified for domain exceptions
+dotnet_diagnostic.RCS1194.severity = none
+
+# Serialization - we don't use binary serialization
+dotnet_diagnostic.S3925.severity = none
+dotnet_diagnostic.SYSLIB0051.severity = none
+
+# Exception logging and rethrowing - our pattern is intentional
+dotnet_diagnostic.S2139.severity = none

@@ -1,0 +1,82 @@
+{
+  "realm": "obss",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "accessTokenLifespan": 300,
+  "accessCodeLifespan": 60,
+  "ssoSessionMaxLifespan": 36000,
+  "ssoSessionIdleTimeout": 1800,
+  "offlineSessionIdleTimeout": 2592000,
+  "roles": {
+    "realm": [
+      { "name": "admin", "composite": true, "composites": { "realm": ["manager", "agent"] } },
+      { "name": "manager", "composite": true, "composites": { "realm": ["agent"] } },
+      { "name": "agent" },
+      { "name": "customer" }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@obss.com",
+      "firstName": "System",
+      "lastName": "Admin",
+      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }],
+      "realmRoles": ["admin"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "obss-api",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "obss-api-secret",
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["http://localhost:3000/*", "http://localhost:5000/*"],
+      "webOrigins": ["http://localhost:3000", "http://localhost:5000"],
+      "defaultClientScopes": ["openid", "profile", "email", "roles"]
+    },
+    {
+      "clientId": "obss-frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:3001/*",
+        "http://localhost:3080/*",
+        "http://192.168.1*",
+        "http://192.168.1*",
+        "http://192.168.1*",
+        "http://192.168.1*",
+        "http://192.168.1*",
+        "http://192.168.1*",
+        "http://127.0.0.1:*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3080",
+        "http://192.168.1.5:3000",
+        "http://192.168.1.5:3001",
+        "http://192.168.1.5:3080",
+        "http://192.168.1.2:3000",
+        "http://192.168.1.2:3001",
+        "http://192.168.1.2:3080"
+      ],
+      "defaultClientScopes": ["openid", "profile", "email", "roles"]
+    }
+  ]
+}

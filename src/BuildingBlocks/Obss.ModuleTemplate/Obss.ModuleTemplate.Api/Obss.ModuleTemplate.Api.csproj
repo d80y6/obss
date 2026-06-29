@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.ModuleTemplate.Application\Obss.ModuleTemplate.Application.csproj" />
+    <ProjectReference Include="..\Obss.ModuleTemplate.Infrastructure\Obss.ModuleTemplate.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

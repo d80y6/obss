@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Modules\IAM\Obss.IAM.Api\Obss.IAM.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\IAM\Obss.IAM.Infrastructure\Obss.IAM.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\Audit\Obss.Audit.Api\Obss.Audit.Api.csproj" />
+    <ProjectReference Include="..\..\Shared\Obss.SharedKernel\Obss.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\BuildingBlocks\Obss.ModuleRegistration\Obss.ModuleRegistration.csproj" />
+    <ProjectReference Include="..\..\Modules\CRM\Obss.CRM.Api\Obss.CRM.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\ProductCatalog\Obss.ProductCatalog.Api\Obss.ProductCatalog.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Orders\Obss.Orders.Api\Obss.Orders.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Subscriptions\Obss.Subscriptions.Api\Obss.Subscriptions.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Billing\Obss.Billing.Api\Obss.Billing.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Rating\Obss.Rating.Api\Obss.Rating.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Invoices\Obss.Invoices.Api\Obss.Invoices.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Payments\Obss.Payments.Api\Obss.Payments.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Collections\Obss.Collections.Api\Obss.Collections.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\ServiceInventory\Obss.ServiceInventory.Api\Obss.ServiceInventory.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\NetworkInventory\Obss.NetworkInventory.Api\Obss.NetworkInventory.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Workflow\Obss.Workflow.Api\Obss.Workflow.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Provisioning\Obss.Provisioning.Api\Obss.Provisioning.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Ticketing\Obss.Ticketing.Api\Obss.Ticketing.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Notifications\Obss.Notifications.Api\Obss.Notifications.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\Reporting\Obss.Reporting.Api\Obss.Reporting.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\ApiGateway\Obss.ApiGateway.Api\Obss.ApiGateway.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\ApiGateway\Obss.ApiGateway.Infrastructure\Obss.ApiGateway.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Modules\ApiGateway\Obss.ApiGateway.Domain\Obss.ApiGateway.Domain.csproj" />
+    <ProjectReference Include="..\..\Modules\NumberInventory\Obss.NumberInventory.Api\Obss.NumberInventory.Api.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Asp.Versioning.Http" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.OpenSearch" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <PackageReference Include="EFCore.NamingConventions" />
+  </ItemGroup>
+
+</Project>

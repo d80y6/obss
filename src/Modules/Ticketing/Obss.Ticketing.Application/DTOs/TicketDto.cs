@@ -1,0 +1,28 @@
+namespace Obss.Ticketing.Application.DTOs;
+
+public sealed record TicketDto(
+    Guid Id,
+    string TenantId,
+    string TicketNumber,
+    Guid CustomerId,
+    string CustomerName,
+    string Subject,
+    string Description,
+    string Priority,
+    string Category,
+    string Status,
+    string Source,
+    string? AssignedTo,
+    string? AssignedGroup,
+    string? Resolution,
+    DateTime CreatedAt,
+    DateTime UpdatedAt,
+    DateTime? ClosedAt,
+    DateTime? FirstResponseAt,
+    DateTime? SlaDeadline,
+    DateTime? SlaResponseDeadline,
+    DateTime? SlaBreachedAt,
+    Guid? SlaDefinitionId,
+    string? SlaStatus,
+    List<TicketCommentDto> Comments,
+    List<TicketAttachmentDto> Attachments);
