@@ -7,11 +7,55 @@ export type PricingType = 'Flat' | 'Tiered' | 'Volume';
 export type RuleType = 'Required' | 'Allowed' | 'Excluded' | 'Dependent';
 export type OptionType = 'Choice' | 'Quantity' | 'Toggle';
 export type ProductType = 'Physical' | 'Digital' | 'Service';
+export type DiscountType = 'Percentage' | 'Fixed' | 'FreePeriod';
 export type TicketPriority = 'Low' | 'Medium' | 'High' | 'Critical';
 export type SlaLevel = 'Basic' | 'Standard' | 'Premium';
 export type LifecycleStatus = 'Draft' | 'Active' | 'Retired' | 'Discontinued';
 
+// Number Inventory
+export type NumberType = 'Geographic' | 'Mobile' | 'TollFree' | 'National' | 'Premium' | 'SharedCost';
+export type NumberStatus = 'Available' | 'Reserved' | 'Assigned' | 'Ported' | 'Suspended' | 'Disconnected';
+
+export interface TelephoneNumberDto {
+  id: string;
+  tenantId: string;
+  number: string;
+  numberType: string;
+  status: string;
+  customerId: string | null;
+  subscriptionId: string | null;
+  assignedAt: string | null;
+  reservedAt: string | null;
+  cost: number;
+  currency: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // CRM
+export interface AccountRefDto {
+  billingAccountId: string;
+  name: string;
+  accountType: string;
+  role: string;
+  href: string | null;
+}
+
+export interface AgreementRefDto {
+  agreementId: string;
+  name: string;
+  agreementType: string;
+  role: string;
+  href: string | null;
+}
+
+export interface PaymentMethodRefDto {
+  paymentMethodId: string;
+  name: string;
+  href: string | null;
+}
+
 export interface CustomerDto {
   id: string;
   tenantId: string;
@@ -30,6 +74,120 @@ export interface CustomerDto {
   currency: string;
   createdAt: string;
   updatedAt: string;
+  description: string | null;
+  statusReason: string | null;
+  externalId: string | null;
+  href: string | null;
+  validFrom: string | null;
+  validUntil: string | null;
+  individual: IndividualDto | null;
+  organization: OrganizationDto | null;
+  characteristics: CharValueDto[];
+  creditProfiles: CreditProfileDto[];
+  relatedParties: RelatedPartyDto[];
+  contacts: ContactDto[];
+  notes: CustomerNoteDto[];
+  notificationHubs: NotificationHubDto[];
+  contactMedia: ContactMediumDto[];
+  accountRefs: AccountRefDto[];
+  agreementRefs: AgreementRefDto[];
+  paymentMethodRefs: PaymentMethodRefDto[];
+}
+
+export interface IndividualDto {
+  id: string;
+  firstName: string;
+  lastName: string;
+  middleName: string | null;
+  salutation: string | null;
+  title: string | null;
+  birthDate: string | null;
+  nationality: string | null;
+  gender: string | null;
+  kycStatus: string;
+  kycVerifiedAt: string | null;
+  kycVerifiedBy: string | null;
+  riskRating: string;
+  documents: IdentityDocumentDto[];
+}
+
+export interface IdentityDocumentDto {
+  id: string;
+  individualId: string;
+  documentType: string;
+  documentNumber: string;
+  issuingAuthority: string | null;
+  issuingCountry: string | null;
+  issuedDate: string | null;
+  expiryDate: string | null;
+  isVerified: boolean;
+}
+
+export interface OrganizationDto {
+  id: string;
+  tradingName: string;
+  companyType: string;
+  industry: string | null;
+  registrationNumber: string | null;
+  taxNumber: string | null;
+  countryOfRegistration: string | null;
+  kycStatus: string;
+  kycVerifiedAt: string | null;
+  kycVerifiedBy: string | null;
+}
+
+export interface CharValueDto {
+  key: string;
+  value: string;
+  valueType: string;
+}
+
+export interface CreditProfileDto {
+  id: string;
+  customerId: string;
+  score: number;
+  scoreType: string;
+  validFrom: string | null;
+  validUntil: string | null;
+  riskRating: string | null;
+}
+
+export interface NotificationHubDto {
+  hubType: string;
+  identifier: string;
+  isOptIn: boolean;
+  validFrom: string | null;
+  validUntil: string | null;
+}
+
+export interface ContactMediumDto {
+  mediumType: string;
+  isPreferred: boolean;
+  validFrom: string | null;
+  validUntil: string | null;
+  characteristics: ContactCharValueDto[];
+}
+
+export interface ContactCharValueDto {
+  key: string;
+  value: string;
+  valueType: string;
+}
+
+export interface RelatedPartyDto {
+  name: string;
+  role: string;
+  referredId: string;
+  referredType: string;
+}
+
+export interface CustomerNoteDto {
+  id: string;
+  customerId: string;
+  content: string;
+  category: string;
+  createdById: string;
+  createdAt: string;
 }
 
 export interface ContactDto {
@@ -119,42 +277,161 @@ export interface TenantDto {
 
 export interface CategoryDto {
   id: string;
+  tenantId: string;
   name: string;
-  description: string;
-  parentId: string | null;
-  productCount: number;
+  description: string | null;
+  parentCategoryId: string | null;
+  isActive: boolean;
+  lifecycleStatus: string;
+  sortOrder: number;
+  version: number;
+  validFrom: string | null;
+  validTo: string | null;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface CatalogDto {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string | null;
+  catalogType: string | null;
+  lifecycleStatus: string;
+  version: number;
+  validFrom: string | null;
+  validTo: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Catalog
 export interface ProductDto {
   id: string;
+  tenantId: string;
   name: string;
-  description: string;
+  description: string | null;
+  categoryId: string | null;
+  categoryName: string | null;
   productType: string;
-  taxCategory: string;
+  isActive: boolean;
   isShippable: boolean;
   taxable: boolean;
-  status: string;
+  taxCategory: string | null;
+  productNumber: string | null;
+  productSpecificationId: string | null;
+  lifecycleStatus: string;
   createdAt: string;
   updatedAt: string;
+  specifications: ProductSpecValueDto[];
+  offers: OfferDto[];
+}
+
+export interface ProductSpecValueDto {
+  name: string;
+  value: string;
+  isRequired: boolean;
+}
+
+export interface ProductSpecificationCharacteristicDto {
+  id: string;
+  productSpecificationId: string;
+  name: string;
+  description: string | null;
+  valueType: string;
+  configurable: boolean;
+  minValue: number | null;
+  maxValue: number | null;
+  regex: string | null;
+  sortOrder: number;
+  maxCardinality: number | null;
+  isRequired: boolean;
+  values: ProductSpecificationCharacteristicValueDto[];
+}
+
+export interface ProductSpecificationCharacteristicValueDto {
+  id: string;
+  characteristicId: string;
+  value: string;
+  unitOfMeasure: string | null;
+  isDefault: boolean;
+  valueFrom: string | null;
+  valueTo: string | null;
+  rangeInterval: string | null;
+  validFrom: string | null;
+  validTo: string | null;
+}
+
+export interface ProductSpecificationDto {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string | null;
+  brand: string | null;
+  version: string | null;
+  productNumber: string | null;
+  lifecycleStatus: string;
+  validFrom: string | null;
+  validTo: string | null;
+  createdAt: string;
+  updatedAt: string;
+  characteristics: ProductSpecificationCharacteristicDto[];
+  relationships: ProductSpecificationRelationshipDto[];
+}
+
+export interface ProductSpecificationRelationshipDto {
+  id: string;
+  productSpecificationId: string;
+  targetSpecificationId: string;
+  relationshipType: string;
+  role: string | null;
+  validFrom: string | null;
+  validTo: string | null;
 }
 
 export interface OfferDto {
   id: string;
+  tenantId: string;
   name: string;
   description: string | null;
-  productId: string;
-  productName: string;
-  productType: string;
   offerType: string;
-  billingPeriod: string;
-  status: string;
   isActive: boolean;
-  currency: string;
-  price: number;
+  isContract: boolean;
+  contractDurationMonths: number | null;
+  billingPeriod: string | null;
+  taxInclusive: boolean;
+  sortOrder: number;
+  validFrom: string | null;
+  validTo: string | null;
   createdAt: string;
   updatedAt: string;
+  pricings: OfferPricingDto[];
+  discounts: OfferDiscountDto[];
+}
+
+export interface OfferPricingDto {
+  id: string;
+  offerId: string;
+  pricingType: string;
+  currency: string;
+  recurringPrice: number;
+  oneTimePrice: number;
+  usagePrice: number;
+  unitOfMeasure: string | null;
+  minQuantity: number | null;
+  maxQuantity: number | null;
+  isActive: boolean;
+}
+
+export interface OfferDiscountDto {
+  id: string;
+  discountType: string;
+  discountValue: number;
+  discountPeriodMonths: number | null;
+  validFrom: string | null;
+  validTo: string | null;
+  isActive: boolean;
+  description: string | null;
 }
 
 // Orders
@@ -187,6 +464,15 @@ export interface OrderDto {
   approvedById: string | null;
   approvedAt: string | null;
   cancellationReason: string | null;
+  description: string | null;
+  channel: string | null;
+  priority: string | null;
+  requestedStartDate: string | null;
+  requestedCompletionDate: string | null;
+  expectedCompletionDate: string | null;
+  notificationContact: string | null;
+  externalId: string | null;
+  quoteId: string | null;
   createdAt: string;
   items: OrderItemDto[];
   payments: OrderPaymentDto[];
@@ -234,11 +520,27 @@ export interface OrderFulfillmentDto {
 export interface EntitlementDto {
   id: string;
   subscriptionId: string;
+  entitlementType: string;
   name: string;
-  type: string;
   limit: number;
-  usage: number;
+  used: number;
   unit: string;
+  isUnlimited: boolean;
+  isOverridable: boolean;
+  validFrom: string;
+  validTo: string | null;
+}
+
+export interface EntitlementDefinition {
+  entitlementType: string;
+  name: string;
+  limit: number;
+  used: number;
+  unit: string;
+  isUnlimited: boolean;
+  isOverridable: boolean;
+  validFrom: string;
+  validTo: string | null;
 }
 
 // Subscriptions
@@ -267,7 +569,39 @@ export interface SubscriptionDto {
   updatedAt: string;
 }
 
+// CRM Agreements
+export interface AgreementDto {
+  id: string;
+  customerId: string;
+  name: string;
+  agreementType: string;
+  status: string;
+  validFrom: string | null;
+  validUntil: string | null;
+  description: string | null;
+  signedAt: string | null;
+  signedBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Billing
+export interface BillingAccountDto {
+  id: string;
+  customerId: string;
+  accountType: string;
+  name: string;
+  status: string;
+  creditLimit: number;
+  currency: string;
+  validFrom: string | null;
+  validUntil: string | null;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface BillDto {
   id: string;
   billNumber: string;
@@ -531,9 +865,11 @@ export interface NetworkElementDto {
 
 export interface SubnetDto {
   id: string;
+  tenantId: string;
+  network: string;
   name: string;
-  cidr: string;
-  gateway: string;
+  description: string | null;
+  gateway: string | null;
   vlanId: number;
   location: string | null;
   status: string;
@@ -591,15 +927,6 @@ export interface ServiceResourceDto {
   releasedAt: string | null;
 }
 
-export interface TopologyDto {
-  id: string;
-  serviceId: string;
-  parentServiceId: string | null;
-  type: string;
-  config: Record<string, unknown>;
-  createdAt: string;
-}
-
 export interface ServiceTopologyDto {
   id: string;
   serviceId: string;
@@ -611,21 +938,26 @@ export interface ServiceTopologyDto {
 
 export interface TopologyLinkDto {
   id: string;
+  serviceTopologyId: string;
   sourceServiceId: string;
   targetServiceId: string;
+  linkType: string;
   direction: string;
-  createdAt: string;
+  attributes: string | null;
 }
 
 export interface DiscoveryJobDto {
   id: string;
-  name: string;
-  type: string;
+  tenantId: string;
+  discoveryType: string;
+  configuration: string | null;
   status: string;
-  targetRange: string;
-  discoveredCount: number;
   startedAt: string | null;
   completedAt: string | null;
+  resourcesFound: number;
+  resourcesMatched: number;
+  errorMessage: string | null;
+  createdBy: string;
   createdAt: string;
 }
 

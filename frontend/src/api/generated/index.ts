@@ -59,7 +59,7 @@ export type SuspendSubscriptionCommand = components["schemas"]["SuspendSubscript
 export type AddContactCommand = components["schemas"]["AddContactCommand"];
 export type AddNoteCommand = components["schemas"]["AddNoteCommand"];
 export type ValidateConfigurationQuery = components["schemas"]["ValidateConfigurationQuery"];
-export type ProductSpecificationDto = components["schemas"]["ProductSpecificationDto"];
+
 export type CompleteOrderFulfillmentCommand = components["schemas"]["CompleteOrderFulfillmentCommand"];
 export type RecordInvoicePaymentCommand = components["schemas"]["RecordInvoicePaymentCommand"];
 export type IssueCreditNoteCommand = components["schemas"]["IssueCreditNoteCommand"];
@@ -77,10 +77,20 @@ export type OptionType = import('./dto').OptionType;
 export type ProductType = import('./dto').ProductType;
 export type TicketPriority = import('./dto').TicketPriority;
 export type SlaLevel = import('./dto').SlaLevel;
+export type DiscountType = import('./dto').DiscountType;
+export type LifecycleStatus = import('./dto').LifecycleStatus;
 
 // Response DTO types (from manual dto.ts)
 export type {
-  CustomerDto, OrderDto, SubscriptionDto, ProductDto, OfferDto,
+  CustomerDto, IndividualDto, IdentityDocumentDto, OrganizationDto,
+  CharValueDto, CreditProfileDto, RelatedPartyDto, CustomerNoteDto, NotificationHubDto, ContactMediumDto, ContactCharValueDto,
+  OrderDto, SubscriptionDto, ProductDto,
+  ProductSpecValueDto,
+  ProductSpecificationCharacteristicDto,
+  ProductSpecificationCharacteristicValueDto,
+  ProductSpecificationDto,
+  ProductSpecificationRelationshipDto,
+  OfferDto,
   IamUserDto, TenantDto, TicketDto, InvoiceDto, PaymentDto, BillDto,
   NetworkElementDto, ServiceDto, ProvisioningJobDto, ProvisioningTemplateDto,
   WorkflowDefinitionDto, WorkflowInstanceDto, SegmentDto, RoleDto,
@@ -92,12 +102,13 @@ export type {
   CreditNoteDto, DisputeDto, InvoiceLineItemDto, OrderItemDto,
   WorkflowStepDto, WorkflowTaskDto, ProvisioningTemplateStepDto,
   ProvisioningTemplateParameterDto, ProvisioningLogEntryDto,
-  AlertRuleDto, TaxRuleDto, BillingCycleDto, BillAdjustmentDto, BillingJobDto,
-  AuditEntryDto, AuditAlertDto, DiscoveryJobDto,
-  ServiceTopologyDto, ServiceResourceDto, TopologyLinkDto, TopologyDto, NetworkLinkDto, NetworkConnectionDto,
-  PonPortDto, CapacityAlertDto, CapacityOverviewDto, EntitlementDto,
-  RefundDto, ReconciliationDto, TicketCommentDto, CategoryDto,
+  AlertRuleDto, TaxRuleDto, BillingCycleDto, BillAdjustmentDto, BillingJobDto, BillingAccountDto,
+  AuditEntryDto, AuditAlertDto, DiscoveryJobDto, TelephoneNumberDto,
+  ServiceTopologyDto, ServiceResourceDto, TopologyLinkDto, NetworkLinkDto, NetworkConnectionDto,
+  PonPortDto, CapacityAlertDto, CapacityOverviewDto, EntitlementDto, EntitlementDefinition,
+  RefundDto, ReconciliationDto, TicketCommentDto, CategoryDto, CatalogDto,
   OrderPaymentDto, OrderFulfillmentDto, PermissionDto, ProblemDetails, ValidationProblemDetails,
+  OfferPricingDto, OfferDiscountDto, AgreementDto,
 } from './dto';
 
 // Re-export raw types for advanced usage
