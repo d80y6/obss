@@ -21,7 +21,8 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
         ProductType productType,
         bool isShippable,
         bool taxable,
-        string? taxCategory)
+        string? taxCategory,
+        string? productNumber)
         : base(id)
     {
         TenantId = tenantId;
@@ -33,6 +34,7 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
         IsShippable = isShippable;
         Taxable = taxable;
         TaxCategory = taxCategory;
+        ProductNumber = productNumber;
         LifecycleStatus = LifecycleStatus.Draft;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
@@ -50,6 +52,9 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
     public bool IsShippable { get; private set; }
     public bool Taxable { get; private set; }
     public string? TaxCategory { get; private set; }
+    public string? ProductNumber { get; private set; }
+    public Guid? ProductSpecificationId { get; private set; }
+    public ProductSpecification? ProductSpecification { get; }
     public LifecycleStatus LifecycleStatus { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
@@ -65,7 +70,8 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
         ProductType productType,
         bool isShippable,
         bool taxable,
-        string? taxCategory)
+        string? taxCategory,
+        string? productNumber = null)
     {
         return new Product(
             Guid.NewGuid(),
@@ -76,7 +82,8 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
             productType,
             isShippable,
             taxable,
-            taxCategory);
+            taxCategory,
+            productNumber);
     }
 
     public void Activate()
@@ -123,6 +130,12 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
         IsShippable = isShippable;
         Taxable = taxable;
         TaxCategory = taxCategory;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AssignProductSpecification(Guid productSpecificationId)
+    {
+        ProductSpecificationId = productSpecificationId;
         UpdatedAt = DateTime.UtcNow;
     }
 
