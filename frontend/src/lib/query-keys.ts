@@ -144,6 +144,8 @@ export const queryKeys = {
     details: () => [...queryKeys.tickets.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.tickets.details(), id] as const,
     sla: (id: string) => [...queryKeys.tickets.detail(id), "sla"] as const,
+    slaDefinitions: () => [...queryKeys.tickets.all, "sla-definitions"] as const,
+    comments: (id: string) => [...queryKeys.tickets.detail(id), "comments"] as const,
   },
   services: {
     all: ["services"] as const,
@@ -161,6 +163,7 @@ export const queryKeys = {
         [...queryKeys.networks.elements.all, "list", filters] as const,
       detail: (id: string) => [...queryKeys.networks.elements.all, "detail", id] as const,
       connections: (id: string) => [...queryKeys.networks.elements.all, "detail", id, "connections"] as const,
+      capacity: (id: string) => [...queryKeys.networks.elements.all, "detail", id, "capacity"] as const,
     },
     olts: {
       all: ["network", "olts"] as const,
@@ -168,6 +171,7 @@ export const queryKeys = {
         [...queryKeys.networks.olts.all, "list", filters] as const,
       detail: (id: string) => [...queryKeys.networks.olts.all, "detail", id] as const,
       ports: (id: string) => [...queryKeys.networks.olts.all, "detail", id, "ports"] as const,
+      registerOnt: (id: string) => [...queryKeys.networks.olts.all, "detail", id, "register-ont"] as const,
     },
     vlans: {
       all: ["network", "vlans"] as const,
@@ -175,13 +179,38 @@ export const queryKeys = {
         [...queryKeys.networks.vlans.all, "list", filters] as const,
       detail: (id: string) => [...queryKeys.networks.vlans.all, "detail", id] as const,
     },
+    links: {
+      all: ["network", "links"] as const,
+      lists: () => [...queryKeys.networks.links.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.networks.links.lists(), filters] as const,
+      details: () => [...queryKeys.networks.links.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.networks.links.details(), id] as const,
+      degraded: () => [...queryKeys.networks.links.all, "degraded"] as const,
+    },
     topology: {
       all: ["network", "topology"] as const,
       list: () => [...queryKeys.networks.topology.all, "list"] as const,
+      maps: {
+        all: ["network", "topology", "maps"] as const,
+        list: () => [...queryKeys.networks.topology.maps.all, "list"] as const,
+      },
+    },
+    subnets: {
+      all: ["network", "subnets"] as const,
+      lists: () => [...queryKeys.networks.subnets.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.networks.subnets.lists(), filters] as const,
+      details: () => [...queryKeys.networks.subnets.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.networks.subnets.details(), id] as const,
     },
     capacity: {
       all: ["network", "capacity"] as const,
       overview: () => [...queryKeys.networks.capacity.all, "overview"] as const,
+      alerts: {
+        all: ["network", "capacity", "alerts"] as const,
+        list: () => [...queryKeys.networks.capacity.alerts.all, "list"] as const,
+      },
     },
   },
   provisioning: {
@@ -240,6 +269,14 @@ export const queryKeys = {
     all: ["notifications"] as const,
     list: (filters: Record<string, string> = {}) =>
       [...queryKeys.notifications.all, "list", filters] as const,
+    templates: {
+      all: ["notifications", "templates"] as const,
+      lists: () => [...queryKeys.notifications.templates.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.notifications.templates.lists(), filters] as const,
+      details: () => [...queryKeys.notifications.templates.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.notifications.templates.details(), id] as const,
+    },
   },
   reporting: {
     all: ["reporting"] as const,
@@ -318,6 +355,27 @@ export const queryKeys = {
       bySubscription: (subscriptionId: string, filters: Record<string, string> = {}) =>
         [...queryKeys.rating.usage.all, "subscription", subscriptionId, filters] as const,
     },
+  },
+  numberInventory: {
+    all: ["number-inventory"] as const,
+    numbers: {
+      all: ["number-inventory", "numbers"] as const,
+      lists: () => [...queryKeys.numberInventory.numbers.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.numberInventory.numbers.lists(), filters] as const,
+      available: (filters: Record<string, string> = {}) =>
+        [...queryKeys.numberInventory.numbers.all, "available", filters] as const,
+      details: () => [...queryKeys.numberInventory.numbers.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.numberInventory.numbers.details(), id] as const,
+    },
+  },
+  productSpecifications: {
+    all: ["product-specifications"] as const,
+    lists: () => [...queryKeys.productSpecifications.all, "list"] as const,
+    list: (filters: Record<string, string> = {}) =>
+      [...queryKeys.productSpecifications.lists(), filters] as const,
+    details: () => [...queryKeys.productSpecifications.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.productSpecifications.details(), id] as const,
   },
   gateway: {
     all: ["gateway"] as const,
