@@ -108,7 +108,7 @@ export type {
   PonPortDto, CapacityAlertDto, CapacityOverviewDto, EntitlementDto, EntitlementDefinition,
   RefundDto, ReconciliationDto, TicketCommentDto, CategoryDto, CatalogDto,
   OrderPaymentDto, OrderFulfillmentDto, PermissionDto, ProblemDetails, ValidationProblemDetails,
-  OfferPricingDto, OfferDiscountDto, AgreementDto,
+  OfferPricingDto, OfferDiscountDto, AgreementDto, ProductOfferingTermDto,
 } from './dto';
 
 // Re-export raw types for advanced usage

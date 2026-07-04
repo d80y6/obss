@@ -389,6 +389,18 @@ export interface ProductSpecificationRelationshipDto {
   validTo: string | null;
 }
 
+export interface ProductOfferingTermDto {
+  id: string;
+  offerId: string;
+  name: string;
+  description: string | null;
+  duration: number;
+  durationUnit: string;
+  termType: string;
+  validFrom: string | null;
+  validTo: string | null;
+}
+
 export interface OfferDto {
   id: string;
   tenantId: string;
@@ -407,6 +419,7 @@ export interface OfferDto {
   updatedAt: string;
   pricings: OfferPricingDto[];
   discounts: OfferDiscountDto[];
+  terms: ProductOfferingTermDto[];
 }
 
 export interface OfferPricingDto {
