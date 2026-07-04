@@ -19,7 +19,8 @@ public sealed record OfferDto(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     List<OfferPricingDto> Pricings,
-    List<OfferDiscountDto> Discounts);
+    List<OfferDiscountDto> Discounts,
+    List<ProductOfferingTermDto> Terms);
 
 public sealed record OfferDiscountDto(
     Guid Id,

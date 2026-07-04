@@ -26,7 +26,11 @@ public static class CatalogMappingConfig
         TypeAdapterConfig<Offer, OfferDto>.NewConfig()
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.Pricings, src => src.OfferPricings.Adapt<List<OfferPricingDto>>())
-            .Map(dest => dest.Discounts, src => src.Discounts.Adapt<List<OfferDiscountDto>>());
+            .Map(dest => dest.Discounts, src => src.Discounts.Adapt<List<OfferDiscountDto>>())
+            .Map(dest => dest.Terms, src => src.Terms.Adapt<List<ProductOfferingTermDto>>());
+
+        TypeAdapterConfig<ProductOfferingTerm, ProductOfferingTermDto>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id);
 
         TypeAdapterConfig<OfferPricing, OfferPricingDto>.NewConfig()
             .Map(dest => dest.Id, src => src.Id)
