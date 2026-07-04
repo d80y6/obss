@@ -14,11 +14,13 @@ public static class CatalogModuleRegistration
 {
     public static IServiceCollection AddCatalogModule(this IServiceCollection services)
     {
+        services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IOfferRepository, OfferRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IProductConfigurationRepository, ProductConfigurationRepository>();
         services.AddScoped<IProductConfigurationValidator, ProductConfigurationValidator>();
+        services.AddScoped<IProductSpecificationRepository, ProductSpecificationRepository>();
 
         CatalogMappingConfig.Configure();
 
@@ -30,9 +32,11 @@ public static class CatalogModuleRegistration
         var group = app.MapGroup("/api/v{version:apiVersion}/catalog")
             .WithTags("Catalog");
 
+        CatalogEndpoints.Map(group);
         ProductEndpoints.Map(group);
         OfferEndpoints.Map(group);
         CategoryEndpoints.Map(group);
+        ProductSpecificationEndpoints.Map(group);
 
         return app;
     }
