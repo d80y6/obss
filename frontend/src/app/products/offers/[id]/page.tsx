@@ -1,32 +1,56 @@
 "use client"
 
 import { useParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
+import { DataTable } from "@/components/shared/DataTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useOffer } from "@/api/hooks/useOffer"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
+import { useDeleteOffer } from "@/api/hooks/useDeleteOffer"
+import { toast } from "@/components/ui/toast"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { queryKeys } from "@/lib/query-keys"
-import { AuditEntryDto } from "@/types/api"
-import { formatCurrency } from "@/lib/formatters"
+import { useQueryClient } from "@tanstack/react-query"
+import type { Column } from "@/components/shared/DataTable"
+import type { ProductOfferingTermDto, BundledProductOfferingDto, OfferPricingDto } from "@/api/generated/dto"
 
 export default function OfferDetailPage() {
   const params = useParams()
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const id = params.id as string
 
   const { data: offer, isLoading } = useOffer(id)
+  const deleteOffer = useDeleteOffer()
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("Offer", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Offer/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("Offer", id)
+
+  const termColumns: Column<ProductOfferingTermDto>[] = [
+    { id: "name", header: "Name", accessorKey: "name" },
+    { id: "duration", header: "Duration", cell: (row) => `${row.duration} ${row.durationUnit}` },
+    { id: "termType", header: "Type", accessorKey: "termType" },
+    { id: "validFrom", header: "Valid From", cell: (row) => row.validFrom ? new Date(row.validFrom).toLocaleDateString() : "-" },
+    { id: "validTo", header: "Valid To", cell: (row) => row.validTo ? new Date(row.validTo).toLocaleDateString() : "-" },
+  ]
+
+  const bundledColumns: Column<BundledProductOfferingDto>[] = [
+    { id: "name", header: "Name", accessorKey: "name" },
+    { id: "quantity", header: "Quantity", accessorKey: "quantity" },
+    { id: "referralType", header: "Referral Type", cell: (row) => row.referralType ?? "-" },
+  ]
+
+  const pricingColumns: Column<OfferPricingDto>[] = [
+    { id: "name", header: "Name", cell: (row) => row.name ?? "-" },
+    { id: "pricingType", header: "Type", accessorKey: "pricingType" },
+    { id: "currency", header: "Currency", accessorKey: "currency" },
+    { id: "recurringPrice", header: "Recurring", cell: (row) => row.recurringPrice > 0 ? `$${row.recurringPrice.toFixed(2)}` : "-" },
+    { id: "oneTimePrice", header: "One-Time", cell: (row) => row.oneTimePrice > 0 ? `$${row.oneTimePrice.toFixed(2)}` : "-" },
+    { id: "usagePrice", header: "Usage", cell: (row) => row.usagePrice > 0 ? `$${row.usagePrice.toFixed(2)}` : "-" },
+    { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.isActive ? "Active" : "Inactive"} /> },
+  ]
 
   const tabs = [
     {
@@ -39,13 +63,76 @@ export default function OfferDetailPage() {
           fields={[
             { label: "Name", value: offer?.name ?? "-" },
             { label: "Description", value: offer?.description ?? "-" },
-            { label: "Product", value: offer?.productName ?? "-" },
-            { label: "Price", value: offer ? formatCurrency(offer.price, offer.currency) : "-" },
+            { label: "Offer Type", value: offer?.offerType ?? "-" },
+            { label: "Price", value: offer?.pricings?.[0] ? `${offer.pricings[0].currency} ${(offer.pricings[0].recurringPrice || offer.pricings[0].oneTimePrice || offer.pricings[0].usagePrice || 0).toFixed(2)}` : "-" },
             { label: "Billing Period", value: offer?.billingPeriod ?? "-" },
-            { label: "Status", value: offer ? <StatusBadge status={offer.status} /> : "-" },
+            { label: "Status", value: offer ? <StatusBadge status={offer.isActive ? "Active" : "Inactive"} /> : "-" },
             { label: "Created", value: offer?.createdAt ? new Date(offer.createdAt).toLocaleDateString() : "-" },
           ]}
         />
+      ),
+    },
+    {
+      id: "terms",
+      label: "Terms",
+      content: (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Terms &amp; Conditions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={termColumns}
+              data={offer?.terms ?? []}
+              loading={isLoading}
+              rowKey={(row) => row.id}
+              emptyTitle="No terms defined"
+              emptyDescription="Add terms to specify contract durations and conditions."
+            />
+          </CardContent>
+        </Card>
+      ),
+    },
+    {
+      id: "bundled-offerings",
+      label: "Bundled",
+      content: (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Bundled Offerings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={bundledColumns}
+              data={offer?.bundledOfferings ?? []}
+              loading={isLoading}
+              rowKey={(row) => row.id}
+              emptyTitle="No bundled offerings"
+              emptyDescription="Add bundled offerings to create product bundles."
+            />
+          </CardContent>
+        </Card>
+      ),
+    },
+    {
+      id: "pricing",
+      label: "Pricing",
+      content: (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Price Configurations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={pricingColumns}
+              data={offer?.pricings ?? []}
+              loading={isLoading}
+              rowKey={(row) => row.id}
+              emptyTitle="No pricing defined"
+              emptyDescription="Add pricing to define how this offer is charged."
+            />
+          </CardContent>
+        </Card>
       ),
     },
     {
@@ -80,10 +167,24 @@ export default function OfferDetailPage() {
     <div className="flex-1 space-y-6 p-6">
       <EntityHeader
         title={offer?.name ?? "Offer"}
-        subtitle={offer?.productName}
-        status={offer?.status}
+        subtitle={offer?.description ?? undefined}
+        status={offer?.isActive ? "Active" : "Inactive"}
         backHref="/products/offers"
         editHref={`/products/offers/${id}/edit`}
+        onDelete={() => {
+          if (confirm("Are you sure you want to delete this offer?")) {
+            deleteOffer.mutate(id, {
+              onSuccess: () => {
+                toast({ title: "Offer deleted", description: "Offer has been deleted." })
+                queryClient.invalidateQueries({ queryKey: queryKeys.offers.lists() })
+                router.push("/products/offers")
+              },
+              onError: () => {
+                toast({ title: "Error", description: "Failed to delete offer.", variant: "destructive" })
+              },
+            })
+          }
+        }}
         loading={isLoading}
       />
 

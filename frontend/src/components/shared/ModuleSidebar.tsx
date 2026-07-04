@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   Package,
+  Book,
   ShoppingCart,
   ClipboardList,
   FileText,
@@ -25,6 +26,7 @@ import {
   Waypoints,
   LogOut,
   ChevronLeft,
+  FileSpreadsheet,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -40,7 +42,9 @@ interface NavItem {
 const modules: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/customers", label: "Customers", icon: Users },
+  { href: "/catalogs", label: "Catalogs", icon: Book },
   { href: "/products", label: "Products", icon: Package },
+  { href: "/product-specifications", label: "Product Specs", icon: FileSpreadsheet },
   { href: "/orders", label: "Orders", icon: ShoppingCart },
   { href: "/subscriptions", label: "Subscriptions", icon: ClipboardList },
   { href: "/billing", label: "Billing", icon: CreditCard },
