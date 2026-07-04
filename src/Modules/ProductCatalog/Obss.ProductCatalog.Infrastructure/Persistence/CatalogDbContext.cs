@@ -28,6 +28,7 @@ public class CatalogDbContext : EfDbContext
     public DbSet<ProductOfferingTerm> ProductOfferingTerms => Set<ProductOfferingTerm>();
     public DbSet<BundledProductOffering> BundledProductOfferings => Set<BundledProductOffering>();
     public DbSet<OptionValue> OptionValues => Set<OptionValue>();
+    public DbSet<PriceRange> PriceRanges => Set<PriceRange>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

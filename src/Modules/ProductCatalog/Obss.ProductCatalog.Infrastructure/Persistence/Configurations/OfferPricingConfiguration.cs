@@ -59,6 +59,24 @@ public sealed class OfferPricingConfiguration : IEntityTypeConfiguration<OfferPr
             .HasColumnName("is_active")
             .IsRequired();
 
+        builder.Property(op => op.Name)
+            .HasColumnName("name")
+            .HasMaxLength(200);
+
+        builder.Property(op => op.Description)
+            .HasColumnName("description")
+            .HasMaxLength(2000);
+
+        builder.Property(op => op.PriceApplicationType)
+            .HasColumnName("price_application_type")
+            .HasConversion<string?>()
+            .HasMaxLength(50);
+
+        builder.HasMany(op => op.PriceRanges)
+            .WithOne()
+            .HasForeignKey(pr => pr.OfferPricingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(op => op.OfferId).HasDatabaseName("ix_offer_pricings_offer_id");
     }
 }
