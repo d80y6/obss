@@ -9,7 +9,7 @@ public sealed class ProductSpecificationConfiguration : IEntityTypeConfiguration
 {
     public void Configure(EntityTypeBuilder<ProductSpecification> builder)
     {
-        builder.ToTable("product_specifications");
+        builder.ToTable("catalog_product_specifications");
 
         builder.HasKey(ps => ps.Id);
 

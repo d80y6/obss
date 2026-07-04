@@ -39,8 +39,8 @@ public sealed record ProductSpecificationCharacteristicValueDto(
     string Value,
     string? UnitOfMeasure,
     bool IsDefault,
-    decimal? ValueFrom,
-    decimal? ValueTo,
+    string? ValueFrom,
+    string? ValueTo,
     string? RangeInterval,
     DateTime? ValidFrom,
     DateTime? ValidTo);

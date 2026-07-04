@@ -17,8 +17,8 @@ public sealed class ProductSpecificationCharacteristicValueConfiguration : IEnti
         builder.Property(v => v.Value).HasColumnName("value").HasMaxLength(1000).IsRequired();
         builder.Property(v => v.UnitOfMeasure).HasColumnName("unit_of_measure").HasMaxLength(50);
         builder.Property(v => v.IsDefault).HasColumnName("is_default").IsRequired();
-        builder.Property(v => v.ValueFrom).HasColumnName("value_from").HasColumnType("decimal(18,4)");
-        builder.Property(v => v.ValueTo).HasColumnName("value_to").HasColumnType("decimal(18,4)");
+        builder.Property(v => v.ValueFrom).HasColumnName("value_from").HasMaxLength(50);
+        builder.Property(v => v.ValueTo).HasColumnName("value_to").HasMaxLength(50);
         builder.Property(v => v.RangeInterval).HasColumnName("range_interval").HasMaxLength(50);
         builder.Property(v => v.ValidFrom).HasColumnName("valid_from");
         builder.Property(v => v.ValidTo).HasColumnName("valid_to");
