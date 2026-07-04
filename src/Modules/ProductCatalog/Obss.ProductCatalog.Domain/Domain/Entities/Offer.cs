@@ -9,6 +9,7 @@ public class Offer : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<OfferPricing> _offerPricings = [];
     private readonly List<OfferDiscount> _discounts = [];
+    private readonly List<ProductOfferingTerm> _terms = [];
 
     private Offer() { }
 
@@ -62,6 +63,7 @@ public class Offer : AggregateRoot<Guid>, ITenantEntity
 
     public IReadOnlyCollection<OfferPricing> OfferPricings => _offerPricings.AsReadOnly();
     public IReadOnlyCollection<OfferDiscount> Discounts => _discounts.AsReadOnly();
+    public IReadOnlyCollection<ProductOfferingTerm> Terms => _terms.AsReadOnly();
 
     public static Offer Create(
         string tenantId,
@@ -139,6 +141,18 @@ public class Offer : AggregateRoot<Guid>, ITenantEntity
     public void RemoveDiscount(OfferDiscount discount)
     {
         _discounts.Remove(discount);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddTerm(ProductOfferingTerm term)
+    {
+        _terms.Add(term);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void RemoveTerm(ProductOfferingTerm term)
+    {
+        _terms.Remove(term);
         UpdatedAt = DateTime.UtcNow;
     }
 

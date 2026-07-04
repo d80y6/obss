@@ -25,6 +25,7 @@ public class CatalogDbContext : EfDbContext
     public DbSet<ProductConfigurationRule> ProductConfigurationRules => Set<ProductConfigurationRule>();
     public DbSet<ProductOption> ProductOptions => Set<ProductOption>();
     public DbSet<ProductSpecification> ProductSpecifications => Set<ProductSpecification>();
+    public DbSet<ProductOfferingTerm> ProductOfferingTerms => Set<ProductOfferingTerm>();
     public DbSet<OptionValue> OptionValues => Set<OptionValue>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
