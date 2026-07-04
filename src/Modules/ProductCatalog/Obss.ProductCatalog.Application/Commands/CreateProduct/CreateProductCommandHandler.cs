@@ -36,7 +36,7 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
         {
             foreach (var spec in request.Specifications)
             {
-                product.AddSpecification(new ProductSpecification(spec.Name, spec.Value, spec.IsRequired));
+                product.AddSpecification(new Obss.ProductCatalog.Domain.Domain.ValueObjects.ProductSpecification(spec.Name, spec.Value, spec.IsRequired));
             }
         }
 

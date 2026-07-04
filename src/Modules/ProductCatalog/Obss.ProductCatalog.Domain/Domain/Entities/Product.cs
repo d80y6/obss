@@ -7,7 +7,7 @@ namespace Obss.ProductCatalog.Domain.Domain.Entities;
 
 public class Product : AggregateRoot<Guid>, ITenantEntity
 {
-    private readonly List<ProductSpecification> _specifications = [];
+    private readonly List<ValueObjects.ProductSpecification> _specifications = [];
     private readonly List<ProductOffer> _productOffers = [];
 
     private Product() { }
@@ -44,6 +44,7 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public Guid? CategoryId { get; private set; }
+    public Category? Category { get; }
     public ProductType ProductType { get; private set; }
     public bool IsActive { get; private set; }
     public bool IsShippable { get; private set; }
@@ -53,7 +54,7 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
-    public IReadOnlyCollection<ProductSpecification> Specifications => _specifications.AsReadOnly();
+    public IReadOnlyCollection<ValueObjects.ProductSpecification> Specifications => _specifications.AsReadOnly();
     public IReadOnlyCollection<ProductOffer> ProductOffers => _productOffers.AsReadOnly();
 
     public static Product Create(
@@ -125,13 +126,13 @@ public class Product : AggregateRoot<Guid>, ITenantEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void AddSpecification(ProductSpecification specification)
+    public void AddSpecification(ValueObjects.ProductSpecification specification)
     {
         _specifications.Add(specification);
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void RemoveSpecification(ProductSpecification specification)
+    public void RemoveSpecification(ValueObjects.ProductSpecification specification)
     {
         _specifications.Remove(specification);
         UpdatedAt = DateTime.UtcNow;

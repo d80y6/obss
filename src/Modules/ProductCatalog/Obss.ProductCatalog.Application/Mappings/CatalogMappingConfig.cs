@@ -10,12 +10,12 @@ public static class CatalogMappingConfig
     public static void Configure()
     {
         TypeAdapterConfig<Product, ProductDto>.NewConfig()
-            .Map(dest => dest.CategoryName, src => src.CategoryId.ToString())
+            .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : null)
             .Map(dest => dest.Specifications, src => src.Specifications.Adapt<List<ProductSpecificationDto>>())
-            .Map(dest => dest.Offers, src => src.ProductOffers.Select(po => po.OfferId).ToList().Adapt<List<OfferDto>>())
+            .Map(dest => dest.Offers, src => src.ProductOffers.Select(po => po.Offer).Adapt<List<OfferDto>>())
             .Map(dest => dest.Id, src => src.Id);
 
-        TypeAdapterConfig<ProductSpecification, ProductSpecificationDto>.NewConfig()
+        TypeAdapterConfig<Obss.ProductCatalog.Domain.Domain.ValueObjects.ProductSpecification, ProductSpecificationDto>.NewConfig()
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.Value, src => src.Value)
             .Map(dest => dest.IsRequired, src => src.IsRequired);
@@ -43,6 +43,9 @@ public static class CatalogMappingConfig
             .Map(dest => dest.Values, src => src.Values.Adapt<List<OptionValueDto>>());
 
         TypeAdapterConfig<OptionValue, OptionValueDto>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<Catalog, CatalogDto>.NewConfig()
             .Map(dest => dest.Id, src => src.Id);
     }
 }
