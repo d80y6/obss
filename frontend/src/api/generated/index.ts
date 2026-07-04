@@ -90,7 +90,7 @@ export type {
   ProductSpecificationCharacteristicValueDto,
   ProductSpecificationDto,
   ProductSpecificationRelationshipDto,
-  OfferDto,
+  BundledProductOfferingDto, OfferDto,
   IamUserDto, TenantDto, TicketDto, InvoiceDto, PaymentDto, BillDto,
   NetworkElementDto, ServiceDto, ProvisioningJobDto, ProvisioningTemplateDto,
   WorkflowDefinitionDto, WorkflowInstanceDto, SegmentDto, RoleDto,

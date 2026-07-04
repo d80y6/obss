@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Obss.ProductCatalog.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Obss.ProductCatalog.Infrastructure.Persistence;
 namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(CatalogDbContext))]
-    partial class CatalogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260702223048_AddCatalogAndCategoryAttributes")]
+    partial class AddCatalogAndCategoryAttributes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,50 +24,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.BundledProductOffering", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("BundledOfferId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("bundled_offer_id");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("OfferId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("offer_id");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer")
-                        .HasColumnName("quantity");
-
-                    b.Property<string>("ReferralType")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("referral_type");
-
-                    b.HasKey("Id")
-                        .HasName("pk_bundled_product_offerings");
-
-                    b.HasIndex("BundledOfferId")
-                        .HasDatabaseName("ix_bundled_product_offerings_bundled_offer_id");
-
-                    b.HasIndex("OfferId")
-                        .HasDatabaseName("ix_bundled_product_offerings_offer_id");
-
-                    b.HasIndex("OfferId", "BundledOfferId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_bundled_product_offerings_offer_bundled");
-
-                    b.ToTable("bundled_product_offerings", (string)null);
-                });
 
             modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.Catalog", b =>
                 {
@@ -506,15 +465,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("name");
 
-                    b.Property<string>("ProductNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("product_number");
-
-                    b.Property<Guid?>("ProductSpecificationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("product_specification_id");
-
                     b.Property<string>("ProductType")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -548,9 +498,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("LifecycleStatus")
                         .HasDatabaseName("ix_products_lifecycle_status");
-
-                    b.HasIndex("ProductSpecificationId")
-                        .HasDatabaseName("ix_products_product_specification_id");
 
                     b.HasIndex("ProductType")
                         .HasDatabaseName("ix_products_product_type");
@@ -652,63 +599,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                     b.ToTable("product_offers", (string)null);
                 });
 
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductOfferingTerm", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("integer")
-                        .HasColumnName("duration");
-
-                    b.Property<string>("DurationUnit")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("duration_unit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("OfferId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("offer_id");
-
-                    b.Property<string>("TermType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("term_type");
-
-                    b.Property<DateTime?>("ValidFrom")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_from");
-
-                    b.Property<DateTime?>("ValidTo")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_to");
-
-                    b.HasKey("Id")
-                        .HasName("pk_product_offering_terms");
-
-                    b.HasIndex("OfferId")
-                        .HasDatabaseName("ix_product_offering_terms_offer_id");
-
-                    b.HasIndex("TermType")
-                        .HasDatabaseName("ix_product_offering_terms_term_type");
-
-                    b.ToTable("product_offering_terms", (string)null);
-                });
-
             modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductOption", b =>
                 {
                     b.Property<Guid>("Id")
@@ -762,254 +652,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_product_options_product_id");
 
                     b.ToTable("product_options", (string)null);
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Brand")
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("brand");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
-
-                    b.Property<string>("LifecycleStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("lifecycle_status");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("ProductNumber")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("product_number");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("tenant_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
-                    b.Property<DateTime?>("ValidFrom")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_from");
-
-                    b.Property<DateTime?>("ValidTo")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_to");
-
-                    b.Property<string>("Version")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_catalog_product_specifications");
-
-                    b.HasIndex("LifecycleStatus")
-                        .HasDatabaseName("ix_product_specifications_lifecycle_status");
-
-                    b.HasIndex("Name")
-                        .HasDatabaseName("ix_product_specifications_name");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("ix_product_specifications_tenant_id");
-
-                    b.HasIndex("TenantId", "ProductNumber")
-                        .IsUnique()
-                        .HasDatabaseName("ix_product_specifications_tenant_id_product_number")
-                        .HasFilter("\"product_number\" IS NOT NULL");
-
-                    b.ToTable("catalog_product_specifications", (string)null);
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationCharacteristic", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<bool>("Configurable")
-                        .HasColumnType("boolean")
-                        .HasColumnName("configurable");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_required");
-
-                    b.Property<int?>("MaxCardinality")
-                        .HasColumnType("integer")
-                        .HasColumnName("max_cardinality");
-
-                    b.Property<decimal?>("MaxValue")
-                        .HasColumnType("decimal(18,4)")
-                        .HasColumnName("max_value");
-
-                    b.Property<decimal?>("MinValue")
-                        .HasColumnType("decimal(18,4)")
-                        .HasColumnName("min_value");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<Guid>("ProductSpecificationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("product_specification_id");
-
-                    b.Property<string>("Regex")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("regex");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("sort_order");
-
-                    b.Property<string>("ValueType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("value_type");
-
-                    b.HasKey("Id")
-                        .HasName("pk_product_specification_characteristics");
-
-                    b.HasIndex("ProductSpecificationId")
-                        .HasDatabaseName("ix_spec_characteristics_product_specification_id");
-
-                    b.ToTable("product_specification_characteristics", (string)null);
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationCharacteristicValue", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("CharacteristicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("characteristic_id");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_default");
-
-                    b.Property<string>("RangeInterval")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("range_interval");
-
-                    b.Property<string>("UnitOfMeasure")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("unit_of_measure");
-
-                    b.Property<DateTime?>("ValidFrom")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_from");
-
-                    b.Property<DateTime?>("ValidTo")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_to");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("value");
-
-                    b.Property<string>("ValueFrom")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("value_from");
-
-                    b.Property<string>("ValueTo")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("value_to");
-
-                    b.HasKey("Id")
-                        .HasName("pk_product_specification_characteristic_values");
-
-                    b.HasIndex("CharacteristicId")
-                        .HasDatabaseName("ix_spec_char_values_characteristic_id");
-
-                    b.ToTable("product_specification_characteristic_values", (string)null);
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationRelationship", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ProductSpecificationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("product_specification_id");
-
-                    b.Property<string>("RelationshipType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("relationship_type");
-
-                    b.Property<string>("Role")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("role");
-
-                    b.Property<Guid>("TargetSpecificationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("target_specification_id");
-
-                    b.Property<DateTime?>("ValidFrom")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_from");
-
-                    b.Property<DateTime?>("ValidTo")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("valid_to");
-
-                    b.HasKey("Id")
-                        .HasName("pk_product_specification_relationships");
-
-                    b.HasIndex("ProductSpecificationId")
-                        .HasDatabaseName("ix_spec_relationships_product_specification_id");
-
-                    b.HasIndex("TargetSpecificationId")
-                        .HasDatabaseName("ix_spec_relationships_target_specification_id");
-
-                    b.ToTable("product_specification_relationships", (string)null);
                 });
 
             modelBuilder.Entity("Obss.SharedKernel.Infrastructure.Persistence.InboxMessage", b =>
@@ -1115,25 +757,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                     b.ToTable("outbox_messages", (string)null);
                 });
 
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.BundledProductOffering", b =>
-                {
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.Offer", "BundledOffer")
-                        .WithMany()
-                        .HasForeignKey("BundledOfferId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired()
-                        .HasConstraintName("fk_bundled_product_offerings_offers_bundled_offer_id");
-
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.Offer", null)
-                        .WithMany("BundledOfferings")
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_bundled_product_offerings_offers_offer_id");
-
-                    b.Navigation("BundledOffer");
-                });
-
             modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.OfferDiscount", b =>
                 {
                     b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.Offer", null)
@@ -1171,12 +794,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_products_categories_category_id");
-
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecification", "ProductSpecification")
-                        .WithMany()
-                        .HasForeignKey("ProductSpecificationId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_products_product_specifications_product_specification_id");
 
                     b.OwnsMany("Obss.ProductCatalog.Domain.Domain.ValueObjects.ProductSpecification", "Specifications", b1 =>
                         {
@@ -1222,8 +839,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
 
                     b.Navigation("Category");
 
-                    b.Navigation("ProductSpecification");
-
                     b.Navigation("Specifications");
                 });
 
@@ -1248,55 +863,11 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductOfferingTerm", b =>
-                {
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.Offer", null)
-                        .WithMany("Terms")
-                        .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_offering_terms_offers_offer_id");
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationCharacteristic", b =>
-                {
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecification", null)
-                        .WithMany("Characteristics")
-                        .HasForeignKey("ProductSpecificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_specification_characteristics_product_specification");
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationCharacteristicValue", b =>
-                {
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationCharacteristic", null)
-                        .WithMany("Values")
-                        .HasForeignKey("CharacteristicId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_specification_characteristic_values_product_specifi");
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationRelationship", b =>
-                {
-                    b.HasOne("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecification", null)
-                        .WithMany("Relationships")
-                        .HasForeignKey("ProductSpecificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_specification_relationships_catalog_product_specifi");
-                });
-
             modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.Offer", b =>
                 {
-                    b.Navigation("BundledOfferings");
-
                     b.Navigation("Discounts");
 
                     b.Navigation("OfferPricings");
-
-                    b.Navigation("Terms");
                 });
 
             modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.Product", b =>
@@ -1305,18 +876,6 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductOption", b =>
-                {
-                    b.Navigation("Values");
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecification", b =>
-                {
-                    b.Navigation("Characteristics");
-
-                    b.Navigation("Relationships");
-                });
-
-            modelBuilder.Entity("Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecificationCharacteristic", b =>
                 {
                     b.Navigation("Values");
                 });

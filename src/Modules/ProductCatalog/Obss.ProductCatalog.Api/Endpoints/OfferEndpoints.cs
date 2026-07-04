@@ -12,6 +12,10 @@ using Obss.ProductCatalog.Application.Commands.UpdateProductOfferingTerm;
 using Obss.ProductCatalog.Application.Commands.RemoveProductOfferingTerm;
 using Obss.ProductCatalog.Application.Queries.GetActiveOffers;
 using Obss.ProductCatalog.Application.Queries.GetOfferById;
+using Obss.ProductCatalog.Application.Commands.AddBundledProductOffering;
+using Obss.ProductCatalog.Application.Commands.UpdateBundledProductOffering;
+using Obss.ProductCatalog.Application.Commands.RemoveBundledProductOffering;
+using Obss.ProductCatalog.Application.Queries.GetBundledProductOfferings;
 using Obss.ProductCatalog.Application.Queries.GetProductOfferingTerms;
 
 namespace Obss.ProductCatalog.Api.Endpoints;
@@ -116,6 +120,42 @@ public static class OfferEndpoints
         group.MapDelete("/offers/{offerId:guid}/terms/{termId:guid}", async (Guid offerId, Guid termId, IMediator mediator) =>
         {
             var result = await mediator.Send(new RemoveProductOfferingTermCommand(offerId, termId));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/offers/{offerId:guid}/bundled-offerings", async (Guid offerId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetBundledProductOfferingsQuery(offerId));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapPost("/offers/{offerId:guid}/bundled-offerings", async (Guid offerId, AddBundledProductOfferingCommand command, IMediator mediator) =>
+        {
+            if (offerId != command.OfferId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/catalog/offers/{offerId}/bundled-offerings/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPut("/offers/{offerId:guid}/bundled-offerings/{id:guid}", async (Guid offerId, Guid id, UpdateBundledProductOfferingCommand command, IMediator mediator) =>
+        {
+            if (offerId != command.OfferId || id != command.BundledOfferingId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/offers/{offerId:guid}/bundled-offerings/{id:guid}", async (Guid offerId, Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new RemoveBundledProductOfferingCommand(offerId, id));
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);

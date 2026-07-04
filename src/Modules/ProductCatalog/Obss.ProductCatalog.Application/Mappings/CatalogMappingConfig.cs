@@ -2,6 +2,7 @@ using Mapster;
 using Obss.ProductCatalog.Application.DTOs;
 using Obss.ProductCatalog.Domain.Domain.Entities;
 using Obss.ProductCatalog.Domain.Domain.ValueObjects;
+using BundledProductOffering = Obss.ProductCatalog.Domain.Domain.Entities.BundledProductOffering;
 using ProductSpecification = Obss.ProductCatalog.Domain.Domain.Entities.ProductSpecification;
 
 namespace Obss.ProductCatalog.Application.Mappings;
@@ -27,7 +28,12 @@ public static class CatalogMappingConfig
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.Pricings, src => src.OfferPricings.Adapt<List<OfferPricingDto>>())
             .Map(dest => dest.Discounts, src => src.Discounts.Adapt<List<OfferDiscountDto>>())
-            .Map(dest => dest.Terms, src => src.Terms.Adapt<List<ProductOfferingTermDto>>());
+            .Map(dest => dest.Terms, src => src.Terms.Adapt<List<ProductOfferingTermDto>>())
+            .Map(dest => dest.BundledOfferings, src => src.BundledOfferings.Adapt<List<BundledProductOfferingDto>>());
+
+        TypeAdapterConfig<BundledProductOffering, BundledProductOfferingDto>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.BundledOffer, src => src.BundledOffer != null ? src.BundledOffer.Adapt<OfferDto>() : null);
 
         TypeAdapterConfig<ProductOfferingTerm, ProductOfferingTermDto>.NewConfig()
             .Map(dest => dest.Id, src => src.Id);

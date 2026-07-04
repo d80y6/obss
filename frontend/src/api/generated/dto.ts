@@ -389,6 +389,16 @@ export interface ProductSpecificationRelationshipDto {
   validTo: string | null;
 }
 
+export interface BundledProductOfferingDto {
+  id: string;
+  offerId: string;
+  bundledOfferId: string;
+  name: string | null;
+  quantity: number;
+  referralType: string | null;
+  bundledOffer: OfferDto | null;
+}
+
 export interface ProductOfferingTermDto {
   id: string;
   offerId: string;
@@ -420,6 +430,7 @@ export interface OfferDto {
   pricings: OfferPricingDto[];
   discounts: OfferDiscountDto[];
   terms: ProductOfferingTermDto[];
+  bundledOfferings?: BundledProductOfferingDto[];
 }
 
 export interface OfferPricingDto {

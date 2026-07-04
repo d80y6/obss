@@ -28,6 +28,14 @@ public sealed class OfferRepository : EfRepository<Offer>, IOfferRepository
             .FirstOrDefaultAsync(o => o.Id == offerId, cancellationToken);
     }
 
+    public async Task<Offer?> GetByIdWithBundledOfferingsAsync(Guid offerId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(o => o.BundledOfferings)
+                .ThenInclude(b => b.BundledOffer)
+            .FirstOrDefaultAsync(o => o.Id == offerId, cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Offer>> GetActiveOffersAsync(
         OfferType? offerType,
         CancellationToken cancellationToken = default)
