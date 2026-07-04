@@ -55,6 +55,13 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnName("tax_category")
             .HasMaxLength(100);
 
+        builder.Property(p => p.ProductNumber)
+            .HasColumnName("product_number")
+            .HasMaxLength(100);
+
+        builder.Property(p => p.ProductSpecificationId)
+            .HasColumnName("product_specification_id");
+
         builder.Property(p => p.LifecycleStatus)
             .HasColumnName("lifecycle_status")
             .HasConversion<string>()
@@ -80,12 +87,23 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             sb.Property(s => s.IsRequired).HasColumnName("is_required").IsRequired();
         });
 
+        builder.HasOne(p => p.Category)
+            .WithMany()
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(p => p.ProductSpecification)
+            .WithMany()
+            .HasForeignKey(p => p.ProductSpecificationId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.HasMany(p => p.ProductOffers)
-            .WithOne()
+            .WithOne(po => po.Product)
             .HasForeignKey(po => po.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(p => p.TenantId).HasDatabaseName("ix_products_tenant_id");
+
         builder.HasIndex(p => p.CategoryId).HasDatabaseName("ix_products_category_id");
         builder.HasIndex(p => p.ProductType).HasDatabaseName("ix_products_product_type");
         builder.HasIndex(p => p.LifecycleStatus).HasDatabaseName("ix_products_lifecycle_status");
