@@ -11,11 +11,11 @@ public static class CatalogMappingConfig
     {
         TypeAdapterConfig<Product, ProductDto>.NewConfig()
             .Map(dest => dest.CategoryName, src => src.Category != null ? src.Category.Name : null)
-            .Map(dest => dest.Specifications, src => src.Specifications.Adapt<List<ProductSpecificationDto>>())
+            .Map(dest => dest.Specifications, src => src.Specifications.Adapt<List<ProductSpecValueDto>>())
             .Map(dest => dest.Offers, src => src.ProductOffers.Select(po => po.Offer).Adapt<List<OfferDto>>())
             .Map(dest => dest.Id, src => src.Id);
 
-        TypeAdapterConfig<Obss.ProductCatalog.Domain.Domain.ValueObjects.ProductSpecification, ProductSpecificationDto>.NewConfig()
+        TypeAdapterConfig<Obss.ProductCatalog.Domain.Domain.ValueObjects.ProductSpecification, ProductSpecValueDto>.NewConfig()
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.Value, src => src.Value)
             .Map(dest => dest.IsRequired, src => src.IsRequired);

@@ -14,4 +14,4 @@ public sealed record CreateProductCommand(
     bool IsShippable,
     bool Taxable,
     string? TaxCategory,
-    List<ProductSpecificationDto>? Specifications) : IRequest<Result<ProductDto>>;
+    List<ProductSpecValueDto>? Specifications) : IRequest<Result<ProductDto>>;

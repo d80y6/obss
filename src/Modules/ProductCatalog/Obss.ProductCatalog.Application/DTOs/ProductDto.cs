@@ -14,13 +14,15 @@ public sealed record ProductDto(
     bool IsShippable,
     bool Taxable,
     string? TaxCategory,
+    string? ProductNumber,
+    Guid? ProductSpecificationId,
     LifecycleStatus LifecycleStatus,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    List<ProductSpecificationDto> Specifications,
+    List<ProductSpecValueDto> Specifications,
     List<OfferDto> Offers);
 
-public sealed record ProductSpecificationDto(
+public sealed record ProductSpecValueDto(
     string Name,
     string Value,
     bool IsRequired);
