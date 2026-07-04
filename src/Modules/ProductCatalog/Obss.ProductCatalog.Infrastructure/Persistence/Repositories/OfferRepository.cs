@@ -21,6 +21,14 @@ public sealed class OfferRepository : EfRepository<Offer>, IOfferRepository
             .FirstOrDefaultAsync(o => o.Id == offerId, cancellationToken);
     }
 
+    public async Task<Offer?> GetByIdWithPricingsAndRangesAsync(Guid offerId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(o => o.OfferPricings)
+                .ThenInclude(op => op.PriceRanges)
+            .FirstOrDefaultAsync(o => o.Id == offerId, cancellationToken);
+    }
+
     public async Task<Offer?> GetByIdWithTermsAsync(Guid offerId, CancellationToken cancellationToken = default)
     {
         return await DbSet

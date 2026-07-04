@@ -17,6 +17,10 @@ using Obss.ProductCatalog.Application.Commands.UpdateBundledProductOffering;
 using Obss.ProductCatalog.Application.Commands.RemoveBundledProductOffering;
 using Obss.ProductCatalog.Application.Queries.GetBundledProductOfferings;
 using Obss.ProductCatalog.Application.Queries.GetProductOfferingTerms;
+using Obss.ProductCatalog.Application.Commands.AddPriceRange;
+using Obss.ProductCatalog.Application.Commands.UpdatePriceRange;
+using Obss.ProductCatalog.Application.Commands.RemovePriceRange;
+using Obss.ProductCatalog.Application.Queries.GetPriceRanges;
 
 namespace Obss.ProductCatalog.Api.Endpoints;
 
@@ -156,6 +160,42 @@ public static class OfferEndpoints
         group.MapDelete("/offers/{offerId:guid}/bundled-offerings/{id:guid}", async (Guid offerId, Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new RemoveBundledProductOfferingCommand(offerId, id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges", async (Guid offerId, Guid pricingId, AddPriceRangeCommand command, IMediator mediator) =>
+        {
+            if (pricingId != command.OfferPricingId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/catalog/offers/{offerId}/pricing/{pricingId}/price-ranges/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges", async (Guid offerId, Guid pricingId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetPriceRangesQuery(pricingId));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapPut("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges/{rangeId:guid}", async (Guid offerId, Guid pricingId, Guid rangeId, UpdatePriceRangeCommand command, IMediator mediator) =>
+        {
+            if (pricingId != command.OfferPricingId || rangeId != command.PriceRangeId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges/{rangeId:guid}", async (Guid offerId, Guid pricingId, Guid rangeId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new RemovePriceRangeCommand(pricingId, rangeId));
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);

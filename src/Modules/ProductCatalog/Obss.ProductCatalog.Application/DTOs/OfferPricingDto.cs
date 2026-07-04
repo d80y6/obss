@@ -13,4 +13,8 @@ public sealed record OfferPricingDto(
     string? UnitOfMeasure,
     int? MinQuantity,
     int? MaxQuantity,
-    bool IsActive);
+    bool IsActive,
+    string? Name,
+    string? Description,
+    PriceApplicationType? PriceApplicationType,
+    List<PriceRangeDto> PriceRanges);

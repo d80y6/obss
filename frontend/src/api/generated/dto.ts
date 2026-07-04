@@ -433,6 +433,15 @@ export interface OfferDto {
   bundledOfferings?: BundledProductOfferingDto[];
 }
 
+export interface PriceRangeDto {
+  id: string;
+  offerPricingId: string;
+  minQuantity: number;
+  maxQuantity: number | null;
+  price: number;
+  isActive: boolean;
+}
+
 export interface OfferPricingDto {
   id: string;
   offerId: string;
@@ -445,6 +454,10 @@ export interface OfferPricingDto {
   minQuantity: number | null;
   maxQuantity: number | null;
   isActive: boolean;
+  name?: string | null;
+  description?: string | null;
+  priceApplicationType?: string | null;
+  priceRanges?: PriceRangeDto[];
 }
 
 export interface OfferDiscountDto {
