@@ -88,6 +88,11 @@ public sealed class OfferConfiguration : IEntityTypeConfiguration<Offer>
             .HasForeignKey(t => t.OfferId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(o => o.BundledOfferings)
+            .WithOne()
+            .HasForeignKey(b => b.OfferId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(o => o.TenantId).HasDatabaseName("ix_offers_tenant_id");
         builder.HasIndex(o => o.OfferType).HasDatabaseName("ix_offers_offer_type");
         builder.HasIndex(o => o.IsActive).HasDatabaseName("ix_offers_is_active");
