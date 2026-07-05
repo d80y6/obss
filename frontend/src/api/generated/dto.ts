@@ -798,6 +798,47 @@ export interface DisputeDto {
 }
 
 // Payments
+export interface PaymentAllocationDto {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  createdAt: string;
+}
+
+export interface PaymentSummaryDto {
+  totalPayments: number;
+  pendingCount: number;
+  completedCount: number;
+  failedCount: number;
+  refundedCount: number;
+  partiallyRefundedCount: number;
+  totalAmount: number;
+  totalCompletedAmount: number;
+  totalRefundedAmount: number;
+  netAmount: number;
+}
+
+export interface PaymentGatewayDto {
+  id: string;
+  tenantId: string;
+  name: string;
+  provider: string;
+  isActive: boolean;
+  configuration: string;
+  supportedCurrencies: string[];
+  minAmount: number | null;
+  maxAmount: number | null;
+  transactionFee: number;
+  feeType: string;
+  createdAt: string;
+}
+
+export interface PaymentGatewayInfo {
+  provider: string;
+  displayName: string;
+  isAvailable: boolean;
+}
+
 export interface RefundDto {
   id: string;
   refundNumber: string;
@@ -808,33 +849,60 @@ export interface RefundDto {
   reason: string;
   status: string;
   createdAt: string;
+  completedAt: string | null;
 }
 
 export interface ReconciliationDto {
   id: string;
-  statementDate: string;
-  totalAmount: number;
-  matchedCount: number;
-  unmatchedCount: number;
+  tenantId: string;
+  importDate: string;
+  importSource: string;
+  importFileName: string | null;
   status: string;
+  totalImportAmount: number;
+  totalReconciledAmount: number;
+  currency: string;
+  importedBy: string;
+  createdAt: string;
+  items: ReconciliationItemDto[];
+}
+
+export interface ReconciliationItemDto {
+  id: string;
+  reconciliationId: string;
+  externalReference: string;
+  amount: number;
+  currency: string;
+  transactionDate: string;
+  description: string | null;
+  matchedInvoiceId: string | null;
+  matchedPaymentId: string | null;
+  status: string;
+  discrepancyReason: string | null;
   createdAt: string;
 }
 
 export interface PaymentDto {
   id: string;
+  tenantId: string;
   paymentNumber: string;
-  invoiceId: string;
-  invoiceNumber: string;
   customerId: string;
   customerName: string;
+  invoiceId: string | null;
+  invoiceNumber: string | null;
   amount: number;
   currency: string;
-  method: string;
+  paymentMethod: string;
+  paymentReference: string | null;
   status: string;
-  transactionId: string;
   paidAt: string;
+  completedAt: string | null;
+  notes: string | null;
+  transactionId: string;
   createdAt: string;
   updatedAt: string;
+  allocations: PaymentAllocationDto[];
+  refunds: RefundDto[];
 }
 
 // Ticketing

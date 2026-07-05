@@ -125,10 +125,19 @@ export const queryKeys = {
       [...queryKeys.payments.lists(), filters] as const,
     details: () => [...queryKeys.payments.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.payments.details(), id] as const,
+    summary: ["payments", "summary"] as const,
+    byInvoice: (invoiceId: string) => ["payments", "by-invoice", invoiceId] as const,
+    gateways: {
+      all: ["payments", "gateways"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.payments.gateways.all, "list", filters] as const,
+    },
+    unmatched: ["payments", "unmatched"] as const,
     reconciliation: {
       all: ["payments", "reconciliation"] as const,
       list: (filters: Record<string, string> = {}) =>
         [...queryKeys.payments.reconciliation.all, "list", filters] as const,
+      detail: (id: string) => [...queryKeys.payments.reconciliation.all, "detail", id] as const,
     },
     refunds: {
       all: ["payments", "refunds"] as const,

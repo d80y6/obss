@@ -106,7 +106,8 @@ export type {
   AuditEntryDto, AuditAlertDto, DiscoveryJobDto, TelephoneNumberDto,
   ServiceTopologyDto, ServiceResourceDto, TopologyLinkDto, NetworkLinkDto, NetworkConnectionDto,
   PonPortDto, CapacityAlertDto, CapacityOverviewDto, EntitlementDto, EntitlementDefinition,
-  RefundDto, ReconciliationDto, TicketCommentDto, CategoryDto, CatalogDto,
+  PaymentAllocationDto, PaymentSummaryDto, PaymentGatewayDto, PaymentGatewayInfo,
+  RefundDto, ReconciliationDto, ReconciliationItemDto, TicketCommentDto, CategoryDto, CatalogDto,
   OrderPaymentDto, OrderFulfillmentDto, PermissionDto, ProblemDetails, ValidationProblemDetails,
   OfferPricingDto, OfferDiscountDto, AgreementDto, ProductOfferingTermDto, PriceRangeDto,
 } from './dto';
