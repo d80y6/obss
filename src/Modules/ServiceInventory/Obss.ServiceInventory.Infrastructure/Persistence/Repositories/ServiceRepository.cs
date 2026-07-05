@@ -47,6 +47,26 @@ public sealed class ServiceRepository : EfRepository<Service>, IServiceRepositor
         return await query.ToListAsync(cancellationToken);
     }
 
+    public async Task<int> CountFilteredAsync(
+        Guid? customerId,
+        ServiceType? serviceType,
+        ServiceStatus? status,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.AsQueryable();
+
+        if (customerId.HasValue)
+            query = query.Where(s => s.CustomerId == customerId.Value);
+
+        if (serviceType.HasValue)
+            query = query.Where(s => s.ServiceType == serviceType.Value);
+
+        if (status.HasValue)
+            query = query.Where(s => s.Status == status.Value);
+
+        return await query.CountAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Service>> GetBySubscriptionAsync(Guid subscriptionId, CancellationToken cancellationToken = default)
     {
         return await DbSet

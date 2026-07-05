@@ -13,11 +13,16 @@ public sealed class CreateServiceCommandHandler : IRequestHandler<CreateServiceC
 {
     private readonly IServiceRepository _serviceRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentTenant _currentTenant;
 
-    public CreateServiceCommandHandler(IServiceRepository serviceRepository, IUnitOfWork unitOfWork)
+    public CreateServiceCommandHandler(
+        IServiceRepository serviceRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentTenant currentTenant)
     {
         _serviceRepository = serviceRepository;
         _unitOfWork = unitOfWork;
+        _currentTenant = currentTenant;
     }
 
     public async Task<Result<ServiceDto>> Handle(CreateServiceCommand request, CancellationToken cancellationToken)
@@ -25,12 +30,16 @@ public sealed class CreateServiceCommandHandler : IRequestHandler<CreateServiceC
         if (!Enum.TryParse<ServiceType>(request.ServiceType, out var serviceType))
             return Result.Failure<ServiceDto>(Error.Validation($"Invalid service type: '{request.ServiceType}'."));
 
+        var tenantIdStr = _currentTenant.TenantId;
+        if (string.IsNullOrEmpty(tenantIdStr) || !Guid.TryParse(tenantIdStr, out var tenantId))
+            return Result.Failure<ServiceDto>(Error.Unauthorized("Valid tenant context is required."));
+
         var existing = await _serviceRepository.GetByIdentifierAsync(request.ServiceIdentifier, cancellationToken);
         if (existing is not null)
             return Result.Failure<ServiceDto>(Error.Conflict($"A service with identifier '{request.ServiceIdentifier}' already exists."));
 
         var service = Service.Create(
-            Guid.Empty,
+            tenantId,
             request.CustomerId,
             request.SubscriptionId,
             serviceType,

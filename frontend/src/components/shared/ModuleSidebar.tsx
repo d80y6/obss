@@ -29,6 +29,8 @@ import {
   ChevronDown,
   BarChart3,
   FileSpreadsheet,
+  CircuitBoard,
+  FileSearch,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -56,7 +58,6 @@ const modules: NavItem[] = [
   { href: "/payments/gateways", label: "Gateways", icon: CreditCard },
   { href: "/rating", label: "Rating", icon: Scale },
   { href: "/tickets", label: "Tickets", icon: Ticket },
-  { href: "/service-inventory", label: "Services", icon: Network },
   { href: "/network", label: "Network", icon: Cable },
   { href: "/provisioning", label: "Provisioning", icon: Settings },
   { href: "/workflow", label: "Workflow", icon: Waypoints },
@@ -71,6 +72,7 @@ export function ModuleSidebar() {
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
   const [collectionsOpen, setCollectionsOpen] = useState(false)
+  const [serviceInventoryOpen, setServiceInventoryOpen] = useState(false)
 
   return (
     <aside
@@ -114,6 +116,60 @@ export function ModuleSidebar() {
           )
         })}
 
+        {!collapsed && (
+          <div>
+            <button
+              onClick={() => setServiceInventoryOpen(!serviceInventoryOpen)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                pathname.startsWith("/service-inventory") ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              )}
+            >
+              <Network className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-left">Service Inventory</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform",
+                  serviceInventoryOpen && "rotate-180"
+                )}
+              />
+            </button>
+            {serviceInventoryOpen && (
+              <div className="ml-2 space-y-1 border-l pl-2">
+                <Link
+                  href="/service-inventory"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/service-inventory" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <Network className="h-4 w-4 shrink-0" />
+                  <span>Services</span>
+                </Link>
+                <Link
+                  href="/service-inventory/discovery"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/service-inventory/discovery" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <CircuitBoard className="h-4 w-4 shrink-0" />
+                  <span>Discovery</span>
+                </Link>
+                <Link
+                  href="/service-inventory/discovery/unmatched"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/service-inventory/discovery/unmatched" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <FileSearch className="h-4 w-4 shrink-0" />
+                  <span>Unmatched Resources</span>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
         {!collapsed && (
           <div>
             <button

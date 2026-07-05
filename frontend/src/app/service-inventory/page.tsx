@@ -38,9 +38,24 @@ export default function ServiceInventoryPage() {
     { id: "subscriptionId", header: "Subscription", accessorKey: "subscriptionId" },
   ]
 
+  const typeOptions = [
+    { label: "All Types", value: "all" },
+    { label: "FTTH", value: "FTTH" },
+    { label: "ADSL", value: "ADSL" },
+    { label: "Fixed Wireless", value: "FixedWireless" },
+    { label: "VoIP", value: "VoIP" },
+    { label: "Static IP", value: "StaticIP" },
+    { label: "DIA", value: "DIA" },
+    { label: "Ethernet", value: "Ethernet" },
+    { label: "VPS", value: "VPS" },
+    { label: "Dedicated Server", value: "DedicatedServer" },
+    { label: "Hosting", value: "Hosting" },
+    { label: "Domain", value: "Domain" },
+  ]
+
   const filterConfig = [
     { id: "status", label: "Status", type: "select" as const, value: statusFilter, onChange: (v: string) => { setStatusFilter(v === "all" ? "" : v); setPage(1) }, options: [{ label: "Active", value: "active" }, { label: "Suspended", value: "suspended" }, { label: "Decommissioned", value: "decommissioned" }] },
-    { id: "type", label: "Type", type: "select" as const, value: typeFilter, onChange: (v: string) => { setTypeFilter(v === "all" ? "" : v); setPage(1) }, options: [] },
+    { id: "type", label: "Type", type: "select" as const, value: typeFilter, onChange: (v: string) => { setTypeFilter(v === "all" ? "" : v); setPage(1) }, options: typeOptions },
   ]
 
   return (

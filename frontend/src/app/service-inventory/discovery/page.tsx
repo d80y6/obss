@@ -14,6 +14,7 @@ import type { DiscoveryJobDto } from "@/api/generated"
 import { Search, Play, CheckCircle2 } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import { useQueryClient } from "@tanstack/react-query"
+import Link from "next/link"
 
 export default function DiscoveryPage() {
   const queryClient = useQueryClient()
@@ -53,6 +54,7 @@ export default function DiscoveryPage() {
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <PageHeader title="Discovery Jobs" backHref="/service-inventory" />
+        <Link href="/service-inventory/discovery/unmatched" className="text-sm text-primary hover:underline">View Unmatched Resources →</Link>
         <Dialog open={startOpen} onOpenChange={setStartOpen}>
           <DialogTrigger asChild>
             <Button><Play className="mr-1 h-4 w-4" /> Start Job</Button>

@@ -2,12 +2,16 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.ServiceInventory.Application.Abstractions;
+using Obss.ServiceInventory.Domain.ValueObjects;
 using Obss.ServiceInventory.Application.Commands.ActivateService;
 using Obss.ServiceInventory.Application.Commands.AddTopologyLink;
+using Obss.ServiceInventory.Application.Commands.AllocateResource;
 using Obss.ServiceInventory.Application.Commands.CompleteDiscoveryJob;
 using Obss.ServiceInventory.Application.Commands.CreateService;
 using Obss.ServiceInventory.Application.Commands.CreateTopology;
 using Obss.ServiceInventory.Application.Commands.DecommissionService;
+using Obss.ServiceInventory.Application.Commands.ReleaseResource;
 using Obss.ServiceInventory.Application.Commands.RemoveTopologyLink;
 using Obss.ServiceInventory.Application.Commands.ResumeService;
 using Obss.ServiceInventory.Application.Commands.StartDiscoveryJob;
@@ -45,12 +49,23 @@ public static class ServiceEndpoints
                 : (IResult)TypedResults.NotFound(result.Error);
         });
 
-        group.MapGet("/services", async ([AsParameters] GetServicesQuery query, IMediator mediator) =>
+        group.MapGet("/services", async (HttpContext httpContext, [AsParameters] GetServicesQuery query, IMediator mediator, IServiceRepository serviceRepository) =>
         {
             var result = await mediator.Send(query);
-            return result.IsSuccess
-                ? (IResult)TypedResults.Ok(result.Value)
-                : (IResult)TypedResults.BadRequest(result.Error);
+            if (!result.IsSuccess)
+                return (IResult)TypedResults.BadRequest(result.Error);
+
+            ServiceType? serviceType = null;
+            if (!string.IsNullOrWhiteSpace(query.ServiceType) && Enum.TryParse<ServiceType>(query.ServiceType, out var parsedType))
+                serviceType = parsedType;
+
+            ServiceStatus? status = null;
+            if (!string.IsNullOrWhiteSpace(query.Status) && Enum.TryParse<ServiceStatus>(query.Status, out var parsedStatus))
+                status = parsedStatus;
+
+            var totalCount = await serviceRepository.CountFilteredAsync(query.CustomerId, serviceType, status);
+            httpContext.Response.Headers["x-total-count"] = totalCount.ToString();
+            return (IResult)TypedResults.Ok(result.Value);
         });
 
         group.MapGet("/subscriptions/{subscriptionId:guid}/services", async (Guid subscriptionId, IMediator mediator) =>
@@ -153,6 +168,24 @@ public static class ServiceEndpoints
         group.MapGet("/services/{id:guid}/resources", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetServiceResourcesQuery(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/services/{id:guid}/resources", async (Guid id, AllocateResourceCommand command, IMediator mediator) =>
+        {
+            if (id != command.ServiceId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/services/{serviceId:guid}/resources/{resourceId:guid}", async (Guid serviceId, Guid resourceId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new ReleaseResourceCommand(serviceId, resourceId));
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);

@@ -249,3 +249,31 @@ export function useRemoveTopologyLink() {
     },
   })
 }
+
+export function useAllocateResource() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ serviceId, resourceType, resourceIdentifier }: { serviceId: string; resourceType: string; resourceIdentifier: string }) => {
+      const res = await api.post(`/api/v1/service-inventory/services/${serviceId}/resources`, { serviceId, resourceType, resourceIdentifier })
+      return res.data as ServiceDto
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.serviceInventory.services.resources(variables.serviceId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.serviceInventory.services.detail(variables.serviceId) })
+    },
+  })
+}
+
+export function useReleaseResource() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ serviceId, resourceId }: { serviceId: string; resourceId: string }) => {
+      const res = await api.delete(`/api/v1/service-inventory/services/${serviceId}/resources/${resourceId}`)
+      return res.data as ServiceDto
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.serviceInventory.services.resources(variables.serviceId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.serviceInventory.services.detail(variables.serviceId) })
+    },
+  })
+}

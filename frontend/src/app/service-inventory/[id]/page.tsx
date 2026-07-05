@@ -14,8 +14,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
 import type { ServiceResourceDto } from "@/api/generated"
-import { useService, useServiceTopology, useServiceResources, useActivateService, useSuspendService, useDecommissionService, useResumeService, useCreateTopology, useAddTopologyLink, useRemoveTopologyLink } from "@/api/hooks/use-service-inventory"
-import { Pencil, Play, Pause, Trash2, RotateCcw, Plus } from "lucide-react"
+import { useService, useServiceTopology, useServiceResources, useActivateService, useSuspendService, useDecommissionService, useResumeService, useCreateTopology, useAddTopologyLink, useRemoveTopologyLink, useAllocateResource, useReleaseResource } from "@/api/hooks/use-service-inventory"
+import { Pencil, Play, Pause, Trash2, RotateCcw, Plus, ArrowRight, ArrowLeftRight } from "lucide-react"
 import Link from "next/link"
 
 export default function ServiceInventoryDetailPage() {
@@ -25,9 +25,28 @@ export default function ServiceInventoryDetailPage() {
 
   const { data: service, isLoading } = useService(id)
   const { data: topology } = useServiceTopology(id)
-  const { data: resources } = useServiceResources(id)
+  const { data: resources, refetch: refetchResources } = useServiceResources(id)
 
   const { data: auditEntries, error: auditError } = useAuditLog("Service", id)
+
+  const [showAllocate, setShowAllocate] = useState(false)
+  const [newResourceType, setNewResourceType] = useState("")
+  const [newResourceId, setNewResourceId] = useState("")
+  const allocateResource = useAllocateResource()
+  const releaseResource = useReleaseResource()
+
+  const handleAllocate = () => {
+    allocateResource.mutate(
+      { serviceId: id, resourceType: newResourceType, resourceIdentifier: newResourceId },
+      { onSuccess: () => { setShowAllocate(false); setNewResourceType(""); setNewResourceId("") } }
+    )
+  }
+
+  const handleRelease = (resourceId: string) => {
+    if (confirm("Release this resource?")) {
+      releaseResource.mutate({ serviceId: id, resourceId })
+    }
+  }
 
   const activateService = useActivateService()
   const suspendService = useSuspendService()
@@ -56,6 +75,13 @@ export default function ServiceInventoryDetailPage() {
     { id: "resourceType", header: "Type", accessorKey: "resourceType" },
     { id: "resourceIdentifier", header: "Identifier", accessorKey: "resourceIdentifier" },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+    { id: "actions", header: "", cell: (row) => (
+      row.status !== "Released" ? (
+        <Button variant="ghost" size="sm" onClick={() => handleRelease(row.id)}>
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
+      ) : null
+    )},
   ]
 
   const tabs = [
@@ -183,20 +209,34 @@ export default function ServiceInventoryDetailPage() {
               <p className="text-sm text-muted-foreground">Topology created. Add links to define service dependencies.</p>
             ) : (
               <div className="space-y-2">
-                {topology.links.map((link) => (
-                  <div key={link.id} className="flex items-center justify-between rounded-md border px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-medium">{link.sourceServiceId}</span>
-                      <span className="text-muted-foreground">→</span>
-                      <span className="font-mono text-sm font-medium">{link.targetServiceId}</span>
-                      <span className="text-xs text-muted-foreground ml-2 rounded-md bg-muted px-2 py-0.5">{link.linkType}</span>
-                      <span className="text-xs text-muted-foreground">({link.direction})</span>
+                {topology.links.map((link) => {
+                  const linkStyles: Record<string, { color: string; bg: string }> = {
+                    DependsOn: { color: "text-red-500", bg: "bg-red-100 dark:bg-red-900/30" },
+                    ConnectedTo: { color: "text-blue-500", bg: "bg-blue-100 dark:bg-blue-900/30" },
+                    Contains: { color: "text-green-500", bg: "bg-green-100 dark:bg-green-900/30" },
+                    BundledWith: { color: "text-purple-500", bg: "bg-purple-100 dark:bg-purple-900/30" },
+                  }
+                  const style = linkStyles[link.linkType] ?? { color: "text-muted-foreground", bg: "bg-muted" }
+                  const DirectionIcon = link.direction === "Bidirectional" ? ArrowLeftRight : ArrowRight
+                  return (
+                    <div key={link.id} className="flex items-center justify-between rounded-md border px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-medium">{link.sourceServiceId}</span>
+                        <DirectionIcon className={`h-4 w-4 ${style.color}`} />
+                        <span className="font-mono text-sm font-medium">{link.targetServiceId}</span>
+                        <span className={`text-xs font-medium ml-1 rounded-md px-2 py-0.5 ${style.color} ${style.bg}`}>
+                          {link.linkType}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {link.direction === "Bidirectional" ? "⇄" : "⇢"}
+                        </span>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeTopologyLink.mutate({ topologyId: topology.id, linkId: link.id })}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeTopologyLink.mutate({ topologyId: topology.id, linkId: link.id })}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </CardContent>
@@ -207,19 +247,43 @@ export default function ServiceInventoryDetailPage() {
       id: "resources",
       label: `Resources (${(resources ?? []).length})`,
       content: (
-        <Card>
-          <CardHeader><CardTitle className="text-base">Resources</CardTitle></CardHeader>
-          <CardContent>
-            <DataTable
-              columns={resColumns}
-              data={resources ?? []}
-              loading={false}
-              error={auditError ? "Failed to load data." : undefined}
-              emptyTitle="No resources"
-              rowKey={(row) => row.id}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Dialog open={showAllocate} onOpenChange={setShowAllocate}>
+              <DialogTrigger asChild>
+                <Button size="sm"><Plus className="mr-1 h-4 w-4" />Allocate Resource</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Allocate Resource</DialogTitle></DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Resource Type</Label>
+                    <Input value={newResourceType} onChange={(e) => setNewResourceType(e.target.value)} placeholder="IPAddress, VLAN, Port, ..." />
+                  </div>
+                  <div>
+                    <Label>Identifier</Label>
+                    <Input value={newResourceId} onChange={(e) => setNewResourceId(e.target.value)} placeholder="e.g. 10.0.0.1" />
+                  </div>
+                  <Button onClick={handleAllocate} disabled={!newResourceType || !newResourceId || allocateResource.isPending} className="w-full">
+                    {allocateResource.isPending ? "Allocating..." : "Allocate"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <Card>
+            <CardHeader><CardTitle className="text-base">Resources</CardTitle></CardHeader>
+            <CardContent>
+              <DataTable
+                columns={resColumns}
+                data={resources ?? []}
+                loading={false}
+                emptyTitle="No resources"
+                rowKey={(row) => row.id}
+              />
+            </CardContent>
+          </Card>
+        </div>
       ),
     },
     {

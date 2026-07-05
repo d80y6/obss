@@ -14,6 +14,11 @@ public interface IServiceRepository : IRepository<Service>
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
+    Task<int> CountFilteredAsync(
+        Guid? customerId,
+        ServiceType? serviceType,
+        ServiceStatus? status,
+        CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Service>> GetBySubscriptionAsync(Guid subscriptionId, CancellationToken cancellationToken = default);
     Task<Service?> GetByIdentifierAsync(string identifier, CancellationToken cancellationToken = default);
 }
