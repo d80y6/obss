@@ -14,13 +14,13 @@ import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
 import api from "@/services/api"
-import { CustomerDto, SubscriptionDto } from "@/types/api"
+import type { CustomerDto, SubscriptionDto } from "@/api/generated"
 import { Button } from "@/components/ui/button"
 import { Plus, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 const serviceSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  serviceIdentifier: z.string().min(1, "Service identifier is required"),
   serviceType: z.string().min(1, "Type is required"),
   customerId: z.string().min(1, "Customer is required"),
   subscriptionId: z.string().min(1, "Subscription is required"),
@@ -60,7 +60,7 @@ export default function NewServicePage() {
         customerId: data.customerId,
         subscriptionId: data.subscriptionId,
         serviceType: data.serviceType,
-        serviceIdentifier: data.name,
+        serviceIdentifier: data.serviceIdentifier,
         location: "",
         configuration: JSON.stringify(data.attributes),
       })
@@ -93,7 +93,7 @@ export default function NewServicePage() {
     <FormPageLayout title="New Service" backHref="/service-inventory" onSubmit={handleSubmit(onSubmit)}>
       <FormErrorSummary errors={errors} />
       <FormSection title="Service Details">
-        <FormField label="Name" required registration={register("name")} error={errors.name} placeholder="Service name" />
+        <FormField label="Service Identifier" required registration={register("serviceIdentifier")} error={errors.serviceIdentifier} placeholder="e.g. SVC-001" />
         <FormSelectField
           label="Type"
           required
@@ -101,11 +101,20 @@ export default function NewServicePage() {
           onValueChange={(v) => setValue("serviceType", v)}
           error={errors.serviceType}
           options={[
-            { label: "Internet", value: "internet" },
-            { label: "VoIP", value: "voip" },
-            { label: "IPTV", value: "iptv" },
-            { label: "VPN", value: "vpn" },
-            { label: "Leased Line", value: "leased-line" },
+            { label: "FTTH", value: "FTTH" },
+            { label: "ADSL", value: "ADSL" },
+            { label: "Fixed Wireless", value: "FixedWireless" },
+            { label: "Yemen WiFi", value: "YemenWiFi" },
+            { label: "VoIP", value: "VoIP" },
+            { label: "Static IP", value: "StaticIP" },
+            { label: "DIA", value: "DIA" },
+            { label: "Ethernet", value: "Ethernet" },
+            { label: "PRI", value: "PRI" },
+            { label: "VPS", value: "VPS" },
+            { label: "Dedicated Server", value: "DedicatedServer" },
+            { label: "Colocation", value: "Colocation" },
+            { label: "Hosting", value: "Hosting" },
+            { label: "Domain", value: "Domain" },
           ]}
         />
         <FormSelectField

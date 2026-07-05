@@ -6,7 +6,7 @@ import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useDiscoveryJobs } from "@/api/hooks/use-service-inventory"
-import { DiscoveryJobDto } from "@/types/api"
+import type { DiscoveryJobDto } from "@/api/generated"
 import { Search } from "lucide-react"
 
 export default function DiscoveryPage() {
@@ -15,12 +15,13 @@ export default function DiscoveryPage() {
   const { data, isLoading } = useDiscoveryJobs()
 
   const columns: Column<DiscoveryJobDto>[] = [
-    { id: "name", header: "Name", accessorKey: "name", sortable: true },
-    { id: "type", header: "Type", accessorKey: "type" },
+    { id: "discoveryType", header: "Type", accessorKey: "discoveryType", sortable: true },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
-    { id: "targetRange", header: "Target Range", accessorKey: "targetRange" },
-    { id: "discoveredCount", header: "Discovered", accessorKey: "discoveredCount" },
+    { id: "resourcesFound", header: "Found", accessorKey: "resourcesFound" },
+    { id: "resourcesMatched", header: "Matched", accessorKey: "resourcesMatched" },
+    { id: "createdBy", header: "Created By", accessorKey: "createdBy" },
     { id: "startedAt", header: "Started", cell: (row) => row.startedAt ? new Date(row.startedAt).toLocaleString() : "-" },
+    { id: "completedAt", header: "Completed", cell: (row) => row.completedAt ? new Date(row.completedAt).toLocaleString() : "-" },
   ]
 
   return (
