@@ -22,6 +22,73 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.Agreement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AgreementType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("agreement_type");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("SignedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("signed_at");
+
+                    b.Property<string>("SignedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("signed_by");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<DateTime?>("ValidFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateTime?>("ValidUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_until");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agreements");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_agreements_customer_id");
+
+                    b.ToTable("agreements", (string)null);
+                });
+
             modelBuilder.Entity("Obss.CRM.Domain.Entities.Contact", b =>
                 {
                     b.Property<Guid>("Id")
@@ -93,6 +160,40 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                     b.ToTable("contacts", (string)null);
                 });
 
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.CreditProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<string>("RiskRating")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("risk_rating");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer")
+                        .HasColumnName("score");
+
+                    b.Property<string>("ScoreType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("score_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_customer_credit_profiles");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_customer_credit_profiles_customer_id");
+
+                    b.ToTable("customer_credit_profiles", (string)null);
+                });
+
             modelBuilder.Entity("Obss.CRM.Domain.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -125,6 +226,11 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("customer_type");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
                     b.Property<string>("DisplayName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -137,9 +243,27 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("email");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("Href")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("href");
+
+                    b.Property<Guid?>("IndividualId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("individual_id");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
+
+                    b.Property<Guid?>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(50)
@@ -156,6 +280,11 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
+
+                    b.Property<string>("StatusReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("status_reason");
 
                     b.Property<string>("TaxNumber")
                         .HasMaxLength(50)
@@ -188,6 +317,12 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Email")
                         .HasDatabaseName("ix_customers_email");
+
+                    b.HasIndex("IndividualId")
+                        .HasDatabaseName("ix_customers_individual_id");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_customers_organization_id");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_customers_status");
@@ -342,6 +477,248 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                     b.ToTable("customer_segment_assignments", (string)null);
                 });
 
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.IdentityDocument", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("DocumentNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("document_number");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("document_type");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expiry_date");
+
+                    b.Property<Guid>("IndividualId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("individual_id");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_verified");
+
+                    b.Property<DateTime?>("IssuedDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("issued_date");
+
+                    b.Property<string>("IssuingAuthority")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("issuing_authority");
+
+                    b.Property<string>("IssuingCountry")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("issuing_country");
+
+                    b.HasKey("Id")
+                        .HasName("pk_individual_identity_documents");
+
+                    b.HasIndex("IndividualId")
+                        .HasDatabaseName("ix_individual_identity_documents_individual_id");
+
+                    b.ToTable("individual_identity_documents", (string)null);
+                });
+
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.Individual", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("BirthDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("birth_date");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("gender");
+
+                    b.Property<string>("KycStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kyc_status");
+
+                    b.Property<DateTime?>("KycVerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("kyc_verified_at");
+
+                    b.Property<string>("KycVerifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("kyc_verified_by");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("middle_name");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("nationality");
+
+                    b.Property<string>("RiskRating")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("risk_rating");
+
+                    b.Property<string>("Salutation")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("salutation");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("title");
+
+                    b.HasKey("Id")
+                        .HasName("pk_individuals");
+
+                    b.ToTable("individuals", (string)null);
+                });
+
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CompanyType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("company_type");
+
+                    b.Property<string>("CountryOfRegistration")
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("country_of_registration");
+
+                    b.Property<string>("Industry")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("industry");
+
+                    b.Property<string>("KycStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("kyc_status");
+
+                    b.Property<DateTime?>("KycVerifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("kyc_verified_at");
+
+                    b.Property<string>("KycVerifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("kyc_verified_by");
+
+                    b.Property<string>("RegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("registration_number");
+
+                    b.Property<string>("TaxNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("tax_number");
+
+                    b.Property<string>("TradingName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("trading_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organizations");
+
+                    b.ToTable("organizations", (string)null);
+                });
+
+            modelBuilder.Entity("Obss.SharedKernel.Infrastructure.Persistence.InboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<string>("EventData")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("event_data");
+
+                    b.Property<string>("EventId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("event_id");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("event_type");
+
+                    b.Property<string>("HandlerName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("handler_name");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_inbox_messages");
+
+                    b.HasIndex("ReceivedAt")
+                        .HasDatabaseName("ix_inbox_messages_received_at");
+
+                    b.HasIndex("EventId", "HandlerName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_inbox_messages_event_id_handler_name");
+
+                    b.ToTable("inbox_messages", (string)null);
+                });
+
             modelBuilder.Entity("Obss.SharedKernel.Infrastructure.Persistence.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -401,6 +778,479 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.CreditProfile", b =>
+                {
+                    b.HasOne("Obss.CRM.Domain.Entities.Customer", null)
+                        .WithMany("CreditProfiles")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_customer_credit_profiles_customers_customer_id");
+
+                    b.OwnsOne("Obss.SharedKernel.Domain.ValueObjects.TimePeriod", "ValidFor", b1 =>
+                        {
+                            b1.Property<Guid>("CreditProfileId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime?>("EndDateTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_until");
+
+                            b1.Property<DateTime?>("StartDateTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_from");
+
+                            b1.HasKey("CreditProfileId");
+
+                            b1.ToTable("customer_credit_profiles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CreditProfileId")
+                                .HasConstraintName("fk_customer_credit_profiles_customer_credit_profiles_id");
+                        });
+
+                    b.Navigation("ValidFor")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.Customer", b =>
+                {
+                    b.HasOne("Obss.CRM.Domain.Entities.Individual", "Individual")
+                        .WithMany()
+                        .HasForeignKey("IndividualId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_customers_individuals_individual_id");
+
+                    b.HasOne("Obss.CRM.Domain.Entities.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_customers_organizations_organization_id");
+
+                    b.OwnsOne("Obss.SharedKernel.Domain.ValueObjects.TimePeriod", "ValidFor", b1 =>
+                        {
+                            b1.Property<Guid>("CustomerId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("id");
+
+                            b1.Property<DateTime?>("EndDateTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_until");
+
+                            b1.Property<DateTime?>("StartDateTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_from");
+
+                            b1.HasKey("CustomerId");
+
+                            b1.ToTable("customers");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CustomerId")
+                                .HasConstraintName("fk_customers_customers_id");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.AccountRef", "AccountRefs", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("AccountType")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("account_type");
+
+                            b1.Property<Guid>("BillingAccountId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("billing_account_id");
+
+                            b1.Property<string>("Href")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("href");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("name");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("role");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_account_refs");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_account_refs_customer_id");
+
+                            b1.ToTable("customer_account_refs", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_account_refs_customers_customer_id");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.AgreementRef", "AgreementRefs", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<Guid>("AgreementId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("agreement_id");
+
+                            b1.Property<string>("AgreementType")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("agreement_type");
+
+                            b1.Property<string>("Href")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("href");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("name");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("role");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_agreement_refs");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_agreement_refs_customer_id");
+
+                            b1.ToTable("customer_agreement_refs", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_agreement_refs_customers_customer_id");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.CharValue", "Characteristics", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Key")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("key");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("value");
+
+                            b1.Property<string>("ValueType")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("character varying(30)")
+                                .HasColumnName("value_type");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_characteristics");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_characteristics_customer_id");
+
+                            b1.ToTable("customer_characteristics", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_characteristics_customers_customer_id");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.ContactMedium", "ContactMedia", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<bool>("IsPreferred")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_preferred");
+
+                            b1.Property<string>("MediumType")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("medium_type");
+
+                            b1.Property<DateTime?>("ValidFrom")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_from");
+
+                            b1.Property<DateTime?>("ValidUntil")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_until");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_contact_media");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_contact_media_customer_id");
+
+                            b1.ToTable("customer_contact_media", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_contact_media_customers_customer_id");
+
+                            b1.OwnsMany("Obss.CRM.Domain.ValueObjects.ContactCharValue", "Characteristics", b2 =>
+                                {
+                                    b2.Property<int>("Id")
+                                        .ValueGeneratedOnAdd()
+                                        .HasColumnType("integer")
+                                        .HasColumnName("id");
+
+                                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b2.Property<int>("Id"));
+
+                                    b2.Property<string>("Key")
+                                        .IsRequired()
+                                        .HasMaxLength(100)
+                                        .HasColumnType("character varying(100)")
+                                        .HasColumnName("key");
+
+                                    b2.Property<string>("Value")
+                                        .IsRequired()
+                                        .HasMaxLength(500)
+                                        .HasColumnType("character varying(500)")
+                                        .HasColumnName("value");
+
+                                    b2.Property<string>("ValueType")
+                                        .IsRequired()
+                                        .HasMaxLength(30)
+                                        .HasColumnType("character varying(30)")
+                                        .HasColumnName("value_type");
+
+                                    b2.Property<int>("contact_medium_id")
+                                        .HasColumnType("integer")
+                                        .HasColumnName("contact_medium_id");
+
+                                    b2.HasKey("Id")
+                                        .HasName("pk_customer_contact_medium_characteristics");
+
+                                    b2.HasIndex("contact_medium_id")
+                                        .HasDatabaseName("ix_customer_contact_medium_characteristics_contact_medium_id");
+
+                                    b2.ToTable("customer_contact_medium_characteristics", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("contact_medium_id")
+                                        .HasConstraintName("fk_customer_contact_medium_characteristics_customer_contact_me");
+                                });
+
+                            b1.Navigation("Characteristics");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.NotificationHub", "NotificationHubs", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("HubType")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("character varying(20)")
+                                .HasColumnName("hub_type");
+
+                            b1.Property<string>("Identifier")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("identifier");
+
+                            b1.Property<bool>("IsOptIn")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_opt_in");
+
+                            b1.Property<DateTime?>("ValidFrom")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_from");
+
+                            b1.Property<DateTime?>("ValidUntil")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("valid_until");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_notification_hubs");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_notification_hubs_customer_id");
+
+                            b1.ToTable("customer_notification_hubs", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_notification_hubs_customers_customer_id");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.PaymentMethodRef", "PaymentMethodRefs", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Href")
+                                .HasMaxLength(500)
+                                .HasColumnType("character varying(500)")
+                                .HasColumnName("href");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("name");
+
+                            b1.Property<Guid>("PaymentMethodId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("payment_method_id");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_payment_method_refs");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_payment_method_refs_customer_id");
+
+                            b1.ToTable("customer_payment_method_refs", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_payment_method_refs_customers_customer_id");
+                        });
+
+                    b.OwnsMany("Obss.CRM.Domain.ValueObjects.RelatedParty", "RelatedParties", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("name");
+
+                            b1.Property<Guid>("ReferredId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("referred_id");
+
+                            b1.Property<string>("ReferredType")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("referred_type");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("role");
+
+                            b1.Property<Guid>("customer_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("customer_id");
+
+                            b1.HasKey("Id")
+                                .HasName("pk_customer_related_parties");
+
+                            b1.HasIndex("customer_id")
+                                .HasDatabaseName("ix_customer_related_parties_customer_id");
+
+                            b1.ToTable("customer_related_parties", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("customer_id")
+                                .HasConstraintName("fk_customer_related_parties_customers_customer_id");
+                        });
+
+                    b.Navigation("AccountRefs");
+
+                    b.Navigation("AgreementRefs");
+
+                    b.Navigation("Characteristics");
+
+                    b.Navigation("ContactMedia");
+
+                    b.Navigation("Individual");
+
+                    b.Navigation("NotificationHubs");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("PaymentMethodRefs");
+
+                    b.Navigation("RelatedParties");
+
+                    b.Navigation("ValidFor");
+                });
+
             modelBuilder.Entity("Obss.CRM.Domain.Entities.CustomerNote", b =>
                 {
                     b.HasOne("Obss.CRM.Domain.Entities.Customer", "Customer")
@@ -425,9 +1275,21 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
                     b.Navigation("Segment");
                 });
 
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.IdentityDocument", b =>
+                {
+                    b.HasOne("Obss.CRM.Domain.Entities.Individual", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("IndividualId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_individual_identity_documents_individuals_individual_id");
+                });
+
             modelBuilder.Entity("Obss.CRM.Domain.Entities.Customer", b =>
                 {
                     b.Navigation("Contacts");
+
+                    b.Navigation("CreditProfiles");
 
                     b.Navigation("Notes");
                 });
@@ -435,6 +1297,11 @@ namespace Obss.CRM.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Obss.CRM.Domain.Entities.CustomerSegment", b =>
                 {
                     b.Navigation("Assignments");
+                });
+
+            modelBuilder.Entity("Obss.CRM.Domain.Entities.Individual", b =>
+                {
+                    b.Navigation("Documents");
                 });
 #pragma warning restore 612, 618
         }

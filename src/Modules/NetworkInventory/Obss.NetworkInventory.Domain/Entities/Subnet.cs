@@ -52,6 +52,15 @@ public class Subnet : AggregateRoot<Guid>
         return new Subnet(Guid.NewGuid(), tenantId, network, name, description, gateway, vlanId, location);
     }
 
+    public void Update(string name, string? description, string? gateway, int vlanId, string? location)
+    {
+        Name = name;
+        Description = description;
+        Gateway = gateway;
+        VLANId = vlanId;
+        Location = location;
+    }
+
     public void Reserve()
     {
         if (Status == SubnetStatus.Reserved)

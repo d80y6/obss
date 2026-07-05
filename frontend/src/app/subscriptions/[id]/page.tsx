@@ -9,7 +9,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSubscription } from "@/api/hooks/useSubscription"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
@@ -19,6 +19,10 @@ import { useOverrideEntitlementLimit } from "@/api/hooks/useOverrideEntitlementL
 import { useUpdateEntitlementUsage } from "@/api/hooks/useUpdateEntitlementUsage"
 import { useChangeSubscriptionQuantity } from "@/api/hooks/useChangeSubscriptionQuantity"
 import { useExtendSubscriptionEndDate } from "@/api/hooks/useExtendSubscriptionEndDate"
+import { useActivateSubscription } from "@/api/hooks/useActivateSubscription"
+import { useSuspendSubscription } from "@/api/hooks/useSuspendSubscription"
+import { useResumeSubscription } from "@/api/hooks/useResumeSubscription"
+import { useCancelSubscription } from "@/api/hooks/useCancelSubscription"
 import type { EntitlementDto, EntitlementDefinition } from "@/api/generated"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
@@ -49,25 +53,36 @@ export default function SubscriptionDetailPage() {
   const changeQuantity = useChangeSubscriptionQuantity(id)
   const extendEndDate = useExtendSubscriptionEndDate(id)
 
-  const lifecycleMutation = useMutation({
-    mutationFn: async (action: string) => {
-      const body = action === "cancel"
-        ? { reason: cancelReason || "Customer request", effectiveDate: new Date().toISOString() }
-        : action === "suspend"
-        ? { reason: cancelReason || "Administrative" }
-        : undefined
-      await api.post(`/api/v1/subscriptions/subscriptions/${id}/${action}`, body)
-    },
-    onSuccess: (_data, action) => {
+  const activateSubscription = useActivateSubscription()
+  const suspendSubscription = useSuspendSubscription(id)
+  const resumeSubscription = useResumeSubscription(id)
+  const cancelSubscription = useCancelSubscription(id)
+
+  const lifecycleAction = (action: string) => {
+    const onSuccess = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.subscriptions.detail(id) })
       toast({ title: "Success", description: `Subscription has been ${action}ed.` })
       setConfirmAction(null)
       setCancelReason("")
-    },
-    onError: () => {
+    }
+    const onError = () => {
       toast({ title: "Error", description: "Failed to perform action.", variant: "destructive" })
-    },
-  })
+    }
+    switch (action) {
+      case "activate":
+        activateSubscription.mutate(id, { onSuccess, onError })
+        break
+      case "suspend":
+        suspendSubscription.mutate({ subscriptionId: id, reason: cancelReason || "Administrative" }, { onSuccess, onError })
+        break
+      case "resume":
+        resumeSubscription.mutate(undefined, { onSuccess, onError })
+        break
+      case "cancel":
+        cancelSubscription.mutate({ subscriptionId: id, reason: cancelReason || "Customer request", effectiveDate: new Date().toISOString() }, { onSuccess, onError })
+        break
+    }
+  }
 
   const { data: entitlements } = useQuery({
     queryKey: queryKeys.subscriptions.entitlements(id),
@@ -365,10 +380,10 @@ export default function SubscriptionDetailPage() {
               <Button
                 variant={confirmAction === "cancel" ? "destructive" : "default"}
                 size="sm"
-                onClick={() => lifecycleMutation.mutate(confirmAction)}
-                disabled={lifecycleMutation.isPending}
+                onClick={() => lifecycleAction(confirmAction)}
+                disabled={activateSubscription.isPending || suspendSubscription.isPending || resumeSubscription.isPending || cancelSubscription.isPending}
               >
-                {lifecycleMutation.isPending ? "Processing..." : `Confirm ${confirmAction.charAt(0).toUpperCase() + confirmAction.slice(1)}`}
+                {activateSubscription.isPending || suspendSubscription.isPending || resumeSubscription.isPending || cancelSubscription.isPending ? "Processing..." : `Confirm ${confirmAction.charAt(0).toUpperCase() + confirmAction.slice(1)}`}
               </Button>
               <Button variant="outline" size="sm" onClick={() => { setConfirmAction(null); setCancelReason("") }}>Cancel</Button>
             </div>

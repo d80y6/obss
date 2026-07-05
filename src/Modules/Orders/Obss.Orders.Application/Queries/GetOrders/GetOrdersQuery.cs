@@ -1,4 +1,5 @@
 using MediatR;
+using Obss.Orders.Application.Contracts;
 using Obss.Orders.Application.DTOs;
 using Obss.SharedKernel.Application.Contracts;
 
@@ -12,4 +13,4 @@ public sealed record GetOrdersQuery(
     string? OrderType,
     string? SearchTerm,
     int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<OrderSummaryDto>>>;
+    int PageSize = 20) : IRequest<Result<PaginatedResult<OrderSummaryDto>>>;

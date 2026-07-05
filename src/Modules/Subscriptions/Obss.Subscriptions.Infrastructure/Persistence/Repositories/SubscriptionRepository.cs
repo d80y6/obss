@@ -26,31 +26,12 @@ public sealed class SubscriptionRepository : EfRepository<Subscription>, ISubscr
         SubscriptionStatus? status,
         DateTime? fromDate,
         DateTime? toDate,
+        string? searchTerm,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        var query = DbSet.AsQueryable();
-
-        if (customerId.HasValue)
-        {
-            query = query.Where(s => s.CustomerId == customerId.Value);
-        }
-
-        if (status.HasValue)
-        {
-            query = query.Where(s => s.Status == status.Value);
-        }
-
-        if (fromDate.HasValue)
-        {
-            query = query.Where(s => s.StartDate >= fromDate.Value);
-        }
-
-        if (toDate.HasValue)
-        {
-            query = query.Where(s => s.StartDate <= toDate.Value);
-        }
+        var query = BuildFilteredQuery(customerId, status, fromDate, toDate, searchTerm);
 
         query = query
             .OrderByDescending(s => s.CreatedAt)
@@ -58,6 +39,47 @@ public sealed class SubscriptionRepository : EfRepository<Subscription>, ISubscr
             .Take(pageSize);
 
         return await query.ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> GetFilteredCountAsync(
+        Guid? customerId,
+        SubscriptionStatus? status,
+        DateTime? fromDate,
+        DateTime? toDate,
+        string? searchTerm,
+        CancellationToken cancellationToken = default)
+    {
+        var query = BuildFilteredQuery(customerId, status, fromDate, toDate, searchTerm);
+        return await query.CountAsync(cancellationToken);
+    }
+
+    private IQueryable<Subscription> BuildFilteredQuery(
+        Guid? customerId,
+        SubscriptionStatus? status,
+        DateTime? fromDate,
+        DateTime? toDate,
+        string? searchTerm)
+    {
+        var query = DbSet.AsQueryable();
+
+        if (customerId.HasValue)
+            query = query.Where(s => s.CustomerId == customerId.Value);
+
+        if (status.HasValue)
+            query = query.Where(s => s.Status == status.Value);
+
+        if (fromDate.HasValue)
+            query = query.Where(s => s.StartDate >= fromDate.Value);
+
+        if (toDate.HasValue)
+            query = query.Where(s => s.StartDate <= toDate.Value);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(s =>
+                s.CustomerName.Contains(searchTerm) ||
+                s.OfferName.Contains(searchTerm));
+
+        return query;
     }
 
     public async Task<IReadOnlyList<Subscription>> GetActiveByCustomerAsync(Guid customerId, CancellationToken cancellationToken = default)

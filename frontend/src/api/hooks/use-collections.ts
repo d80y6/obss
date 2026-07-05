@@ -30,7 +30,8 @@ export function useCaseActions(id: string) {
   return useQuery({
     queryKey: queryKeys.collections.cases.actions(id),
     queryFn: async () => {
-      return [] as CollectionActionDto[]
+      const res = await api.get(`/api/v1/collections/cases/${id}/actions`)
+      return res.data as CollectionActionDto[]
     },
     enabled: !!id,
   })
@@ -40,7 +41,8 @@ export function useCaseArrangements(id: string) {
   return useQuery({
     queryKey: queryKeys.collections.cases.arrangements(id),
     queryFn: async () => {
-      return [] as PaymentArrangementDto[]
+      const res = await api.get(`/api/v1/collections/cases/${id}/arrangements`)
+      return res.data as PaymentArrangementDto[]
     },
     enabled: !!id,
   })

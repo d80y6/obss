@@ -9,6 +9,8 @@ using Obss.Billing.Domain.Services;
 using Obss.Billing.Infrastructure.Persistence;
 using Obss.Billing.Infrastructure.Persistence.Repositories;
 using Obss.Billing.Infrastructure.Services;
+using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Billing.Api.Extensions;
 
@@ -23,6 +25,7 @@ public static class BillingModuleRegistration
         services.AddScoped<ITaxCalculator, TaxCalculator>();
 
         services.AddHostedService<BillingGenerationJob>();
+        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
         BillingMappingConfig.Configure();
 

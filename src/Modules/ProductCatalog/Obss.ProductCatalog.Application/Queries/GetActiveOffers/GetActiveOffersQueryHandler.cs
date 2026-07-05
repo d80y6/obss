@@ -1,12 +1,13 @@
 using Mapster;
 using MediatR;
 using Obss.ProductCatalog.Application.Abstractions;
+using Obss.ProductCatalog.Application.Contracts;
 using Obss.ProductCatalog.Application.DTOs;
 using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.ProductCatalog.Application.Queries.GetActiveOffers;
 
-public sealed class GetActiveOffersQueryHandler : IRequestHandler<GetActiveOffersQuery, Result<IReadOnlyList<OfferDto>>>
+public sealed class GetActiveOffersQueryHandler : IRequestHandler<GetActiveOffersQuery, Result<PaginatedResult<OfferDto>>>
 {
     private readonly IOfferRepository _offerRepository;
 
@@ -15,11 +16,19 @@ public sealed class GetActiveOffersQueryHandler : IRequestHandler<GetActiveOffer
         _offerRepository = offerRepository;
     }
 
-    public async Task<Result<IReadOnlyList<OfferDto>>> Handle(GetActiveOffersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<OfferDto>>> Handle(GetActiveOffersQuery request, CancellationToken cancellationToken)
     {
-        var offers = await _offerRepository.GetActiveOffersAsync(request.OfferType, cancellationToken);
+        var (items, totalCount) = await _offerRepository.GetFilteredAsync(
+            request.OfferType,
+            request.SearchTerm,
+            request.Page,
+            request.PageSize,
+            cancellationToken);
 
-        var result = offers.Adapt<List<OfferDto>>();
-        return Result.Success<IReadOnlyList<OfferDto>>(result);
+        var result = new PaginatedResult<OfferDto>(
+            items.Adapt<List<OfferDto>>(),
+            totalCount);
+
+        return Result.Success(result);
     }
 }

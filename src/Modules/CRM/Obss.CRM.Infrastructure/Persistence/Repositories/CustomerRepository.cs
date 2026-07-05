@@ -68,4 +68,32 @@ public sealed class CustomerRepository : EfRepository<Customer>, ICustomerReposi
             .Where(n => n.CustomerId == customerId)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<int> GetFilteredCountAsync(
+        string? tenantId,
+        string? status,
+        string? customerType,
+        string? searchTerm,
+        CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(tenantId))
+            query = query.Where(c => c.TenantId == tenantId);
+
+        if (!string.IsNullOrWhiteSpace(status))
+            query = query.Where(c => c.Status.ToString() == status);
+
+        if (!string.IsNullOrWhiteSpace(customerType))
+            query = query.Where(c => c.CustomerType.ToString() == customerType);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+            query = query.Where(c =>
+                c.DisplayName.Contains(searchTerm) ||
+                c.CompanyName!.Contains(searchTerm) ||
+                c.Email.Value.Contains(searchTerm) ||
+                c.TaxNumber!.Contains(searchTerm));
+
+        return await query.CountAsync(cancellationToken);
+    }
 }

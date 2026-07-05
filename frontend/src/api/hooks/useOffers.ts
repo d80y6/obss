@@ -10,7 +10,8 @@ export function useOffers(filters: Record<string, string> = {}) {
       const params = new URLSearchParams()
       Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v) })
       const res = await api.get(`/api/v1/catalog/offers?${params.toString()}`)
-      return res.data as OfferDto[]
+      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
+      return { items: res.data as OfferDto[], total }
     },
   })
 }

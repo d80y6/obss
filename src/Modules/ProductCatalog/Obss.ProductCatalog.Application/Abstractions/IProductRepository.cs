@@ -7,7 +7,7 @@ namespace Obss.ProductCatalog.Application.Abstractions;
 public interface IProductRepository : IRepository<Product>
 {
     Task<Product?> GetByIdWithOffersAsync(Guid productId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<Product>> GetFilteredAsync(
+    Task<(IReadOnlyList<Product> Items, int TotalCount)> GetFilteredAsync(
         Guid? categoryId,
         ProductType? productType,
         LifecycleStatus? status,

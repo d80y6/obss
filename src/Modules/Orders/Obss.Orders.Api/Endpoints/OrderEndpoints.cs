@@ -7,6 +7,9 @@ using Obss.Orders.Application.Commands.ApproveOrder;
 using Obss.Orders.Application.Commands.CancelOrder;
 using Obss.Orders.Application.Commands.CompleteOrderFulfillment;
 using Obss.Orders.Application.Commands.CreateOrder;
+using Obss.Orders.Application.Commands.DeleteOrder;
+using Obss.Orders.Application.Commands.PartialUpdateOrder;
+using Obss.Orders.Application.Commands.RemoveOrderItem;
 using Obss.Orders.Application.Commands.SubmitOrder;
 using Obss.Orders.Application.Commands.ValidateOrder;
 using Obss.Orders.Application.Queries.GetOrderById;
@@ -36,23 +39,29 @@ public static class OrderEndpoints
                 : (IResult)TypedResults.NotFound(result.Error);
         });
 
-        group.MapGet("/orders", async ([AsParameters] GetOrdersQuery query, IMediator mediator) =>
+        group.MapGet("/orders", async ([AsParameters] GetOrdersQuery query, IMediator mediator, HttpContext httpContext) =>
         {
             var result = await mediator.Send(query);
-            return result.IsSuccess
-                ? (IResult)TypedResults.Ok(result.Value)
-                : (IResult)TypedResults.BadRequest(result.Error);
+            if (!result.IsSuccess)
+                return (IResult)TypedResults.BadRequest(result.Error);
+
+            httpContext.Response.Headers.Append("X-Total-Count", result.Value.TotalCount.ToString());
+            httpContext.Response.Headers.Append("X-Result-Count", result.Value.Items.Count.ToString());
+            return (IResult)TypedResults.Ok(result.Value.Items);
         });
 
-        group.MapGet("/customers/{customerId:guid}/orders", async (Guid customerId, [AsParameters] GetOrdersByCustomerQuery query, IMediator mediator) =>
+        group.MapGet("/customers/{customerId:guid}/orders", async (Guid customerId, [AsParameters] GetOrdersByCustomerQuery query, IMediator mediator, HttpContext httpContext) =>
         {
             if (customerId != query.CustomerId)
                 return (IResult)TypedResults.BadRequest();
 
             var result = await mediator.Send(query);
-            return result.IsSuccess
-                ? (IResult)TypedResults.Ok(result.Value)
-                : (IResult)TypedResults.BadRequest(result.Error);
+            if (!result.IsSuccess)
+                return (IResult)TypedResults.BadRequest(result.Error);
+
+            httpContext.Response.Headers.Append("X-Total-Count", result.Value.TotalCount.ToString());
+            httpContext.Response.Headers.Append("X-Result-Count", result.Value.Items.Count.ToString());
+            return (IResult)TypedResults.Ok(result.Value.Items);
         });
 
         group.MapPost("/orders/{id:guid}/submit", async (Guid id, IMediator mediator) =>
@@ -93,6 +102,14 @@ public static class OrderEndpoints
                 : (IResult)TypedResults.BadRequest(result.Error);
         });
 
+        group.MapDelete("/orders/{orderId:guid}/items/{itemId:guid}", async (Guid orderId, Guid itemId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new RemoveOrderItemCommand(orderId, itemId));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
         group.MapGet("/orders/{id:guid}/fulfillment", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetOrderFulfillmentStatusQuery(id));
@@ -116,6 +133,25 @@ public static class OrderEndpoints
             var result = await mediator.Send(new ValidateOrderCommand(id));
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPatch("/orders/{id:guid}", async (Guid id, PartialUpdateOrderCommand command, IMediator mediator) =>
+        {
+            if (id != command.Id)
+                return (IResult)TypedResults.BadRequest();
+
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/orders/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteOrderCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
         });
     }

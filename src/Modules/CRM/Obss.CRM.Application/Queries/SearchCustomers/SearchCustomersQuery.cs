@@ -1,4 +1,5 @@
 using MediatR;
+using Obss.CRM.Application.Contracts;
 using Obss.CRM.Application.DTOs;
 using Obss.SharedKernel.Application.Contracts;
 
@@ -10,4 +11,4 @@ public sealed record SearchCustomersQuery(
     string? CustomerType,
     string? SearchTerm,
     int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<CustomerDto>>>;
+    int PageSize = 20) : IRequest<Result<PaginatedResult<CustomerDto>>>;

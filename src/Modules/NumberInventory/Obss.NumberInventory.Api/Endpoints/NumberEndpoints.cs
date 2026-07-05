@@ -4,7 +4,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.NumberInventory.Application.Commands.AddNumber;
 using Obss.NumberInventory.Application.Commands.AssignNumber;
+using Obss.NumberInventory.Application.Commands.DisconnectNumber;
+using Obss.NumberInventory.Application.Commands.PortInNumber;
+using Obss.NumberInventory.Application.Commands.PortOutNumber;
 using Obss.NumberInventory.Application.Commands.ReleaseNumber;
+using Obss.NumberInventory.Application.Commands.ReserveNumber;
+using Obss.NumberInventory.Application.Commands.ResumeNumber;
+using Obss.NumberInventory.Application.Commands.SuspendNumber;
 using Obss.NumberInventory.Application.Queries.GetAvailableNumbers;
 using Obss.NumberInventory.Application.Queries.GetNumberById;
 using Obss.NumberInventory.Application.Queries.SearchNumbers;
@@ -60,6 +66,56 @@ public static class NumberEndpoints
         group.MapPost("/numbers/{id:guid}/release", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new ReleaseNumberCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/numbers/{id:guid}/reserve", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new ReserveNumberCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/numbers/{id:guid}/suspend", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new SuspendNumberCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/numbers/{id:guid}/resume", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new ResumeNumberCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/numbers/{id:guid}/disconnect", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DisconnectNumberCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/numbers/{id:guid}/port-in", async (Guid id, PortInNumberCommand command, IMediator mediator) =>
+        {
+            if (id != command.NumberId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/numbers/{id:guid}/port-out", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new PortOutNumberCommand(id));
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);

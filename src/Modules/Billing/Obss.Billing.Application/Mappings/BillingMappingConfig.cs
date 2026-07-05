@@ -30,5 +30,9 @@ public static class BillingMappingConfig
 
         TypeAdapterConfig<TaxExemption, TaxExemptionDto>.NewConfig()
             .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<BillingAccount, BillingAccountDto>.NewConfig()
+            .Map(dest => dest.AccountType, src => src.AccountType.ToString())
+            .Map(dest => dest.Id, src => src.Id);
     }
 }

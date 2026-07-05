@@ -1,3 +1,4 @@
+using Obss.ProductCatalog.Domain.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 using Obss.SharedKernel.Infrastructure.Persistence;
 
@@ -21,8 +22,11 @@ public class Category : Entity<Guid>, ITenantEntity
         Description = description;
         ParentCategoryId = parentCategoryId;
         IsActive = true;
+        LifecycleStatus = LifecycleStatus.Active;
         SortOrder = sortOrder;
+        Version = 1;
         CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public string TenantId { get; private set; } = string.Empty;
@@ -30,8 +34,15 @@ public class Category : Entity<Guid>, ITenantEntity
     public string? Description { get; private set; }
     public Guid? ParentCategoryId { get; private set; }
     public bool IsActive { get; private set; }
+    public LifecycleStatus LifecycleStatus { get; private set; }
     public int SortOrder { get; private set; }
+    public int Version { get; private set; }
+    public DateTime? ValidFrom { get; private set; }
+    public DateTime? ValidTo { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
+
+    public bool IsRoot => !ParentCategoryId.HasValue;
 
     public static Category Create(
         string tenantId,
@@ -49,6 +60,9 @@ public class Category : Entity<Guid>, ITenantEntity
             return;
 
         IsActive = true;
+        LifecycleStatus = LifecycleStatus.Active;
+        Version++;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void Deactivate()
@@ -57,11 +71,23 @@ public class Category : Entity<Guid>, ITenantEntity
             return;
 
         IsActive = false;
+        LifecycleStatus = LifecycleStatus.Retired;
+        Version++;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void MoveTo(Category parent)
     {
         ParentCategoryId = parent.Id;
+        Version++;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void MoveToParent(Guid? parentCategoryId)
+    {
+        ParentCategoryId = parentCategoryId;
+        Version++;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void UpdateDetails(string name, string? description, int sortOrder)
@@ -69,5 +95,14 @@ public class Category : Entity<Guid>, ITenantEntity
         Name = name;
         Description = description;
         SortOrder = sortOrder;
+        Version++;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void SetValidityPeriod(DateTime? validFrom, DateTime? validTo)
+    {
+        ValidFrom = validFrom;
+        ValidTo = validTo;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

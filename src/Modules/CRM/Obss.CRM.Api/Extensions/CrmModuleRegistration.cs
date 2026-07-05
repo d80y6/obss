@@ -7,6 +7,8 @@ using Obss.CRM.Application.BackgroundJobs;
 using Obss.CRM.Application.Mappings;
 using Obss.CRM.Infrastructure.Persistence;
 using Obss.CRM.Infrastructure.Persistence.Repositories;
+using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.CRM.Api.Extensions;
 
@@ -16,6 +18,7 @@ public static class CrmModuleRegistration
     {
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ICustomerSegmentRepository, CustomerSegmentRepository>();
+        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
         services.AddHostedService<CustomerSegmentationJob>();
 
@@ -30,7 +33,9 @@ public static class CrmModuleRegistration
             .WithTags("CRM");
 
         CustomerEndpoints.Map(group);
+        PartyEndpoints.Map(group);
         LookupEndpoints.Map(group);
+        AgreementEndpoints.Map(group);
 
         return app;
     }

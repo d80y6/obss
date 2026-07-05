@@ -1,0 +1,17 @@
+using FluentValidation;
+
+namespace Obss.CRM.Application.Commands.CreateIndividual;
+
+internal sealed class CreateIndividualValidator : AbstractValidator<CreateIndividualCommand>
+{
+    public CreateIndividualValidator()
+    {
+        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.MiddleName).MaximumLength(100);
+        RuleFor(x => x.Salutation).MaximumLength(20);
+        RuleFor(x => x.Title).MaximumLength(50);
+        RuleFor(x => x.Nationality).MaximumLength(3);
+        RuleFor(x => x.Gender).MaximumLength(20);
+    }
+}

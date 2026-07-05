@@ -103,6 +103,16 @@ public class TelephoneNumber : AggregateRoot<Guid>
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public void Resume()
+    {
+        if (Status != NumberStatus.Suspended)
+            throw new InvalidNumberStateException(
+                $"Cannot resume number in '{Status}' status. Only 'Suspended' numbers can be resumed.");
+
+        Status = NumberStatus.Assigned;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void Suspend()
     {
         if (Status != NumberStatus.Assigned && Status != NumberStatus.Ported)

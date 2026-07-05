@@ -1,13 +1,14 @@
 using Mapster;
 using MediatR;
 using Obss.Orders.Application.Abstractions;
+using Obss.Orders.Application.Contracts;
 using Obss.Orders.Application.DTOs;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Orders.Application.Queries.GetOrders;
 
-public sealed class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<IReadOnlyList<OrderSummaryDto>>>
+public sealed class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Result<PaginatedResult<OrderSummaryDto>>>
 {
     private readonly IOrderRepository _orderRepository;
 
@@ -16,7 +17,7 @@ public sealed class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Resu
         _orderRepository = orderRepository;
     }
 
-    public async Task<Result<IReadOnlyList<OrderSummaryDto>>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<OrderSummaryDto>>> Handle(GetOrdersQuery request, CancellationToken cancellationToken)
     {
         OrderStatus? status = null;
         if (!string.IsNullOrWhiteSpace(request.Status) && Enum.TryParse<OrderStatus>(request.Status, true, out var parsedStatus))
@@ -35,7 +36,14 @@ public sealed class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Resu
             request.PageSize,
             cancellationToken);
 
-        var result = orders.Adapt<List<OrderSummaryDto>>();
-        return Result.Success<IReadOnlyList<OrderSummaryDto>>(result);
+        var totalCount = await _orderRepository.GetCountAsync(
+            request.CustomerId,
+            status,
+            request.FromDate,
+            request.ToDate,
+            cancellationToken);
+
+        var items = orders.Adapt<List<OrderSummaryDto>>();
+        return Result.Success(new PaginatedResult<OrderSummaryDto>(items, totalCount));
     }
 }

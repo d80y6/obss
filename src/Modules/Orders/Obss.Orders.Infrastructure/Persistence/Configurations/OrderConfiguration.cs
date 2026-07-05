@@ -113,6 +113,38 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasColumnName("cancellation_reason")
             .HasMaxLength(1000);
 
+        builder.Property(o => o.Description)
+            .HasColumnName("description")
+            .HasMaxLength(2000);
+
+        builder.Property(o => o.Channel)
+            .HasColumnName("channel")
+            .HasMaxLength(50);
+
+        builder.Property(o => o.Priority)
+            .HasColumnName("priority")
+            .HasMaxLength(30);
+
+        builder.Property(o => o.RequestedStartDate)
+            .HasColumnName("requested_start_date");
+
+        builder.Property(o => o.RequestedCompletionDate)
+            .HasColumnName("requested_completion_date");
+
+        builder.Property(o => o.ExpectedCompletionDate)
+            .HasColumnName("expected_completion_date");
+
+        builder.Property(o => o.NotificationContact)
+            .HasColumnName("notification_contact")
+            .HasMaxLength(200);
+
+        builder.Property(o => o.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
+        builder.Property(o => o.QuoteId)
+            .HasColumnName("quote_id");
+
         builder.HasMany(o => o.Items)
             .WithOne()
             .HasForeignKey(i => i.OrderId)

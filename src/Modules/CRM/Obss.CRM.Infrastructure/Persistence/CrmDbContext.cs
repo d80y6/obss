@@ -20,6 +20,11 @@ public class CrmDbContext : EfDbContext
     public DbSet<CustomerNote> CustomerNotes => Set<CustomerNote>();
     public DbSet<CustomerSegment> CustomerSegments => Set<CustomerSegment>();
     public DbSet<CustomerSegmentAssignment> CustomerSegmentAssignments => Set<CustomerSegmentAssignment>();
+    public DbSet<Individual> Individuals => Set<Individual>();
+    public DbSet<IdentityDocument> IdentityDocuments => Set<IdentityDocument>();
+    public DbSet<Organization> Organizations => Set<Organization>();
+    public DbSet<CreditProfile> CreditProfiles => Set<CreditProfile>();
+    public DbSet<Agreement> Agreements => Set<Agreement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

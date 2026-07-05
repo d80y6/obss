@@ -35,6 +35,11 @@ public sealed class ProductOfferConfiguration : IEntityTypeConfiguration<Product
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.HasOne(po => po.Offer)
+            .WithMany()
+            .HasForeignKey(po => po.OfferId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(po => po.ProductId).HasDatabaseName("ix_product_offers_product_id");
         builder.HasIndex(po => po.OfferId).HasDatabaseName("ix_product_offers_offer_id");
         builder.HasIndex(po => new { po.ProductId, po.OfferId }).HasDatabaseName("ix_product_offers_product_offer").IsUnique();

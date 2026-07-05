@@ -1,12 +1,13 @@
 using Mapster;
 using MediatR;
 using Obss.ProductCatalog.Application.Abstractions;
+using Obss.ProductCatalog.Application.Contracts;
 using Obss.ProductCatalog.Application.DTOs;
 using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.ProductCatalog.Application.Queries.GetProducts;
 
-public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<IReadOnlyList<ProductDto>>>
+public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, Result<PaginatedResult<ProductDto>>>
 {
     private readonly IProductRepository _productRepository;
 
@@ -15,9 +16,9 @@ public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, 
         _productRepository = productRepository;
     }
 
-    public async Task<Result<IReadOnlyList<ProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<ProductDto>>> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = await _productRepository.GetFilteredAsync(
+        var (items, totalCount) = await _productRepository.GetFilteredAsync(
             request.CategoryId,
             request.ProductType,
             request.Status,
@@ -26,7 +27,10 @@ public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, 
             request.PageSize,
             cancellationToken);
 
-        var result = products.Adapt<List<ProductDto>>();
-        return Result.Success<IReadOnlyList<ProductDto>>(result);
+        var result = new PaginatedResult<ProductDto>(
+            items.Adapt<List<ProductDto>>(),
+            totalCount);
+
+        return Result.Success(result);
     }
 }

@@ -13,6 +13,7 @@ public static class ServiceModuleRegistration
 {
     public static IServiceCollection AddServiceInventoryModule(this IServiceCollection services)
     {
+        services.AddScoped<IServiceRepository, ServiceRepository>();
         services.AddScoped<IServiceTopologyRepository, ServiceTopologyRepository>();
         services.AddScoped<IResourceDiscoveryJobRepository, ResourceDiscoveryJobRepository>();
         ServiceMappingConfig.Configure();

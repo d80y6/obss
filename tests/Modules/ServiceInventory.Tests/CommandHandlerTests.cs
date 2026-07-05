@@ -3,6 +3,8 @@ using FluentAssertions;
 using NSubstitute;
 using Obss.ServiceInventory.Application.Commands.CreateService;
 using Obss.ServiceInventory.Application.Commands.ActivateService;
+using Obss.ServiceInventory.Application.Commands.SuspendService;
+using Obss.ServiceInventory.Application.Commands.DecommissionService;
 using Obss.ServiceInventory.Domain.ValueObjects;
 using Obss.ServiceInventory.Infrastructure.Persistence;
 using Obss.ServiceInventory.Infrastructure.Persistence.Repositories;
@@ -145,6 +147,84 @@ public class CommandHandlerTests : ServiceIntegrationTests
         var command = new ActivateServiceCommand(Guid.NewGuid());
 
         var result = await handler.Handle(command, CancellationToken.None);
+
+        result.IsSuccess.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task SuspendServiceCommand_ShouldSuspendActiveService()
+    {
+        using var context = CreateDbContext();
+        var serviceRepository = new ServiceRepository(context);
+        var unitOfWork = CreateUnitOfWork(context);
+
+        var createHandler = new CreateServiceCommandHandler(serviceRepository, unitOfWork);
+        var createCommand = new CreateServiceCommand(
+            Guid.NewGuid(), Guid.NewGuid(), "FTTH", "SVC-005", null, null);
+        var createResult = await createHandler.Handle(createCommand, CancellationToken.None);
+        createResult.IsSuccess.Should().BeTrue();
+
+        var activateHandler = new ActivateServiceCommandHandler(serviceRepository, unitOfWork);
+        await activateHandler.Handle(new ActivateServiceCommand(createResult.Value.Id), CancellationToken.None);
+
+        var suspendHandler = new SuspendServiceCommandHandler(serviceRepository, unitOfWork);
+        var result = await suspendHandler.Handle(
+            new SuspendServiceCommand(createResult.Value.Id, "Maintenance"), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Status.Should().Be("Suspended");
+        result.Value.SuspendedAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task SuspendServiceCommand_ShouldFailForNonExistentService()
+    {
+        using var context = CreateDbContext();
+        var serviceRepository = new ServiceRepository(context);
+        var unitOfWork = CreateUnitOfWork(context);
+
+        var handler = new SuspendServiceCommandHandler(serviceRepository, unitOfWork);
+        var result = await handler.Handle(
+            new SuspendServiceCommand(Guid.NewGuid(), "Reason"), CancellationToken.None);
+
+        result.IsSuccess.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DecommissionServiceCommand_ShouldDecommissionActiveService()
+    {
+        using var context = CreateDbContext();
+        var serviceRepository = new ServiceRepository(context);
+        var unitOfWork = CreateUnitOfWork(context);
+
+        var createHandler = new CreateServiceCommandHandler(serviceRepository, unitOfWork);
+        var createCommand = new CreateServiceCommand(
+            Guid.NewGuid(), Guid.NewGuid(), "ADSL", "SVC-006", null, null);
+        var createResult = await createHandler.Handle(createCommand, CancellationToken.None);
+        createResult.IsSuccess.Should().BeTrue();
+
+        var activateHandler = new ActivateServiceCommandHandler(serviceRepository, unitOfWork);
+        await activateHandler.Handle(new ActivateServiceCommand(createResult.Value.Id), CancellationToken.None);
+
+        var decommissionHandler = new DecommissionServiceCommandHandler(serviceRepository, unitOfWork);
+        var result = await decommissionHandler.Handle(
+            new DecommissionServiceCommand(createResult.Value.Id), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Status.Should().Be("Decommissioned");
+        result.Value.DecommissionedAt.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task DecommissionServiceCommand_ShouldFailForNonExistentService()
+    {
+        using var context = CreateDbContext();
+        var serviceRepository = new ServiceRepository(context);
+        var unitOfWork = CreateUnitOfWork(context);
+
+        var handler = new DecommissionServiceCommandHandler(serviceRepository, unitOfWork);
+        var result = await handler.Handle(
+            new DecommissionServiceCommand(Guid.NewGuid()), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
     }

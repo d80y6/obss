@@ -1,5 +1,6 @@
 using MediatR;
 using Obss.SharedKernel.Application.Contracts;
+using Obss.Subscriptions.Application.Contracts;
 using Obss.Subscriptions.Application.DTOs;
 using Obss.Subscriptions.Domain.ValueObjects;
 
@@ -10,5 +11,6 @@ public sealed record GetSubscriptionsQuery(
     SubscriptionStatus? Status,
     DateTime? FromDate,
     DateTime? ToDate,
+    string? SearchTerm,
     int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<SubscriptionSummaryDto>>>;
+    int PageSize = 20) : IRequest<Result<PaginatedResult<SubscriptionSummaryDto>>>;

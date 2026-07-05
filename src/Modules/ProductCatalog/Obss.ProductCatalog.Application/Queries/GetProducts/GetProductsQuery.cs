@@ -1,4 +1,5 @@
 using MediatR;
+using Obss.ProductCatalog.Application.Contracts;
 using Obss.ProductCatalog.Application.DTOs;
 using Obss.ProductCatalog.Domain.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Contracts;
@@ -11,4 +12,4 @@ public sealed record GetProductsQuery(
     LifecycleStatus? Status,
     string? SearchTerm,
     int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<ProductDto>>>;
+    int PageSize = 20) : IRequest<Result<PaginatedResult<ProductDto>>>;

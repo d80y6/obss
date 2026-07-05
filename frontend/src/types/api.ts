@@ -2,7 +2,9 @@
  * @deprecated Import from '@/api/generated' instead.
  */
 export type {
-  CustomerDto, OrderDto, SubscriptionDto, ProductDto, OfferDto,
+  CustomerDto, IndividualDto, IdentityDocumentDto, OrganizationDto,
+  CharValueDto, CreditProfileDto, RelatedPartyDto, CustomerNoteDto, NotificationHubDto, ContactMediumDto, ContactCharValueDto,
+  OrderDto, SubscriptionDto, ProductDto, OfferDto,
   IamUserDto, TenantDto, TicketDto, InvoiceDto, PaymentDto, BillDto,
   NetworkElementDto, ServiceDto, ProvisioningJobDto, ProvisioningTemplateDto,
   WorkflowDefinitionDto, WorkflowInstanceDto, SegmentDto, RoleDto,
@@ -16,9 +18,9 @@ export type {
   ProvisioningTemplateParameterDto, ProvisioningLogEntryDto,
   AlertRuleDto, TaxRuleDto, BillingCycleDto, BillAdjustmentDto, BillingJobDto,
   AuditEntryDto, AuditAlertDto, DiscoveryJobDto,
-  ServiceTopologyDto, ServiceResourceDto, TopologyLinkDto, TopologyDto, NetworkLinkDto, NetworkConnectionDto,
+  ServiceTopologyDto, ServiceResourceDto, TopologyLinkDto, NetworkLinkDto, NetworkConnectionDto,
   PonPortDto, CapacityAlertDto, CapacityOverviewDto, EntitlementDto,
-  RefundDto, ReconciliationDto, TicketCommentDto, CategoryDto,
+  BillingAccountDto, RefundDto, ReconciliationDto, TicketCommentDto, CategoryDto,
   OrderPaymentDto, OrderFulfillmentDto, PermissionDto, ProblemDetails, ValidationProblemDetails,
   CreateCustomerCommand, CreateOrderCommand, CreateSubscriptionCommand,
   CreateProductCommand, CreateOfferCommand, CreateUserCommand, CreateTenantCommand,

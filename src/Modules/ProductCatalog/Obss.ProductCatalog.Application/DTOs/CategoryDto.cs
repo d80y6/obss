@@ -1,3 +1,5 @@
+using Obss.ProductCatalog.Domain.Domain.ValueObjects;
+
 namespace Obss.ProductCatalog.Application.DTOs;
 
 public sealed record CategoryDto(
@@ -7,5 +9,10 @@ public sealed record CategoryDto(
     string? Description,
     Guid? ParentCategoryId,
     bool IsActive,
+    LifecycleStatus LifecycleStatus,
     int SortOrder,
-    DateTime CreatedAt);
+    int Version,
+    DateTime? ValidFrom,
+    DateTime? ValidTo,
+    DateTime CreatedAt,
+    DateTime UpdatedAt);

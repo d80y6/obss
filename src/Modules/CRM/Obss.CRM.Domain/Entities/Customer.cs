@@ -10,6 +10,14 @@ public class Customer : AggregateRoot<Guid>
 {
     private readonly List<CustomerNote> _notes = [];
     private readonly List<Contact> _contacts = [];
+    private readonly List<CharValue> _characteristics = [];
+    private readonly List<CreditProfile> _creditProfiles = [];
+    private readonly List<RelatedParty> _relatedParties = [];
+    private readonly List<NotificationHub> _notificationHubs = [];
+    private readonly List<ContactMedium> _contactMedia = [];
+    private readonly List<AccountRef> _accountRefs = [];
+    private readonly List<AgreementRef> _agreementRefs = [];
+    private readonly List<PaymentMethodRef> _paymentMethodRefs = [];
 
     private Customer() { }
 
@@ -61,9 +69,27 @@ public class Customer : AggregateRoot<Guid>
     public string Currency { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public Guid? IndividualId { get; private set; }
+    public Guid? OrganizationId { get; private set; }
+    public Individual? Individual { get; private set; }
+    public Organization? Organization { get; private set; }
+    public string? Description { get; private set; }
+    public string? StatusReason { get; private set; }
+    public string? ExternalId { get; private set; }
+    public string? Href { get; private set; }
+    public TimePeriod? ValidFor { get; private set; }
 
     public IReadOnlyCollection<CustomerNote> Notes => _notes.AsReadOnly();
     public IReadOnlyCollection<Contact> Contacts => _contacts.AsReadOnly();
+
+    public IReadOnlyCollection<CharValue> Characteristics => _characteristics.AsReadOnly();
+    public IReadOnlyCollection<CreditProfile> CreditProfiles => _creditProfiles.AsReadOnly();
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
+    public IReadOnlyCollection<NotificationHub> NotificationHubs => _notificationHubs.AsReadOnly();
+    public IReadOnlyCollection<ContactMedium> ContactMedia => _contactMedia.AsReadOnly();
+    public IReadOnlyCollection<AccountRef> AccountRefs => _accountRefs.AsReadOnly();
+    public IReadOnlyCollection<AgreementRef> AgreementRefs => _agreementRefs.AsReadOnly();
+    public IReadOnlyCollection<PaymentMethodRef> PaymentMethodRefs => _paymentMethodRefs.AsReadOnly();
 
     public static Customer Create(
         string tenantId,
@@ -199,4 +225,116 @@ public class Customer : AggregateRoot<Guid>
         Currency = currency;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void SetEngagedParty(Individual individual)
+    {
+        Individual = individual;
+        IndividualId = individual.Id;
+        Organization = null;
+        OrganizationId = null;
+    }
+
+    public void SetEngagedParty(Organization organization)
+    {
+        Organization = organization;
+        OrganizationId = organization.Id;
+        Individual = null;
+        IndividualId = null;
+    }
+
+    public void UpdateTmfDetails(
+        string? description = null,
+        string? statusReason = null,
+        string? externalId = null,
+        string? href = null,
+        TimePeriod? validFor = null)
+    {
+        if (description is not null) Description = description;
+        if (statusReason is not null) StatusReason = statusReason;
+        if (externalId is not null) ExternalId = externalId;
+        if (href is not null) Href = href;
+        if (validFor is not null) ValidFor = validFor;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void SetStatus(CustomerStatus newStatus, string? reason = null)
+    {
+        if (newStatus == Status)
+            return;
+
+        Status = newStatus;
+        if (reason is not null)
+            StatusReason = reason;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddCharacteristic(CharValue characteristic)
+    {
+        _characteristics.Add(characteristic);
+    }
+
+    public void RemoveCharacteristic(string key)
+    {
+        _characteristics.RemoveAll(c => c.Key == key);
+    }
+
+    public void AddCreditProfile(CreditProfile profile)
+    {
+        _creditProfiles.Add(profile);
+    }
+
+    public void AddRelatedParty(RelatedParty party)
+    {
+        _relatedParties.Add(party);
+    }
+
+    public void RemoveRelatedParty(Guid referredId)
+    {
+        _relatedParties.RemoveAll(r => r.ReferredId == referredId);
+    }
+
+    public void AddNotificationHub(HubType hubType, string identifier, bool isOptIn, DateTime? validFrom, DateTime? validUntil)
+    {
+        _notificationHubs.Add(new NotificationHub(hubType, identifier, isOptIn, validFrom, validUntil));
+    }
+
+    public void RemoveNotificationHub(HubType hubType, string identifier)
+    {
+        _notificationHubs.RemoveAll(h => h.HubType == hubType && h.Identifier == identifier);
+    }
+
+    public void SetNotificationHubOptIn(HubType hubType, string identifier, bool isOptIn)
+    {
+        var hub = _notificationHubs.FirstOrDefault(h => h.HubType == hubType && h.Identifier == identifier);
+        if (hub is null) throw new InvalidOperationException("Notification hub not found.");
+        hub.SetOptIn(isOptIn);
+    }
+
+    public void AddContactMedium(ContactMediumType mediumType, bool isPreferred, DateTime? validFrom, DateTime? validUntil)
+    {
+        _contactMedia.Add(new ContactMedium(mediumType, isPreferred, validFrom, validUntil));
+    }
+
+    public void RemoveContactMedium(ContactMediumType mediumType)
+    {
+        _contactMedia.RemoveAll(m => m.MediumType == mediumType);
+    }
+
+    public void AddAccountRef(Guid billingAccountId, string name, string accountType, string role, string? href)
+        => _accountRefs.Add(new AccountRef(billingAccountId, name, accountType, role, href));
+
+    public void RemoveAccountRef(Guid billingAccountId)
+        => _accountRefs.RemoveAll(r => r.BillingAccountId == billingAccountId);
+
+    public void AddAgreementRef(Guid agreementId, string name, string agreementType, string role, string? href)
+        => _agreementRefs.Add(new AgreementRef(agreementId, name, agreementType, role, href));
+
+    public void RemoveAgreementRef(Guid agreementId)
+        => _agreementRefs.RemoveAll(r => r.AgreementId == agreementId);
+
+    public void AddPaymentMethodRef(Guid paymentMethodId, string name, string? href)
+        => _paymentMethodRefs.Add(new PaymentMethodRef(paymentMethodId, name, href));
+
+    public void RemovePaymentMethodRef(Guid paymentMethodId)
+        => _paymentMethodRefs.RemoveAll(r => r.PaymentMethodId == paymentMethodId);
 }

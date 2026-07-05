@@ -2,6 +2,7 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Obss.Orders.Application.Abstractions;
+using Obss.Orders.Application.Contracts;
 using Obss.Orders.Application.DTOs;
 using Obss.Orders.Application.Queries.GetOrderById;
 using Obss.Orders.Application.Queries.GetOrders;
@@ -65,6 +66,11 @@ public class QueryHandlerTests
                 Arg.Any<int>(), Arg.Any<int>(),
                 Arg.Any<CancellationToken>())
             .Returns(orders);
+        repository.GetCountAsync(
+                Arg.Any<Guid?>(), Arg.Any<OrderStatus?>(),
+                Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(orders.Count);
         var handler = new GetOrdersQueryHandler(repository);
 
         var result = await handler.Handle(
@@ -72,7 +78,7 @@ public class QueryHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(2);
+        result.Value.Items.Should().HaveCount(2);
     }
 
     [Fact]
@@ -87,6 +93,10 @@ public class QueryHandlerTests
         repository.GetByCustomerAsync(customerId, Arg.Any<int>(), Arg.Any<int>(),
                 Arg.Any<CancellationToken>())
             .Returns(orders);
+        repository.GetCountAsync(customerId, Arg.Any<OrderStatus?>(),
+                Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(orders.Count);
         var handler = new GetOrdersByCustomerQueryHandler(repository);
 
         var result = await handler.Handle(
@@ -94,7 +104,7 @@ public class QueryHandlerTests
             CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(1);
+        result.Value.Items.Should().HaveCount(1);
     }
 
     [Fact]

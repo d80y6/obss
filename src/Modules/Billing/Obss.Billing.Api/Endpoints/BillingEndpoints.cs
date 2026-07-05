@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Obss.Billing.Application.Commands.AddAdjustment;
+using Obss.Billing.Application.Commands.CreateBillingAccount;
+using Obss.Billing.Application.Commands.UpdateBillingAccount;
+using Obss.Billing.Application.Queries.GetBillingAccountById;
+using Obss.Billing.Application.Queries.SearchBillingAccounts;
 using Obss.Billing.Application.Commands.ApplyTaxExemption;
 using Obss.Billing.Application.Commands.CalculateBillTaxes;
 using Obss.Billing.Application.Commands.CreateTaxRule;
@@ -141,6 +145,40 @@ public static class BillingEndpoints
             dbContext.BillingJobs.Add(job);
             await unitOfWork.SaveChangesAsync();
             return (IResult)TypedResults.Created($"/api/v1/billing/jobs/{job.Id}", job);
+        });
+
+        group.MapPost("/billing-accounts", async (CreateBillingAccountCommand command, IMediator mediator) =>
+        {
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/billing/billing-accounts/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/billing-accounts/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetBillingAccountByIdQuery(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapPut("/billing-accounts/{id:guid}", async (Guid id, UpdateBillingAccountCommand command, IMediator mediator) =>
+        {
+            if (id != command.Id)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/billing-accounts", async ([AsParameters] SearchBillingAccountsQuery query, IMediator mediator) =>
+        {
+            var result = await mediator.Send(query);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
         });
     }
 }

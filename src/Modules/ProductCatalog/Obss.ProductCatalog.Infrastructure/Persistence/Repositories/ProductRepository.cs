@@ -16,11 +16,13 @@ public sealed class ProductRepository : EfRepository<Product>, IProductRepositor
     public async Task<Product?> GetByIdWithOffersAsync(Guid productId, CancellationToken cancellationToken = default)
     {
         return await DbSet
+            .Include(p => p.Category)
             .Include(p => p.ProductOffers)
+                .ThenInclude(po => po.Offer)
             .FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Product>> GetFilteredAsync(
+    public async Task<(IReadOnlyList<Product> Items, int TotalCount)> GetFilteredAsync(
         Guid? categoryId,
         ProductType? productType,
         LifecycleStatus? status,
@@ -30,7 +32,9 @@ public sealed class ProductRepository : EfRepository<Product>, IProductRepositor
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
+            .Include(p => p.Category)
             .Include(p => p.ProductOffers)
+                .ThenInclude(po => po.Offer)
             .AsQueryable();
 
         if (categoryId.HasValue)
@@ -55,11 +59,14 @@ public sealed class ProductRepository : EfRepository<Product>, IProductRepositor
                 (p.Description != null && p.Description.Contains(searchTerm)));
         }
 
-        query = query
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
             .OrderBy(p => p.Name)
             .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
 
-        return await query.ToListAsync(cancellationToken);
+        return (items, totalCount);
     }
 }

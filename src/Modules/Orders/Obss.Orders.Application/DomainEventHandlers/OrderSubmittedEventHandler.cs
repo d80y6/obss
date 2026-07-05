@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Obss.Orders.Application.IntegrationEvents;
 using Obss.Orders.Domain.Events;
@@ -5,7 +6,7 @@ using Obss.SharedKernel.Application.Abstractions;
 
 namespace Obss.Orders.Application.DomainEventHandlers;
 
-public sealed class OrderSubmittedEventHandler
+public sealed class OrderSubmittedEventHandler : INotificationHandler<OrderSubmittedDomainEvent>
 {
     private readonly IOutboxService _outboxService;
     private readonly ICurrentTenant _currentTenant;

@@ -36,16 +36,40 @@ public sealed class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasColumnName("is_active")
             .IsRequired();
 
+        builder.Property(c => c.LifecycleStatus)
+            .HasColumnName("lifecycle_status")
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
+
         builder.Property(c => c.SortOrder)
             .HasColumnName("sort_order")
             .IsRequired();
+
+        builder.Property(c => c.Version)
+            .HasColumnName("version")
+            .IsRequired()
+            .HasDefaultValue(1);
+
+        builder.Property(c => c.ValidFrom)
+            .HasColumnName("valid_from");
+
+        builder.Property(c => c.ValidTo)
+            .HasColumnName("valid_to");
 
         builder.Property(c => c.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.Property(c => c.UpdatedAt)
+            .HasColumnName("updated_at")
+            .IsRequired();
+
+        builder.Ignore(c => c.IsRoot);
+
         builder.HasIndex(c => c.TenantId).HasDatabaseName("ix_categories_tenant_id");
         builder.HasIndex(c => c.ParentCategoryId).HasDatabaseName("ix_categories_parent_category_id");
+        builder.HasIndex(c => c.LifecycleStatus).HasDatabaseName("ix_categories_lifecycle_status");
         builder.HasIndex(c => new { c.TenantId, c.Name }).HasDatabaseName("ix_categories_tenant_id_name");
     }
 }

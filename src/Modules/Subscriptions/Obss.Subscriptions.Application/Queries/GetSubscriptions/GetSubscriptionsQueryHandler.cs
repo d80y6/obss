@@ -2,11 +2,12 @@ using Mapster;
 using MediatR;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.Subscriptions.Application.Abstractions;
+using Obss.Subscriptions.Application.Contracts;
 using Obss.Subscriptions.Application.DTOs;
 
 namespace Obss.Subscriptions.Application.Queries.GetSubscriptions;
 
-public sealed class GetSubscriptionsQueryHandler : IRequestHandler<GetSubscriptionsQuery, Result<IReadOnlyList<SubscriptionSummaryDto>>>
+public sealed class GetSubscriptionsQueryHandler : IRequestHandler<GetSubscriptionsQuery, Result<PaginatedResult<SubscriptionSummaryDto>>>
 {
     private readonly ISubscriptionRepository _subscriptionRepository;
 
@@ -15,18 +16,27 @@ public sealed class GetSubscriptionsQueryHandler : IRequestHandler<GetSubscripti
         _subscriptionRepository = subscriptionRepository;
     }
 
-    public async Task<Result<IReadOnlyList<SubscriptionSummaryDto>>> Handle(GetSubscriptionsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<SubscriptionSummaryDto>>> Handle(GetSubscriptionsQuery request, CancellationToken cancellationToken)
     {
         var subscriptions = await _subscriptionRepository.GetFilteredAsync(
             request.CustomerId,
             request.Status,
             request.FromDate,
             request.ToDate,
+            request.SearchTerm,
             request.Page,
             request.PageSize,
             cancellationToken);
 
-        var result = subscriptions.Adapt<List<SubscriptionSummaryDto>>();
-        return Result.Success<IReadOnlyList<SubscriptionSummaryDto>>(result);
+        var totalCount = await _subscriptionRepository.GetFilteredCountAsync(
+            request.CustomerId,
+            request.Status,
+            request.FromDate,
+            request.ToDate,
+            request.SearchTerm,
+            cancellationToken);
+
+        var items = subscriptions.Adapt<List<SubscriptionSummaryDto>>();
+        return Result.Success(new PaginatedResult<SubscriptionSummaryDto>(items, totalCount));
     }
 }

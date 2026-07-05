@@ -10,4 +10,9 @@ public sealed record OrderSummaryDto(
     string OrderType,
     decimal GrandTotal,
     string Currency,
-    string? Notes);
+    string? Notes,
+    string? Description,
+    string? Channel,
+    string? Priority,
+    DateTime? RequestedStartDate,
+    DateTime? RequestedCompletionDate);

@@ -1,9 +1,12 @@
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.ProductCatalog.Application.Abstractions;
-using Obss.ProductCatalog.Domain.Domain.Entities;
-using Obss.SharedKernel.Application.Abstractions;
+using Obss.ProductCatalog.Application.Commands.CreateCategory;
+using Obss.ProductCatalog.Application.Commands.DeleteCategory;
+using Obss.ProductCatalog.Application.Commands.PatchCategory;
+using Obss.ProductCatalog.Application.Commands.UpdateCategory;
 
 namespace Obss.ProductCatalog.Api.Endpoints;
 
@@ -25,38 +28,40 @@ public static class CategoryEndpoints
                 : (IResult)TypedResults.NotFound();
         });
 
-        group.MapPost("/categories", async (CreateCategoryRequest request, ICategoryRepository repository, IUnitOfWork unitOfWork) =>
+        group.MapPost("/categories", async (CreateCategoryCommand command, IMediator mediator) =>
         {
-            var category = Category.Create(request.TenantId, request.Name, request.Description, request.ParentCategoryId, request.SortOrder);
-            await repository.AddAsync(category);
-            await unitOfWork.SaveChangesAsync();
-            return (IResult)TypedResults.Created($"/api/v1/catalog/categories/{category.Id}", category);
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/catalog/categories/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
         });
 
-        group.MapPut("/categories/{id:guid}", async (Guid id, UpdateCategoryRequest request, ICategoryRepository repository, IUnitOfWork unitOfWork) =>
+        group.MapPut("/categories/{id:guid}", async (Guid id, UpdateCategoryCommand command, IMediator mediator) =>
         {
-            var category = await repository.GetByIdAsync(id);
-            if (category is null)
-                return (IResult)TypedResults.NotFound();
-
-            category.UpdateDetails(request.Name, request.Description, request.SortOrder);
-            await repository.UpdateAsync(category);
-            await unitOfWork.SaveChangesAsync();
-            return (IResult)TypedResults.Ok(category);
+            if (id != command.CategoryId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
         });
 
-        group.MapDelete("/categories/{id:guid}", async (Guid id, ICategoryRepository repository, IUnitOfWork unitOfWork) =>
+        group.MapPatch("/categories/{id:guid}", async (Guid id, PatchCategoryCommand command, IMediator mediator) =>
         {
-            var category = await repository.GetByIdAsync(id);
-            if (category is null)
-                return (IResult)TypedResults.NotFound();
+            if (id != command.CategoryId)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
 
-            await repository.DeleteAsync(category);
-            await unitOfWork.SaveChangesAsync();
-            return (IResult)TypedResults.NoContent();
+        group.MapDelete("/categories/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteCategoryCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.NotFound(result.Error);
         });
     }
 }
-
-public record CreateCategoryRequest(string TenantId, string Name, string? Description, Guid? ParentCategoryId, int SortOrder);
-public record UpdateCategoryRequest(string Name, string? Description, int SortOrder);

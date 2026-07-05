@@ -62,6 +62,15 @@ public class Order : AggregateRoot<Guid>
     public string? ApprovedById { get; private set; }
     public DateTime? ApprovedAt { get; private set; }
     public string? CancellationReason { get; private set; }
+    public string? Description { get; private set; }
+    public string? Channel { get; private set; }
+    public string? Priority { get; private set; }
+    public DateTime? RequestedStartDate { get; private set; }
+    public DateTime? RequestedCompletionDate { get; private set; }
+    public DateTime? ExpectedCompletionDate { get; private set; }
+    public string? NotificationContact { get; private set; }
+    public string? ExternalId { get; private set; }
+    public Guid? QuoteId { get; private set; }
 
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
     public IReadOnlyCollection<OrderPayment> Payments => _payments.AsReadOnly();
@@ -269,6 +278,37 @@ public class Order : AggregateRoot<Guid>
             ?? throw new InvalidOperationException($"Payment with id {paymentId} not found.");
 
         payment.Complete();
+    }
+
+    public void UpdateDetails(
+        string? description = null,
+        string? channel = null,
+        string? priority = null,
+        string? notes = null,
+        DateTime? requestedStartDate = null,
+        DateTime? requestedCompletionDate = null,
+        DateTime? expectedCompletionDate = null,
+        string? notificationContact = null,
+        string? externalId = null,
+        Guid? quoteId = null,
+        Address? billingAddress = null,
+        Address? shippingAddress = null)
+    {
+        if (Status != OrderStatus.Draft && Status != OrderStatus.Submitted)
+            throw new InvalidOperationException($"Cannot update order in {Status} status.");
+
+        if (description is not null) Description = description;
+        if (channel is not null) Channel = channel;
+        if (priority is not null) Priority = priority;
+        if (notes is not null) Notes = notes;
+        if (requestedStartDate.HasValue) RequestedStartDate = requestedStartDate;
+        if (requestedCompletionDate.HasValue) RequestedCompletionDate = requestedCompletionDate;
+        if (expectedCompletionDate.HasValue) ExpectedCompletionDate = expectedCompletionDate;
+        if (notificationContact is not null) NotificationContact = notificationContact;
+        if (externalId is not null) ExternalId = externalId;
+        if (quoteId.HasValue) QuoteId = quoteId;
+        if (billingAddress is not null) BillingAddress = billingAddress;
+        if (shippingAddress is not null) ShippingAddress = shippingAddress;
     }
 
     private static string GenerateOrderNumber()

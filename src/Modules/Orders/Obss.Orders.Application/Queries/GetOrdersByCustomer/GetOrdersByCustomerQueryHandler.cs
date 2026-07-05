@@ -1,12 +1,13 @@
 using Mapster;
 using MediatR;
 using Obss.Orders.Application.Abstractions;
+using Obss.Orders.Application.Contracts;
 using Obss.Orders.Application.DTOs;
 using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Orders.Application.Queries.GetOrdersByCustomer;
 
-public sealed class GetOrdersByCustomerQueryHandler : IRequestHandler<GetOrdersByCustomerQuery, Result<IReadOnlyList<OrderSummaryDto>>>
+public sealed class GetOrdersByCustomerQueryHandler : IRequestHandler<GetOrdersByCustomerQuery, Result<PaginatedResult<OrderSummaryDto>>>
 {
     private readonly IOrderRepository _orderRepository;
 
@@ -15,7 +16,7 @@ public sealed class GetOrdersByCustomerQueryHandler : IRequestHandler<GetOrdersB
         _orderRepository = orderRepository;
     }
 
-    public async Task<Result<IReadOnlyList<OrderSummaryDto>>> Handle(GetOrdersByCustomerQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedResult<OrderSummaryDto>>> Handle(GetOrdersByCustomerQuery request, CancellationToken cancellationToken)
     {
         var orders = await _orderRepository.GetByCustomerAsync(
             request.CustomerId,
@@ -23,7 +24,9 @@ public sealed class GetOrdersByCustomerQueryHandler : IRequestHandler<GetOrdersB
             request.PageSize,
             cancellationToken);
 
-        var result = orders.Adapt<List<OrderSummaryDto>>();
-        return Result.Success<IReadOnlyList<OrderSummaryDto>>(result);
+        var totalCount = await _orderRepository.GetCountAsync(request.CustomerId, null, null, null, cancellationToken);
+
+        var items = orders.Adapt<List<OrderSummaryDto>>();
+        return Result.Success(new PaginatedResult<OrderSummaryDto>(items, totalCount));
     }
 }

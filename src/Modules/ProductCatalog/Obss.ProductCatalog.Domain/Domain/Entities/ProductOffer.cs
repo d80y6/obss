@@ -17,7 +17,9 @@ public class ProductOffer : Entity<Guid>
     }
 
     public Guid ProductId { get; private set; }
+    public Product? Product { get; }
     public Guid OfferId { get; private set; }
+    public Offer? Offer { get; }
     public bool IsPrimary { get; private set; }
     public bool IsRequired { get; private set; }
     public DateTime CreatedAt { get; private set; }
