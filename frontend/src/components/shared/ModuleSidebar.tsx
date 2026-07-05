@@ -50,6 +50,8 @@ const modules: NavItem[] = [
   { href: "/billing", label: "Billing", icon: CreditCard },
   { href: "/invoices", label: "Invoices", icon: FileText },
   { href: "/payments", label: "Payments", icon: DollarSign },
+  { href: "/payments/summary", label: "Payment Summary", icon: FileText },
+  { href: "/payments/gateways", label: "Gateways", icon: CreditCard },
   { href: "/rating", label: "Rating", icon: Scale },
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/collections", label: "Collections", icon: Settings },
