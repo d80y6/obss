@@ -39,8 +39,8 @@ export default function SubscriptionsPage() {
   const queryClient = useQueryClient()
 
   const bulkMutation = useMutation({
-    mutationFn: async ({ ids, action }: { ids: string[]; action: string }) => {
-      const promises = ids.map((id) => api.post(`/api/v1/subscriptions/subscriptions/${id}/${action}`))
+    mutationFn: async ({ ids, action, body }: { ids: string[]; action: string; body?: Record<string, unknown> }) => {
+      const promises = ids.map((id) => api.post(`/api/v1/subscriptions/subscriptions/${id}/${action}`, body))
       await Promise.all(promises)
     },
     onSuccess: (_data, variables) => {
@@ -103,6 +103,7 @@ export default function SubscriptionsPage() {
             bulkActions={[
               { label: "Activate", onClick: (ids) => bulkMutation.mutate({ ids, action: "activate" }) },
               { label: "Suspend", onClick: (ids) => bulkMutation.mutate({ ids, action: "suspend" }), variant: "destructive" },
+              { label: "Cancel Selected", onClick: (ids) => bulkMutation.mutate({ ids, action: "cancel", body: { reason: "Bulk cancellation", effectiveDate: new Date().toISOString() } }), variant: "destructive" },
             ]}
           />
         </CardContent>

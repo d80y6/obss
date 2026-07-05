@@ -200,6 +200,37 @@ export default function SubscriptionDetailPage() {
       ),
     },
     {
+      id: "addons",
+      label: `Add-Ons (${(sub?.addOns ?? []).length})`,
+      content: (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Subscription Add-Ons</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!sub?.addOns || sub.addOns.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No add-ons for this subscription.</p>
+            ) : (
+              <div className="space-y-2">
+                {sub.addOns.map((addon) => (
+                  <div key={addon.id} className="flex items-center justify-between rounded-md border px-4 py-3">
+                    <div>
+                      <p className="font-medium">{addon.offerName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Qty: {addon.quantity} | ${addon.price.toFixed(2)}
+                        {addon.endDate ? ` | Ends: ${new Date(addon.endDate).toLocaleDateString()}` : ""}
+                      </p>
+                    </div>
+                    <StatusBadge status={addon.isActive ? "Active" : "Inactive"} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ),
+    },
+    {
       id: "audit",
       label: "Audit",
       content: (

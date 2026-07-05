@@ -604,6 +604,51 @@ export interface SubscriptionDto {
   renewalDate: string | null;
   createdAt: string;
   updatedAt: string;
+  addOns: SubscriptionAddOnDto[];
+  services: SubscriptionServiceDto[];
+}
+
+export interface SubscriptionServiceDto {
+  id: string;
+  serviceId: string;
+  serviceType: string;
+  status: string;
+  provisionedAt: string;
+}
+
+export interface SubscriptionAddOnDto {
+  id: string;
+  offerId: string;
+  offerName: string;
+  price: number;
+  quantity: number;
+  startDate: string;
+  endDate: string | null;
+  isActive: boolean;
+}
+
+export interface EntitlementUsageDto {
+  entitlementType: string;
+  used: number;
+  limit: number;
+  available: number;
+  unit: string;
+  isUnlimited: boolean;
+}
+
+export interface SubscriptionSummaryDto {
+  id: string;
+  customerId: string;
+  customerName: string;
+  offerName: string;
+  status: string;
+  billingPeriod: string;
+  price: number;
+  quantity: number;
+  startDate: string;
+  endDate: string | null;
+  renewalDate: string | null;
+  activationDate: string | null;
 }
 
 // CRM Agreements
