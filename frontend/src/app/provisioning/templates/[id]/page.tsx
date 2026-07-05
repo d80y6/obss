@@ -5,7 +5,7 @@ import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api/client"
-import type { ProvisioningTemplateDto } from "@/types/api"
+import type { ProvisioningTemplateDto } from "@/api/generated"
 
 export default function ProvisioningTemplateDetailPage() {
   const params = useParams()

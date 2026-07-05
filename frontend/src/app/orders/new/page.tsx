@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useMutation, useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +9,33 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { SearchBar } from "@/components/shared/SearchBar"
 import { toast } from "@/components/ui/toast"
-import api from "@/services/api"
-import { CustomerDto, ProductDto, OrderDto } from "@/types/api"
+import type { CustomerDto, ProductDto } from "@/api/generated"
 import { useProducts } from "@/api/hooks/useProducts"
+import { useCustomers } from "@/api/hooks/useCustomers"
+import { useCreateOrder } from "@/api/hooks/useCreateOrder"
+
+const ORDER_TYPES = [
+  { value: "New", label: "New" },
+  { value: "Renewal", label: "Renewal" },
+  { value: "Change", label: "Change" },
+  { value: "Termination", label: "Termination" },
+  { value: "Transfer", label: "Transfer" },
+]
+
+const CURRENCIES = [
+  { value: "USD", label: "USD ($)" },
+  { value: "EUR", label: "EUR (€)" },
+  { value: "GBP", label: "GBP (£)" },
+  { value: "TRY", label: "TRY (₺)" },
+  { value: "AED", label: "AED (د.إ)" },
+]
+
+const BILLING_PERIODS = [
+  { value: "Monthly", label: "Monthly" },
+  { value: "Quarterly", label: "Quarterly" },
+  { value: "SemiAnnual", label: "Semi-Annual" },
+  { value: "Annual", label: "Annual" },
+]
 
 interface OrderItem {
   productId: string
@@ -34,15 +57,21 @@ export default function NewOrderPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null)
   const [items, setItems] = useState<OrderItem[]>([])
   const [notes, setNotes] = useState("")
+  const [orderType, setOrderType] = useState("New")
+  const [currency, setCurrency] = useState("USD")
+  const [billingAddressStreet, setBillingAddressStreet] = useState("")
+  const [billingAddressCity, setBillingAddressCity] = useState("")
+  const [billingAddressState, setBillingAddressState] = useState("")
+  const [billingAddressPostalCode, setBillingAddressPostalCode] = useState("")
+  const [billingAddressCountry, setBillingAddressCountry] = useState("")
+  const [shippingAddressStreet, setShippingAddressStreet] = useState("")
+  const [shippingAddressCity, setShippingAddressCity] = useState("")
+  const [shippingAddressState, setShippingAddressState] = useState("")
+  const [shippingAddressPostalCode, setShippingAddressPostalCode] = useState("")
+  const [shippingAddressCountry, setShippingAddressCountry] = useState("")
+  const [showAddressFields, setShowAddressFields] = useState(false)
 
-  const { data: customers } = useQuery({
-    queryKey: ["customers", "search", customerSearch],
-    queryFn: async () => {
-      const params = customerSearch ? `?search=${customerSearch}` : ""
-      const res = await api.get(`/api/v1/crm/customers${params}`)
-      return res.data as CustomerDto[]
-    },
-  })
+  const { data: customersData } = useCustomers(customerSearch ? { search: customerSearch } : {})
 
   const { data: products } = useProducts()
 
@@ -52,38 +81,48 @@ export default function NewOrderPage() {
     { id: "customerType", header: "Type", accessorKey: "customerType" },
   ]
 
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      const customer = selectedCustomer!
-      const res = await api.post<OrderDto>("/api/v1/orders/orders", {
-        customerId: customer.id,
-        customerName: customer.displayName,
-        orderType: "STANDARD",
-        currency: "USD",
-        items: items.map((item) => ({
-          productId: item.productId,
-          offerId: item.offerId,
-          productName: item.productName,
-          offerName: item.offerName,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          recurringPrice: item.recurringPrice,
-          discountAmount: item.discountAmount,
-          taxAmount: item.taxAmount,
-          billingPeriod: item.billingPeriod,
-        })),
-        notes,
-      })
-      return res.data
-    },
-    onSuccess: (data) => {
-      toast({ title: "Order created", description: `Order ${data.orderNumber} has been created.` })
-      router.push(`/orders/${data.id}`)
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to create order.", variant: "destructive" })
-    },
-  })
+  const createMutation = useCreateOrder()
+
+  const handleCreateOrder = () => {
+    const customer = selectedCustomer!
+    createMutation.mutate({
+      customerId: customer.id,
+      customerName: customer.displayName,
+      orderType,
+      currency,
+      notes,
+      billingAddressStreet: billingAddressStreet || null,
+      billingAddressCity: billingAddressCity || null,
+      billingAddressState: billingAddressState || null,
+      billingAddressPostalCode: billingAddressPostalCode || null,
+      billingAddressCountry: billingAddressCountry || null,
+      shippingAddressStreet: shippingAddressStreet || null,
+      shippingAddressCity: shippingAddressCity || null,
+      shippingAddressState: shippingAddressState || null,
+      shippingAddressPostalCode: shippingAddressPostalCode || null,
+      shippingAddressCountry: shippingAddressCountry || null,
+      items: items.map((item) => ({
+        productId: item.productId,
+        offerId: item.offerId,
+        productName: item.productName,
+        offerName: item.offerName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        recurringPrice: item.recurringPrice,
+        discountAmount: item.discountAmount,
+        taxAmount: item.taxAmount,
+        billingPeriod: item.billingPeriod,
+      })),
+    }, {
+      onSuccess: (data) => {
+        toast({ title: "Order created", description: `Order ${data.orderNumber} has been created.` })
+        router.push(`/orders/${data.id}`)
+      },
+      onError: () => {
+        toast({ title: "Error", description: "Failed to create order.", variant: "destructive" })
+      },
+    })
+  }
 
   const productList = products?.items ?? []
 
@@ -99,15 +138,9 @@ export default function NewOrderPage() {
     })
   }
 
-  const updateItemQty = (productId: string, quantity: number) => {
+  const updateItemField = (productId: string, field: keyof OrderItem, value: string | number) => {
     setItems((prev) =>
-      prev.map((i) => (i.productId === productId ? { ...i, quantity: Math.max(1, quantity) } : i))
-    )
-  }
-
-  const updateItemPrice = (productId: string, unitPrice: number) => {
-    setItems((prev) =>
-      prev.map((i) => (i.productId === productId ? { ...i, unitPrice } : i))
+      prev.map((i) => (i.productId === productId ? { ...i, [field]: value } : i))
     )
   }
 
@@ -141,10 +174,10 @@ export default function NewOrderPage() {
             <CardTitle className="text-base">Select Customer</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <SearchBar value={customerSearch} onChange={setCustomerSearch} placeholder="Search customers..." />
+              <SearchBar value={customerSearch} onChange={setCustomerSearch} placeholder="Search customers..." />
             <DataTable
               columns={customerColumns}
-              data={customers ?? []}
+              data={customersData?.items ?? []}
               rowKey={(row) => row.id}
               onRowClick={(row) => {
                 setSelectedCustomer(row)
@@ -186,15 +219,15 @@ export default function NewOrderPage() {
               <div className="space-y-2">
                 <p className="text-sm font-medium">Order Items</p>
                 {items.map((item) => (
-                  <div key={item.productId} className="flex items-center gap-3 p-3 border rounded-md">
-                    <span className="flex-1 text-sm font-medium">{item.productName}</span>
+                  <div key={item.productId} className="flex flex-wrap items-center gap-3 p-3 border rounded-md">
+                    <span className="flex-1 text-sm font-medium min-w-[120px]">{item.productName}</span>
                     <div className="flex items-center gap-2">
                       <label className="text-xs text-muted-foreground">Qty:</label>
                       <Input
                         type="number"
                         className="w-16 h-8"
                         value={item.quantity}
-                        onChange={(e) => updateItemQty(item.productId, parseInt(e.target.value) || 1)}
+                        onChange={(e) => updateItemField(item.productId, "quantity", parseInt(e.target.value) || 1)}
                         min={1}
                       />
                     </div>
@@ -204,11 +237,53 @@ export default function NewOrderPage() {
                         type="number"
                         className="w-24 h-8"
                         value={item.unitPrice}
-                        onChange={(e) => updateItemPrice(item.productId, parseFloat(e.target.value) || 0)}
+                        onChange={(e) => updateItemField(item.productId, "unitPrice", parseFloat(e.target.value) || 0)}
                         min={0}
                         step={0.01}
                       />
                     </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-muted-foreground">Recurring:</label>
+                      <Input
+                        type="number"
+                        className="w-20 h-8"
+                        value={item.recurringPrice}
+                        onChange={(e) => updateItemField(item.productId, "recurringPrice", parseFloat(e.target.value) || 0)}
+                        min={0}
+                        step={0.01}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-muted-foreground">Disc:</label>
+                      <Input
+                        type="number"
+                        className="w-20 h-8"
+                        value={item.discountAmount}
+                        onChange={(e) => updateItemField(item.productId, "discountAmount", parseFloat(e.target.value) || 0)}
+                        min={0}
+                        step={0.01}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-muted-foreground">Tax:</label>
+                      <Input
+                        type="number"
+                        className="w-20 h-8"
+                        value={item.taxAmount}
+                        onChange={(e) => updateItemField(item.productId, "taxAmount", parseFloat(e.target.value) || 0)}
+                        min={0}
+                        step={0.01}
+                      />
+                    </div>
+                    <select
+                      className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                      value={item.billingPeriod}
+                      onChange={(e) => updateItemField(item.productId, "billingPeriod", e.target.value)}
+                    >
+                      {BILLING_PERIODS.map((bp) => (
+                        <option key={bp.value} value={bp.value}>{bp.label}</option>
+                      ))}
+                    </select>
                     <span className="text-sm font-medium w-20 text-right">
                       ${(item.quantity * item.unitPrice).toFixed(2)}
                     </span>
@@ -244,15 +319,43 @@ export default function NewOrderPage() {
             <CardTitle className="text-base">Review Order</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="p-3 border rounded-md space-y-1">
-              <p className="text-sm font-medium">Customer</p>
-              <p className="text-sm text-muted-foreground">
-                {selectedCustomer?.displayName} ({selectedCustomer?.email})
-              </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="p-3 border rounded-md space-y-1">
+                <p className="text-sm font-medium">Customer</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedCustomer?.displayName} ({selectedCustomer?.email})
+                </p>
+              </div>
+              <div className="p-3 border rounded-md space-y-1">
+                <p className="text-sm font-medium">Order Type</p>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  value={orderType}
+                  onChange={(e) => setOrderType(e.target.value)}
+                >
+                  {ORDER_TYPES.map((ot) => (
+                    <option key={ot.value} value={ot.value}>{ot.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="p-3 border rounded-md space-y-1">
+                <p className="text-sm font-medium">Currency</p>
+                <select
+                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div className="p-3 border rounded-md space-y-2">
-              <p className="text-sm font-medium">Items ({items.length})</p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">Items ({items.length})</p>
+              </div>
               {items.map((item) => (
                 <div key={item.productId} className="flex justify-between text-sm">
                   <span>{item.productName} x {item.quantity}</span>
@@ -260,9 +363,44 @@ export default function NewOrderPage() {
                 </div>
               ))}
               <div className="border-t pt-2 flex justify-between font-medium">
-                <span>Total</span>
+                <span>Total ({currency})</span>
                 <span>${totalAmount.toFixed(2)}</span>
               </div>
+            </div>
+
+            <div className="border rounded-md">
+              <button
+                type="button"
+                className="w-full px-4 py-2 text-sm font-medium text-left flex items-center justify-between hover:bg-muted/50"
+                onClick={() => setShowAddressFields(!showAddressFields)}
+              >
+                <span>Billing & Shipping Addresses (Optional)</span>
+                <span className="text-muted-foreground">{showAddressFields ? "▲" : "▼"}</span>
+              </button>
+              {showAddressFields && (
+                <div className="p-4 space-y-4">
+                  <div>
+                    <p className="text-sm font-medium mb-2">Billing Address</p>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Input placeholder="Street" value={billingAddressStreet} onChange={(e) => setBillingAddressStreet(e.target.value)} />
+                      <Input placeholder="City" value={billingAddressCity} onChange={(e) => setBillingAddressCity(e.target.value)} />
+                      <Input placeholder="State" value={billingAddressState} onChange={(e) => setBillingAddressState(e.target.value)} />
+                      <Input placeholder="Postal Code" value={billingAddressPostalCode} onChange={(e) => setBillingAddressPostalCode(e.target.value)} />
+                      <Input placeholder="Country" value={billingAddressCountry} onChange={(e) => setBillingAddressCountry(e.target.value)} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Shipping Address</p>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Input placeholder="Street" value={shippingAddressStreet} onChange={(e) => setShippingAddressStreet(e.target.value)} />
+                      <Input placeholder="City" value={shippingAddressCity} onChange={(e) => setShippingAddressCity(e.target.value)} />
+                      <Input placeholder="State" value={shippingAddressState} onChange={(e) => setShippingAddressState(e.target.value)} />
+                      <Input placeholder="Postal Code" value={shippingAddressPostalCode} onChange={(e) => setShippingAddressPostalCode(e.target.value)} />
+                      <Input placeholder="Country" value={shippingAddressCountry} onChange={(e) => setShippingAddressCountry(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {notes && (
@@ -274,7 +412,7 @@ export default function NewOrderPage() {
 
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-              <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending}>
+              <Button onClick={handleCreateOrder} disabled={createMutation.isPending}>
                 {createMutation.isPending ? "Creating..." : "Create Order"}
               </Button>
             </div>

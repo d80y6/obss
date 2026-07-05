@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { SlaDefinitionDto } from "@/types/api"
+import type { SlaDefinitionDto } from "@/api/generated"
 import { Clock, Plus } from "lucide-react"
 import {
   Dialog,

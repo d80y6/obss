@@ -17,7 +17,7 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorFallback } from "@/components/shared/ErrorFallback"
 import api from "@/services/api"
-import { OrderDto, TicketDto, InvoiceDto, CustomerDto } from "@/types/api"
+import type { OrderDto, TicketDto, InvoiceDto, CustomerDto } from "@/api/generated"
 import { Users, ShoppingCart, Ticket, FileText, Plus } from "lucide-react"
 import Link from "next/link"
 import {

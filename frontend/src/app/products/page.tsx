@@ -21,7 +21,7 @@ export default function ProductsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const filters: Record<string, string> = {
-    ...(search ? { search } : {}),
+    ...(search ? { SearchTerm: search } : {}),
     page: String(page),
     pageSize: String(pageSize),
   }
@@ -35,7 +35,7 @@ export default function ProductsPage() {
     {
       id: "status",
       header: "Status",
-      cell: (row) => <StatusBadge status={row.status} />,
+      cell: (row) => <StatusBadge status={row.lifecycleStatus} />,
       sortable: true,
     },
     {

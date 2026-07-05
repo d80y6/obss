@@ -3,36 +3,50 @@
 import { useParams } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
+import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
-import { useQuery } from "@tanstack/react-query"
-import { api } from "@/api/client"
-import { NetworkElementDto } from "@/types/api"
+import { useOlt } from "@/api/hooks/useOlt"
+import type { OltDto } from "@/api/generated/dto"
 
 export default function OltDetailPage() {
   const params = useParams()
   const id = params.id as string
-  const { data: item, isLoading } = useQuery({
-    queryKey: ["network", "olts", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/network/olts/${id}`)
-      return res.data as NetworkElementDto
+  const { data: olt, isLoading } = useOlt(id)
+
+  const tabs = [
+    {
+      id: "overview",
+      label: "Overview",
+      content: (
+        <EntityMetadata
+          title="OLT Details"
+          loading={isLoading}
+          columns={2}
+          fields={[
+            { label: "Name", value: olt?.name ?? "-" },
+            { label: "Model", value: olt?.model ?? "-" },
+            { label: "Vendor", value: olt?.vendor ?? "-" },
+            { label: "IP Address", value: olt?.ipAddress ?? "-" },
+            { label: "Location", value: olt?.location ?? "-" },
+            { label: "Status", value: olt ? <StatusBadge status={olt.status} /> : "-" },
+            { label: "PON Port Count", value: olt?.ponPortCount?.toString() ?? "-" },
+            { label: "Created", value: olt?.createdAt ? new Date(olt.createdAt).toLocaleDateString() : "-" },
+          ]}
+        />
+      ),
     },
-    enabled: !!id,
-  })
+  ]
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <EntityHeader title={item?.name ?? "OLT"} subtitle={item?.elementType}
-        status={item?.status} backHref="/network/olts" loading={isLoading} />
-      <EntityMetadata loading={isLoading} fields={[
-        { label: "Name", value: item?.name ?? "-" },
-        { label: "Status", value: item ? <StatusBadge status={item.status} /> : "-" },
-        { label: "Location", value: item?.location ?? "-" },
-        { label: "IP Address", value: item?.ipAddress ?? "-" },
-        { label: "Model", value: item?.model ?? "-" },
-        { label: "Vendor", value: item?.vendor ?? "-" },
-        { label: "Serial Number", value: item?.serialNumber ?? "-" },
-      ]} />
+      <EntityHeader
+        title={olt?.name ?? "OLT"}
+        subtitle={olt?.model ? `${olt.vendor} ${olt.model}` : undefined}
+        status={olt?.status}
+        backHref="/network/olts"
+        loading={isLoading}
+      />
+      <EntityTabs tabs={tabs} defaultTab="overview" />
     </div>
   )
 }

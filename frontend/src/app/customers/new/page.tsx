@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery, useMutation } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { z } from "zod"
 import { FormPageLayout } from "@/forms/FormPageLayout"
 import { FormSection } from "@/forms/FormSection"
@@ -12,8 +12,8 @@ import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
 import api from "@/services/api"
-import { useAuthStore } from "@/stores/auth-store"
-import type { CustomerDto } from "@/api/generated"
+import { useCreateCustomer } from "@/api/hooks/useCreateCustomer"
+import type { CreateCustomerCommand } from "@/api/generated"
 
 interface LookupItem {
   value: string
@@ -38,7 +38,6 @@ type CustomerForm = z.infer<typeof customerSchema>
 
 export default function NewCustomerPage() {
   const router = useRouter()
-  const user = useAuthStore((s) => s.user)
 
   const { data: customerTypes } = useQuery({
     queryKey: ["lookups", "customer-types"],
@@ -82,51 +81,47 @@ export default function NewCustomerPage() {
     },
   })
 
-  const createMutation = useMutation({
-    mutationFn: async (data: CustomerForm) => {
-      const res = await api.post<CustomerDto>("/api/v1/crm/customers", {
-        tenantId: user?.tenantId ?? "",
-        customerType: data.customerType,
-        companyName: data.companyName || null,
-        displayName: `${data.firstName} ${data.lastName}`.trim(),
-        taxNumber: data.taxNumber || null,
-        registrationNumber: data.registrationNumber || null,
-        email: data.email,
-        phoneNumber: data.phoneNumber || null,
-        countryCode: data.countryCode || null,
-        website: data.website || null,
-        currency: data.currency,
-      })
-      return res.data
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Customer created",
-        description: `${data.displayName} has been created successfully.`,
-      })
-      router.push(`/customers/${data.id}`)
-    },
-    onError: (error) => {
-      const apiError = error as { response?: { data?: { errors?: Record<string, string[]> } } }
-      const fieldErrors = apiError?.response?.data?.errors
-      if (fieldErrors) {
-        Object.entries(fieldErrors).forEach(([field, messages]) => {
-          setError(field as keyof CustomerForm, {
-            message: (messages as string[])[0],
-          })
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to create customer. Please try again.",
-          variant: "destructive",
-        })
-      }
-    },
-  })
+  const createCustomer = useCreateCustomer()
 
   const onSubmit = (data: CustomerForm) => {
-    createMutation.mutate(data)
+    const payload = {
+      customerType: data.customerType,
+      companyName: data.companyName || null,
+      displayName: `${data.firstName} ${data.lastName}`.trim(),
+      taxNumber: data.taxNumber || null,
+      registrationNumber: data.registrationNumber || null,
+      email: data.email,
+      phoneNumber: data.phoneNumber || null,
+      countryCode: data.countryCode || null,
+      website: data.website || null,
+      currency: data.currency,
+    }
+    createCustomer.mutate(payload as CreateCustomerCommand, {
+      onSuccess: (created) => {
+        toast({
+          title: "Customer created",
+          description: `${created.displayName} has been created successfully.`,
+        })
+        router.push(`/customers/${created.id}`)
+      },
+      onError: (error) => {
+        const apiError = error as { response?: { data?: { errors?: Record<string, string[]> } } }
+        const fieldErrors = apiError?.response?.data?.errors
+        if (fieldErrors) {
+          Object.entries(fieldErrors).forEach(([field, messages]) => {
+            setError(field as keyof CustomerForm, {
+              message: (messages as string[])[0],
+            })
+          })
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to create customer. Please try again.",
+            variant: "destructive",
+          })
+        }
+      },
+    })
   }
 
   return (
@@ -222,7 +217,7 @@ export default function NewCustomerPage() {
           />
         </div>
       </FormSection>
-      <FormActions backHref="/customers" loading={createMutation.isPending} submitLabel="Create Customer" />
+      <FormActions backHref="/customers" loading={createCustomer.isPending} submitLabel="Create Customer" />
     </FormPageLayout>
   )
 }

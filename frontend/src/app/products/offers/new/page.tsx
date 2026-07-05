@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
 import { z } from "zod"
 import { FormPageLayout } from "@/forms/FormPageLayout"
 import { FormSection } from "@/forms/FormSection"
@@ -11,11 +10,8 @@ import { FormField, FormSelectField } from "@/forms/FormField"
 import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
-import api from "@/services/api"
-import type { OfferDto } from "@/api/generated"
 import { useProducts } from "@/api/hooks/useProducts"
-import { queryKeys } from "@/lib/query-keys"
-import { useQueryClient } from "@tanstack/react-query"
+import { useCreateOffer } from "@/api/hooks/useCreateOffer"
 
 const offerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -23,13 +19,13 @@ const offerSchema = z.object({
   productId: z.string().min(1, "Product is required"),
   offerType: z.string().min(1, "Offer type is required"),
   billingPeriod: z.string().optional(),
-  isContract: z.boolean().default(false),
-  contractDurationMonths: z.coerce.number().optional(),
-  taxInclusive: z.boolean().default(false),
-  sortOrder: z.coerce.number().default(0),
-  recurringPrice: z.coerce.number().default(0),
-  oneTimePrice: z.coerce.number().default(0),
-  currency: z.string().default("USD"),
+  isContract: z.boolean().optional(),
+  contractDurationMonths: z.number().optional(),
+  taxInclusive: z.boolean().optional(),
+  sortOrder: z.number().optional(),
+  recurringPrice: z.number().optional(),
+  oneTimePrice: z.number().optional(),
+  currency: z.string().optional(),
   validFrom: z.string().optional(),
   validTo: z.string().optional(),
 })
@@ -52,7 +48,6 @@ const billingPeriodOptions = [
 
 export default function NewOfferPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const { data: products } = useProducts()
 
@@ -63,52 +58,46 @@ export default function NewOfferPage() {
     formState: { errors },
   } = useForm<OfferForm>({
     resolver: zodResolver(offerSchema),
-    defaultValues: { currency: "USD", isContract: false, taxInclusive: false, sortOrder: 0 },
+    defaultValues: { currency: "USD", isContract: false, taxInclusive: false, sortOrder: 0, recurringPrice: 0, oneTimePrice: 0 },
   })
 
-  const createMutation = useMutation({
-    mutationFn: async (data: OfferForm) => {
-      const res = await api.post<OfferDto>("/api/v1/catalog/offers", {
-        name: data.name,
-        description: data.description || null,
-        productId: data.productId,
-        offerType: data.offerType,
-        isContract: data.isContract,
-        contractDurationMonths: data.isContract ? data.contractDurationMonths || null : null,
-        billingPeriod: data.billingPeriod || null,
-        taxInclusive: data.taxInclusive,
-        sortOrder: data.sortOrder,
-        validFrom: data.validFrom ? new Date(data.validFrom).toISOString() : null,
-        validTo: data.validTo ? new Date(data.validTo).toISOString() : null,
-        pricings: [
-          {
-            pricingType: "Flat",
-            currency: data.currency,
-            recurringPrice: data.recurringPrice,
-            oneTimePrice: data.oneTimePrice,
-            usagePrice: 0,
-            unitOfMeasure: null,
-            minQuantity: null,
-            maxQuantity: null,
-            isActive: true,
-          },
-        ],
-      })
-      return res.data
-    },
-    onSuccess: (data) => {
-      toast({ title: "Offer created", description: `${data.name} has been created successfully.` })
-      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
-      queryClient.invalidateQueries({ queryKey: queryKeys.offers.all })
-      router.push(`/products/offers/${data.id}`)
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to create offer.", variant: "destructive" })
-    },
-  })
+  const createOffer = useCreateOffer()
 
   const onSubmit = (data: OfferForm) => {
-    createMutation.mutate(data)
+    createOffer.mutate({
+      name: data.name,
+      description: data.description || null,
+      productId: data.productId,
+      offerType: data.offerType,
+      isContract: data.isContract ?? false,
+      contractDurationMonths: data.isContract ? (data.contractDurationMonths ?? null) : null,
+      billingPeriod: data.billingPeriod || null,
+      taxInclusive: data.taxInclusive ?? false,
+      sortOrder: data.sortOrder ?? 0,
+      validFrom: data.validFrom ? new Date(data.validFrom).toISOString() : null,
+      validTo: data.validTo ? new Date(data.validTo).toISOString() : null,
+      pricings: [
+        {
+          pricingType: "Flat",
+          currency: data.currency ?? "USD",
+          recurringPrice: data.recurringPrice ?? 0,
+          oneTimePrice: data.oneTimePrice ?? 0,
+          usagePrice: 0,
+          unitOfMeasure: null,
+          minQuantity: null,
+          maxQuantity: null,
+          isActive: true,
+        },
+      ],
+    }, {
+      onSuccess: (result) => {
+        toast({ title: "Offer created", description: `${result.name} has been created successfully.` })
+        router.push(`/products/offers/${result.id}`)
+      },
+      onError: () => {
+        toast({ title: "Error", description: "Failed to create offer.", variant: "destructive" })
+      },
+    })
   }
 
   const productOptions = (products?.items ?? []).map((p) => ({ label: p.name, value: p.id }))
@@ -168,16 +157,14 @@ export default function NewOfferPage() {
             error={errors.recurringPrice}
             registration={register("recurringPrice")}
             type="number"
-            step="0.01"
-            placeholder="0.00"
+            placeholder="0"
           />
           <FormField
             label="One-Time Price"
             error={errors.oneTimePrice}
             registration={register("oneTimePrice")}
             type="number"
-            step="0.01"
-            placeholder="0.00"
+            placeholder="0"
           />
           <FormField
             label="Currency"
@@ -219,7 +206,7 @@ export default function NewOfferPage() {
           />
         </div>
       </FormSection>
-      <FormActions backHref="/products/offers" loading={createMutation.isPending} submitLabel="Create Offer" />
+      <FormActions backHref="/products/offers" loading={createOffer.isPending} submitLabel="Create Offer" />
     </FormPageLayout>
   )
 }

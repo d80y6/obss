@@ -19,7 +19,8 @@ import { useInvoice } from "@/api/hooks/useInvoice"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { DisputeDto, CreditNoteDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { DisputeDto, CreditNoteDto } from "@/api/generated"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
 import Link from "next/link"
@@ -50,14 +51,7 @@ export default function InvoiceDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("Invoice", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Invoice/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("Invoice", id)
 
   const finalizeMutation = useMutation({
     mutationFn: async () => {

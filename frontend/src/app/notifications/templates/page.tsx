@@ -5,9 +5,8 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { SearchBar } from "@/components/shared/SearchBar"
 import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { NotificationTemplateDto } from "@/types/api"
+import { useNotificationTemplates } from "@/api/hooks/use-notification-templates"
+import type { NotificationTemplateDto } from "@/api/generated"
 import { FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -17,18 +16,7 @@ export default function NotificationTemplatesPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["notification-templates", search],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (search) params.set("search", search)
-      params.set("page", String(page))
-      params.set("pageSize", String(pageSize))
-      const res = await api.get(`/api/v1/notifications/templates?${params.toString()}`)
-      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
-      return { items: res.data as NotificationTemplateDto[], total }
-    },
-  })
+  const { data, isLoading, error } = useNotificationTemplates(search)
 
   const columns: Column<NotificationTemplateDto>[] = [
     { id: "name", header: "Name", accessorKey: "name", sortable: true },
@@ -48,14 +36,14 @@ export default function NotificationTemplatesPage() {
           <div className="mt-4">
             <DataTable
               columns={columns}
-              data={data?.items ?? []}
+              data={data ?? []}
               loading={isLoading}
               error={error ? "Failed to load data." : undefined}
               emptyTitle="No templates"
               emptyIcon={FileText}
               rowKey={(row) => row.id}
               onRowClick={(row) => router.push(`/notifications/templates/${row.id}`)}
-              pagination={{ page, pageSize, total: data?.total ?? data?.items?.length ?? 0, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
+              pagination={{ page, pageSize, total: data?.length ?? 0, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
             />
           </div>
         </CardContent>

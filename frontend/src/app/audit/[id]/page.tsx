@@ -4,22 +4,14 @@ import { useParams } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { AuditEntryDto } from "@/types/api"
+import { useAuditEntry } from "@/api/hooks/use-audit-entries"
+import type { AuditEntryDto } from "@/api/generated/dto"
 
 export default function AuditEntryDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: entry, isLoading } = useQuery({
-    queryKey: ["audit", "entries", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entries/${id}`)
-      return res.data as AuditEntryDto
-    },
-    enabled: !!id,
-  })
+  const { data: entry, isLoading } = useAuditEntry(id)
 
   return (
     <div className="flex-1 space-y-6 p-6">

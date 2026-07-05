@@ -9,9 +9,8 @@ import { Button } from "@/components/ui/button"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { useReportDefinition, useReportExecutions, useExecuteReport } from "@/api/hooks/use-reporting"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { ReportExecutionDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { ReportExecutionDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import { useState } from "react"
 
@@ -24,14 +23,7 @@ export default function ReportDefinitionDetailPage() {
   const { data: executions, refetch: refetchExecutions } = useReportExecutions(id)
   const executeMutation = useExecuteReport()
 
-  const { data: auditEntries } = useQuery({
-    queryKey: ["audit", "entity", "ReportDefinition", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/ReportDefinition/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("ReportDefinition", id)
 
   const handleExecute = async () => {
     setExecuting(true)

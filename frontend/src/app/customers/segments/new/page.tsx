@@ -12,7 +12,7 @@ import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
 import api from "@/services/api"
-import { SegmentDto } from "@/types/api"
+import type { SegmentDto } from "@/api/generated"
 
 const segmentSchema = z.object({
   name: z.string().min(1, "Name is required"),

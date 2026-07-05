@@ -4,11 +4,12 @@ import { useParams } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
+import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { queryKeys } from "@/lib/query-keys"
-import { CategoryDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { CategoryDto } from "@/api/generated"
 
 export default function CategoryDetailPage() {
   const params = useParams()
@@ -31,16 +32,9 @@ export default function CategoryDetailPage() {
     },
   })
 
-  const parentCategory = categories?.find((c) => c.id === category?.parentId)
+  const parentCategory = categories?.find((c) => c.id === category?.parentCategoryId)
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("Category", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Category/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("Category", id)
 
   const tabs = [
     {
@@ -50,12 +44,17 @@ export default function CategoryDetailPage() {
         <EntityMetadata
           title="Category Details"
           loading={isLoading}
+          columns={2}
           fields={[
             { label: "Name", value: category?.name ?? "-" },
             { label: "Description", value: category?.description ?? "-" },
             { label: "Parent Category", value: parentCategory?.name ?? "-" },
-            { label: "Product Count", value: category ? String(category.productCount) : "-" },
+            { label: "Status", value: category ? <StatusBadge status={category.lifecycleStatus} /> : "-" },
+            { label: "Is Root", value: category?.parentCategoryId === null ? "Yes" : "No" },
+            { label: "Sort Order", value: category ? String(category.sortOrder) : "-" },
+            { label: "Version", value: category ? String(category.version) : "-" },
             { label: "Created", value: category?.createdAt ? new Date(category.createdAt).toLocaleDateString() : "-" },
+            { label: "Updated", value: category?.updatedAt ? new Date(category.updatedAt).toLocaleDateString() : "-" },
           ]}
         />
       ),
@@ -92,7 +91,8 @@ export default function CategoryDetailPage() {
     <div className="flex-1 space-y-6 p-6">
       <EntityHeader
         title={category?.name ?? "Category"}
-        subtitle={category?.description}
+        subtitle={category?.description ?? undefined}
+        status={category?.lifecycleStatus}
         backHref="/products/categories"
         editHref={`/products/categories/${id}/edit`}
         loading={isLoading}

@@ -17,7 +17,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { ReconciliationDto, PaymentDto } from "@/types/api"
+import { useReconciliation } from "@/api/hooks/useReconciliation"
+import type { ReconciliationDto, PaymentDto } from "@/api/generated"
 import { ArrowLeftRight, Upload, Wand2, CheckCircle } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import {

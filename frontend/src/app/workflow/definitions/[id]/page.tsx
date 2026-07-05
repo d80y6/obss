@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { WorkflowDefinitionDto, AuditEntryDto } from "@/types/api"
+import { useWorkflowDefinition } from "@/api/hooks/use-workflow-definitions"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { toast } from "@/components/ui/toast"
 import { Plus, Trash2 } from "lucide-react"
 
@@ -24,23 +25,9 @@ export default function WorkflowDefinitionDetailPage() {
   const [newStepType, setNewStepType] = useState("task")
   const [newStepConfig, setNewStepConfig] = useState("{}")
 
-  const { data: def, isLoading } = useQuery({
-    queryKey: queryKeys.workflow.definitions.detail(id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/workflow/definitions/${id}`)
-      return res.data as WorkflowDefinitionDto
-    },
-    enabled: !!id,
-  })
+  const { data: def, isLoading } = useWorkflowDefinition(id)
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("WorkflowDefinition", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/WorkflowDefinition/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("WorkflowDefinition", id)
 
   const addStep = useMutation({
     mutationFn: async () => {

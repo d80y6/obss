@@ -6,32 +6,16 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { queryKeys } from "@/lib/query-keys"
-import { BillingJobDto, AuditEntryDto } from "@/types/api"
+import { useBillingJob } from "@/api/hooks/useBillingJob"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
 
 export default function BillingJobDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: job, isLoading, error: jobError } = useQuery({
-    queryKey: queryKeys.billing.jobs.detail(id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/billing/jobs/${id}`)
-      return res.data as BillingJobDto
-    },
-    enabled: !!id,
-  })
+  const { data: job, isLoading, error: jobError } = useBillingJob(id)
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("BillingJob", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/BillingJob/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("BillingJob", id)
 
   const percentComplete = job ? (job.totalProcessed + job.totalErrors > 0
     ? Math.round((job.totalProcessed / (job.totalProcessed + job.totalErrors)) * 100)

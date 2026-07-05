@@ -8,10 +8,8 @@ import { SearchBar } from "@/components/shared/SearchBar"
 import { FilterBar } from "@/components/shared/FilterBar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useQuery } from "@tanstack/react-query"
-import { queryKeys } from "@/lib/query-keys"
-import { api } from "@/api/client"
-import { NotificationDto } from "@/types/api"
+import { useNotifications } from "@/api/hooks/use-notifications"
+import type { NotificationDto } from "@/api/generated/dto"
 import { Bell, FileText } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -54,16 +52,7 @@ export default function NotificationsPage() {
     pageSize: String(pageSize),
   }
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: queryKeys.notifications.list(filters),
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v) })
-      const res = await api.get(`/api/v1/notifications/notifications?${params.toString()}`)
-      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
-      return { items: res.data as NotificationDto[], total }
-    },
-  })
+  const { data, isLoading, error } = useNotifications(filters)
 
   const columns: Column<NotificationDto>[] = [
     { id: "title", header: "Title", accessorKey: "title", sortable: true },
@@ -106,7 +95,7 @@ export default function NotificationsPage() {
           <div className="mt-4">
             <DataTable
               columns={columns}
-              data={data?.items ?? []}
+              data={data ?? []}
               loading={isLoading}
               error={error ? "Failed to load data." : undefined}
               emptyTitle="No notifications"
@@ -115,7 +104,7 @@ export default function NotificationsPage() {
               selectedIds={selectedIds}
               onSelectionChange={setSelectedIds}
               onRowClick={(row) => router.push(`/notifications/${row.id}`)}
-              pagination={{ page, pageSize, total: data?.total ?? data?.items?.length ?? 0, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
+              pagination={{ page, pageSize, total: (data ?? []).length, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
             />
           </div>
         </CardContent>

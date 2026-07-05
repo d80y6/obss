@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { CreditNoteDto } from "@/types/api"
+import type { CreditNoteDto } from "@/api/generated"
 import { FileX } from "lucide-react"
 
 export default function CreditNotesPage() {

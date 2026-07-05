@@ -17,7 +17,7 @@ import api from "@/services/api"
 import { useQueryClient } from "@tanstack/react-query"
 import { queryKeys } from "@/lib/query-keys"
 import { useEffect } from "react"
-import { ContactDto } from "@/types/api"
+import type { ContactDto } from "@/api/generated"
 
 const contactSchema = z.object({
   firstName: z.string().min(1, "First name is required"),

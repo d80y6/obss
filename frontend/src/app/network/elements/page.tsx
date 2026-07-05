@@ -4,43 +4,47 @@ import { useState } from "react"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
-import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { NetworkElementDto } from "@/types/api"
+import { SearchBar } from "@/components/shared/SearchBar"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useNetworkElements } from "@/api/hooks/useNetworkElements"
+import type { NetworkElementDto } from "@/api/generated"
 import { Cable } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function NetworkElementsPage() {
   const router = useRouter()
+  const [search, setSearch] = useState("")
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["network-elements"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/network/elements")
-      return res.data as NetworkElementDto[]
-    },
-  })
+  const filters: Record<string, string> = {
+    ...(search ? { search } : {}),
+    page: String(page),
+    pageSize: String(pageSize),
+  }
+
+  const { data, isLoading, error } = useNetworkElements(filters)
 
   const columns: Column<NetworkElementDto>[] = [
     { id: "name", header: "Name", accessorKey: "name", sortable: true },
+    { id: "hostname", header: "Hostname", accessorKey: "hostname" },
     { id: "elementType", header: "Type", accessorKey: "elementType" },
-    { id: "model", header: "Model", accessorKey: "model" },
     { id: "vendor", header: "Vendor", accessorKey: "vendor" },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
-    { id: "location", header: "Location", accessorKey: "location" },
-    { id: "ipAddress", header: "IP", accessorKey: "ipAddress" },
   ]
 
   return (
     <div className="flex-1 space-y-6 p-6">
       <PageHeader title="Network Elements" backHref="/network" />
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader className="pb-3">
+          <SearchBar value={search} onChange={(v) => { setSearch(v); setPage(1) }} placeholder="Search network elements..." />
+        </CardHeader>
+        <CardContent>
           <DataTable
             columns={columns}
-            data={data ?? []}
+            data={data?.items ?? []}
             loading={isLoading}
             error={error ? "Failed to load data." : undefined}
             emptyTitle="No network elements"
@@ -49,6 +53,13 @@ export default function NetworkElementsPage() {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onRowClick={(row) => router.push(`/network/elements/${row.id}`)}
+            pagination={{
+              page,
+              pageSize,
+              total: data?.total ?? data?.items?.length ?? 0,
+              onPageChange: setPage,
+              onPageSizeChange: (size) => { setPageSize(size); setPage(1) },
+            }}
           />
         </CardContent>
       </Card>

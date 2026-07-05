@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { DisputeDto } from "@/types/api"
+import type { DisputeDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import { CheckCircle, XCircle } from "lucide-react"
 

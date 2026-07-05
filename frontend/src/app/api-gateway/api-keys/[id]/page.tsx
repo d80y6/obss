@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
-import { ApiKeyDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { ApiKeyDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import { useApiKey, useRevokeApiKey } from "@/api/hooks/use-api-gateway"
 
@@ -20,14 +21,7 @@ export default function ApiKeyDetailPage() {
   const { data: apiKey, isLoading } = useApiKey(id)
   const revokeMutation = useRevokeApiKey()
 
-  const { data: auditEntries } = useQuery({
-    queryKey: ["audit", "entity", "ApiKey", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/ApiKey/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("ApiKey", id)
 
   const handleRevoke = () => {
     revokeMutation.mutate(id, {

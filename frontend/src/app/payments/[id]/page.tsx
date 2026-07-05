@@ -11,7 +11,7 @@ import { usePayment } from "@/api/hooks/usePayment"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
 import Link from "next/link"
@@ -24,14 +24,7 @@ export default function PaymentDetailPage() {
 
   const { data: payment, isLoading } = usePayment(id)
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("Payment", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Payment/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("Payment", id)
 
   const completeMutation = useMutation({
     mutationFn: async () => {

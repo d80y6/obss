@@ -4,19 +4,12 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { RefundDto } from "@/types/api"
+import { useRefunds } from "@/api/hooks/useRefunds"
+import type { RefundDto } from "@/api/generated/dto"
 import { RotateCcw } from "lucide-react"
 
 export default function RefundsPage() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["payment-refunds"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/payments/payments/refunds")
-      return res.data as RefundDto[]
-    },
-  })
+  const { data, isLoading, error } = useRefunds()
 
   const columns: Column<RefundDto>[] = [
     { id: "refundNumber", header: "Refund #", accessorKey: "refundNumber" },

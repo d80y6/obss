@@ -1,42 +1,42 @@
 "use client"
 
-import { useState } from "react"
-import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
-import { Card, CardContent } from "@/components/ui/card"
-import { api } from "@/api/client"
-import { NetworkElementDto } from "@/types/api"
-import { useQuery } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
+import { PageHeader } from "@/components/shared/PageHeader"
 import { StatusBadge } from "@/components/shared/StatusBadge"
-import { Server } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { useOlts } from "@/api/hooks/useOlts"
+import type { OltDto } from "@/api/generated/dto"
+import { Radio } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function OltsPage() {
   const router = useRouter()
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["network", "olts"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/network/olts")
-      return res.data as NetworkElementDto[]
-    },
-  })
+  const { data, isLoading, error } = useOlts()
 
-  const columns: Column<NetworkElementDto>[] = [
+  const columns: Column<OltDto>[] = [
     { id: "name", header: "Name", accessorKey: "name", sortable: true },
-    { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+    { id: "model", header: "Model", accessorKey: "model" },
+    { id: "vendor", header: "Vendor", accessorKey: "vendor" },
     { id: "location", header: "Location", accessorKey: "location" },
+    { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+    { id: "ponPortCount", header: "Port Count", accessorKey: "ponPortCount" },
   ]
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <PageHeader title="OLTs" backHref="/network" />
+      <PageHeader title="OLTs" backHref="/network" createHref="/network/olts/new" createLabel="New OLT" />
       <Card>
         <CardContent className="pt-6">
-          <DataTable columns={columns} data={data ?? []} loading={isLoading}
+          <DataTable
+            columns={columns}
+            data={data ?? []}
+            loading={isLoading}
             error={error ? "Failed to load data." : undefined}
-            emptyTitle="No OLTs" emptyIcon={Server}
+            emptyTitle="No OLTs"
+            emptyIcon={Radio}
             rowKey={(row) => row.id}
-            onRowClick={(row) => router.push(`/network/olts/${row.id}`)} />
+            onRowClick={(row) => router.push(`/network/olts/${row.id}`)}
+          />
         </CardContent>
       </Card>
     </div>

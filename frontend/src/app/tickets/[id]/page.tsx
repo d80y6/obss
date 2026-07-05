@@ -15,7 +15,8 @@ import { useUsers } from "@/api/hooks/useUsers"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { TicketCommentDto, AuditEntryDto, SlaDefinitionDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { TicketCommentDto, SlaDefinitionDto } from "@/api/generated"
 import { cn } from "@/lib/utils"
 import { toast } from "@/components/ui/toast"
 import {
@@ -79,25 +80,13 @@ export default function TicketDetailPage() {
   const { data: ticketSla } = useQuery({
     queryKey: queryKeys.tickets.sla(id),
     queryFn: async () => {
-      const res = await api.get(`/api/v1/ticketing/tickets/${id}/sla`)
-      return res.data as {
-        slaName: string
-        responseDeadline: string
-        resolutionDeadline: string
-        breached: boolean
-      } | null
+      const res = await api.get(`/api/v1/tickets/${id}/sla`)
+      return res.data as { slaName: string; breached: boolean; responseDeadline: string; resolutionDeadline: string }
     },
     enabled: !!id,
   })
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("Ticket", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Ticket/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("Ticket", id)
 
   const assignMutation = useMutation({
     mutationFn: async (userId: string) => {

@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { CollectionCaseDto, CollectionActionDto, PaymentArrangementDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { CollectionCaseDto, CollectionActionDto, PaymentArrangementDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import Link from "next/link"
 import { CheckCircle, Send, Plus, Phone, CreditCard } from "lucide-react"
@@ -47,14 +48,7 @@ export default function CollectionCaseDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("CollectionCase", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/CollectionCase/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("CollectionCase", id)
 
   const resolveMutation = useMutation({
     mutationFn: async () => {

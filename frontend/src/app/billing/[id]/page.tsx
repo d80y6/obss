@@ -9,10 +9,12 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useBill } from "@/api/hooks/useBill"
+import { useFinalizeBill } from "@/api/hooks/useFinalizeBill"
+import { useAddBillAdjustment } from "@/api/hooks/useAddBillAdjustment"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -31,27 +33,9 @@ export default function BillDetailPage() {
 
   const { data: bill, isLoading } = useBill(id)
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("Bill", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Bill/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, isLoading: auditLoading } = useAuditLog("Bill", id)
 
-  const finalizeMutation = useMutation({
-    mutationFn: async () => {
-      await api.post(`/api/v1/billing/bills/${id}/finalize`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.billing.bills.detail(id) })
-      toast({ title: "Bill finalized" })
-    },
-    onError: () => {
-      toast({ title: "Failed to finalize bill", variant: "destructive" })
-    },
-  })
+  const finalizeMutation = useFinalizeBill()
 
   const generateInvoiceMutation = useMutation({
     mutationFn: async () => {
@@ -68,27 +52,7 @@ export default function BillDetailPage() {
     },
   })
 
-  const addAdjustmentMutation = useMutation({
-    mutationFn: async () => {
-      const res = await api.post(`/api/v1/billing/bills/${id}/adjustments`, {
-        amount: parseFloat(adjAmount),
-        description: adjReason,
-        currency: "USD",
-      })
-      return res.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.billing.bills.adjustments(id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.billing.bills.detail(id) })
-      toast({ title: "Adjustment added" })
-      setAdjustmentOpen(false)
-      setAdjAmount("")
-      setAdjReason("")
-    },
-    onError: () => {
-      toast({ title: "Failed to add adjustment", variant: "destructive" })
-    },
-  })
+  const addAdjustmentMutation = useAddBillAdjustment(id)
 
   const tabs = [
     {
@@ -130,7 +94,19 @@ export default function BillDetailPage() {
                       <Label>Description</Label>
                       <Input value={adjReason} onChange={(e) => setAdjReason(e.target.value)} placeholder="e.g. Discount" />
                     </div>
-                    <Button onClick={() => addAdjustmentMutation.mutate()} disabled={!adjAmount || !adjReason || addAdjustmentMutation.isPending}>
+                    <Button onClick={() => addAdjustmentMutation.mutate({
+                      amount: parseFloat(adjAmount),
+                      description: adjReason,
+                      currency: "USD",
+                    }, {
+                      onSuccess: () => {
+                        toast({ title: "Adjustment added" })
+                        setAdjustmentOpen(false)
+                        setAdjAmount("")
+                        setAdjReason("")
+                      },
+                      onError: () => toast({ title: "Failed to add adjustment", variant: "destructive" }),
+                    })} disabled={!adjAmount || !adjReason || addAdjustmentMutation.isPending}>
                       {addAdjustmentMutation.isPending ? "Adding..." : "Add"}
                     </Button>
                   </div>
@@ -153,7 +129,9 @@ export default function BillDetailPage() {
             <CardTitle className="text-base">Audit Trail</CardTitle>
           </CardHeader>
           <CardContent>
-            {(auditEntries ?? []).length === 0 ? (
+            {auditLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : (auditEntries ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">No audit entries.</p>
             ) : (
               auditEntries?.map((entry) => (
@@ -170,6 +148,31 @@ export default function BillDetailPage() {
         </Card>
       ),
     },
+    {
+      id: "actions",
+      label: "Actions",
+      content: (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Bill Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button variant="default" size="sm" onClick={() => finalizeMutation.mutate(id, {
+              onSuccess: () => toast({ title: "Bill finalized" }),
+              onError: () => toast({ title: "Failed to finalize bill", variant: "destructive" }),
+            })} disabled={finalizeMutation.isPending}>
+              <FileText className="mr-1 h-4 w-4" /> {finalizeMutation.isPending ? "Finalizing..." : "Finalize"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => generateInvoiceMutation.mutate()} disabled={generateInvoiceMutation.isPending}>
+              <Plus className="mr-1 h-4 w-4" /> {generateInvoiceMutation.isPending ? "Generating..." : "Generate Invoice"}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setAdjustmentOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" /> Add Adjustment
+            </Button>
+          </CardContent>
+        </Card>
+      ),
+    },
   ]
 
   return (
@@ -181,16 +184,6 @@ export default function BillDetailPage() {
         backHref="/billing"
         loading={isLoading}
       />
-      {bill && bill.status !== "FINALIZED" && bill.status !== "CANCELLED" && (
-        <div className="flex gap-2">
-          <Button variant="default" size="sm" onClick={() => finalizeMutation.mutate()}>
-            <FileText className="mr-1 h-4 w-4" /> Finalize
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => generateInvoiceMutation.mutate()}>
-            <Plus className="mr-1 h-4 w-4" /> Generate Invoice
-          </Button>
-        </div>
-      )}
       <EntityTabs tabs={tabs} defaultTab="overview" />
     </div>
   )

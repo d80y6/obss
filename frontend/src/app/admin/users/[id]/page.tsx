@@ -17,7 +17,8 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { IamUserDto, RoleDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { IamUserDto, RoleDto } from "@/api/generated"
 
 export default function UserDetailPage() {
   const params = useParams()
@@ -40,14 +41,7 @@ export default function UserDetailPage() {
     },
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("User", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/User/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("User", id)
 
   const tabs = [
     {

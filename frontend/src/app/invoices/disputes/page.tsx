@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { DisputeDto } from "@/types/api"
+import type { DisputeDto } from "@/api/generated"
 import { FileCheck } from "lucide-react"
 
 export default function DisputesPage() {

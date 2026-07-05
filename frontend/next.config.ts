@@ -24,6 +24,21 @@ const nextConfig: NextConfig = {
   
   // FIX: This must reside at the root level of NextConfig
   allowedDevOrigins: [localIp, "localhost", "127.0.0.1", "0.0.0.0"],
+
+  async redirects() {
+    return [
+      {
+        source: "/services",
+        destination: "/service-inventory",
+        permanent: true,
+      },
+      {
+        source: "/services/:id",
+        destination: "/service-inventory/:id",
+        permanent: true,
+      },
+    ]
+  },
 };
 
 export default nextConfig;

@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { ProvisioningJobDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { ProvisioningJobDto } from "@/api/generated"
 import { useStartProvisioningJob, useRetryProvisioningJob, useProvisioningJob } from "@/api/hooks/use-provisioning-jobs"
 import { toast } from "@/components/ui/toast"
 import { Play, RotateCcw, FileText } from "lucide-react"
@@ -24,14 +25,7 @@ export default function ProvisioningJobDetailPage() {
 
   const { data: job, isLoading } = useProvisioningJob(id)
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("ProvisioningJob", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/ProvisioningJob/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("ProvisioningJob", id)
 
   const startJob = useStartProvisioningJob()
   const retryJob = useRetryProvisioningJob()

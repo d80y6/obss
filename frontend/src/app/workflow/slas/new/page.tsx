@@ -12,7 +12,7 @@ import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
 import api from "@/services/api"
-import { WorkflowDefinitionDto } from "@/types/api"
+import type { WorkflowDefinitionDto } from "@/api/generated"
 
 const slaSchema = z.object({
   name: z.string().min(1, "Name is required"),

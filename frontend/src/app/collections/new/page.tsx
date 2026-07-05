@@ -12,7 +12,7 @@ import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { CustomerDto } from "@/types/api"
+import type { CustomerDto } from "@/api/generated"
 
 const schema = z.object({
   customerId: z.string().min(1, "Customer is required"),

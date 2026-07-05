@@ -6,7 +6,7 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api/client"
-import type { SegmentDto } from "@/types/api"
+import { useSegment } from "@/api/hooks/useSegment"
 
 interface SegmentAssignmentDto {
   customerId: string
@@ -18,14 +18,7 @@ export default function SegmentDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: segment, isLoading, error: segmentError } = useQuery({
-    queryKey: ["segments", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/crm/segments/${id}`)
-      return res.data as SegmentDto
-    },
-    enabled: !!id,
-  })
+  const { data: segment, isLoading, error: segmentError } = useSegment(id)
 
   const { data: assignments, error: assignmentsError } = useQuery({
     queryKey: ["segments", id, "assignments"],

@@ -6,7 +6,7 @@ import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { SearchBar } from "@/components/shared/SearchBar"
 import { useSegments } from "@/api/hooks/useSegments"
-import { SegmentDto } from "@/types/api"
+import type { SegmentDto } from "@/api/generated"
 import { Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 

@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent } from "@/components/ui/card"
 import { useRoles } from "@/api/hooks/useRoles"
-import { RoleDto } from "@/types/api"
+import type { RoleDto } from "@/api/generated"
 import { Shield } from "lucide-react"
 import { useRouter } from "next/navigation"
 

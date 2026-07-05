@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useAuditAlerts, useAcknowledgeAlert } from "@/api/hooks/use-audit-alerts"
-import { AuditAlertDto } from "@/types/api"
+import type { AuditAlertDto } from "@/api/generated/dto"
 import { AlertTriangle } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 

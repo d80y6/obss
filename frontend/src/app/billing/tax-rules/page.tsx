@@ -5,23 +5,20 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { TaxRuleDto } from "@/types/api"
+import { useTaxRules } from "@/api/hooks/useTaxRules"
+import type { TaxRuleDto } from "@/api/generated"
 import { Percent } from "lucide-react"
 
 export default function TaxRulesPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["billing-tax-rules"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/billing/tax-rules")
-      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
-      return { items: res.data as TaxRuleDto[], total }
-    },
-  })
+  const filters: Record<string, string> = {
+    page: String(page),
+    pageSize: String(pageSize),
+  }
+
+  const { data, isLoading, error } = useTaxRules(filters)
 
   const columns: Column<TaxRuleDto>[] = [
     { id: "name", header: "Name", accessorKey: "name" },

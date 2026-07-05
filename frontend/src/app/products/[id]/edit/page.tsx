@@ -23,12 +23,10 @@ import { useEffect } from "react"
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
-  isShippable: z.boolean().default(false),
-  taxable: z.boolean().default(true),
   taxCategory: z.string().min(1, "Tax category is required"),
 })
 
-type ProductForm = z.infer<typeof productSchema>
+type ProductForm = z.input<typeof productSchema>
 
 const taxCategories = [
   { label: "Standard", value: "Standard" },
@@ -59,10 +57,8 @@ export default function EditProductPage() {
     if (product) {
       reset({
         name: product.name,
-        description: product.description,
-        isShippable: product.isShippable,
-        taxable: product.taxable,
-        taxCategory: product.taxCategory || "Standard",
+        description: product.description ?? "",
+        taxCategory: product.taxCategory ?? "Standard",
       })
     }
   }, [product, reset])
@@ -73,9 +69,9 @@ export default function EditProductPage() {
         productId: id,
         name: data.name,
         description: data.description,
-        categoryId: product?.categoryId || null,
-        isShippable: data.isShippable,
-        taxable: data.taxable,
+        categoryId: null,
+        isShippable: false,
+        taxable: true,
         taxCategory: data.taxCategory,
       })
       return res.data

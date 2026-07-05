@@ -7,9 +7,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { SearchBar } from "@/components/shared/SearchBar"
 import { FilterBar } from "@/components/shared/FilterBar"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { CollectionCaseDto } from "@/types/api"
+import { useCollectionCases } from "@/api/hooks/use-collections"
+import type { CollectionCaseDto } from "@/api/generated"
 import { Landmark } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -28,19 +27,14 @@ export default function CollectionsPage() {
   const [pageSize, setPageSize] = useState(10)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["collections", search, statusFilter, page, pageSize],
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      if (search) params.set("search", search)
-      if (statusFilter) params.set("status", statusFilter)
-      params.set("page", String(page))
-      params.set("pageSize", String(pageSize))
-      const res = await api.get(`/api/v1/collections/cases?${params.toString()}`)
-      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
-      return { items: res.data as CollectionCaseDto[], total }
-    },
-  })
+  const filters: Record<string, string> = {
+    ...(search ? { search } : {}),
+    ...(statusFilter ? { status: statusFilter } : {}),
+    page: String(page),
+    pageSize: String(pageSize),
+  }
+
+  const { data, isLoading, error } = useCollectionCases(filters)
 
   const columns: Column<CollectionCaseDto>[] = [
     { id: "id", header: "Case ID", cell: (row) => row.id.substring(0, 8) + "..." },
@@ -80,7 +74,7 @@ export default function CollectionsPage() {
         <CardContent>
           <DataTable
             columns={columns}
-             data={data?.items ?? []}
+             data={data ?? []}
             loading={isLoading}
             error={error ? "Failed to load data." : undefined}
             emptyTitle="No collection cases"
@@ -89,7 +83,7 @@ export default function CollectionsPage() {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onRowClick={(row) => router.push(`/collections/${row.id}`)}
-            pagination={{ page, pageSize, total: data?.total ?? data?.items?.length ?? 0, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
+            pagination={{ page, pageSize, total: data?.length ?? 0, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
           />
         </CardContent>
       </Card>

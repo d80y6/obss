@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { z } from "zod"
 import { FormPageLayout } from "@/forms/FormPageLayout"
 import { FormSection } from "@/forms/FormSection"
@@ -10,9 +9,10 @@ import { FormField, FormSelectField } from "@/forms/FormField"
 import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
-import api from "@/services/api"
-import { queryKeys } from "@/lib/query-keys"
-import { RecordPaymentCommand, CustomerDto, InvoiceDto, PaymentDto } from "@/api/generated"
+import { RecordPaymentCommand } from "@/api/generated"
+import { useCustomers } from "@/api/hooks/useCustomers"
+import { useInvoices } from "@/api/hooks/useInvoices"
+import { useCreatePayment } from "@/api/hooks/useCreatePayment"
 
 const schema = z.object({
   customerId: z.string().min(1, "Customer is required"),
@@ -35,29 +35,28 @@ const methodOptions = [
 
 export default function NewPaymentPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
-  const { data: customers } = useQuery({
-    queryKey: queryKeys.customers.list({ pageSize: "1000" }),
-    queryFn: async () => {
-      const res = await api.get("/api/v1/crm/customers?pageSize=1000")
-      return res.data as CustomerDto[]
-    },
-  })
+  const { data: customersData } = useCustomers({ pageSize: "1000" })
 
-  const { data: invoices } = useQuery({
-    queryKey: queryKeys.invoices.list({ pageSize: "1000", status: "SENT" }),
-    queryFn: async () => {
-      const res = await api.get("/api/v1/invoices/invoices?pageSize=1000&status=SENT")
-      return res.data as InvoiceDto[]
-    },
-  })
+  const { data: invoicesData } = useInvoices({ pageSize: "1000", status: "SENT" })
 
-  const mutation = useMutation({
-    mutationFn: async (data: FormData) => {
+  const mutation = useCreatePayment()
+
+  const customerOptions = (customersData?.items ?? []).map((c) => ({
+    label: `${c.displayName} (${c.email})`,
+    value: c.id,
+  }))
+
+  const invoiceOptions = (invoicesData?.items ?? []).map((inv) => ({
+    label: `${inv.invoiceNumber} - ${inv.customerName} (${inv.currency ?? ""} ${(inv.totalAmount ?? 0).toLocaleString()})`,
+    value: inv.id,
+  }))
+
+  return (
+    <FormPageLayout title="Record Payment" backHref="/payments" onSubmit={handleSubmit((data) => {
       const payload: RecordPaymentCommand = {
         customerId: data.customerId,
         amount: parseFloat(data.amount),
@@ -67,31 +66,16 @@ export default function NewPaymentPage() {
         invoiceId: data.invoiceId ?? null,
         notes: data.notes ?? null,
       }
-      const res = await api.post("/api/v1/payments/payments", payload)
-      return res.data as PaymentDto
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.payments.all })
-      toast({ title: "Payment recorded" })
-      router.push("/payments")
-    },
-    onError: () => {
-      toast({ title: "Failed to record payment", variant: "destructive" })
-    },
-  })
-
-  const customerOptions = (customers ?? []).map((c) => ({
-    label: `${c.displayName} (${c.email})`,
-    value: c.id,
-  }))
-
-  const invoiceOptions = (invoices ?? []).map((inv) => ({
-    label: `${inv.invoiceNumber} - ${inv.customerName} (${inv.currency ?? ""} ${(inv.totalAmount ?? 0).toLocaleString()})`,
-    value: inv.id,
-  }))
-
-  return (
-    <FormPageLayout title="Record Payment" backHref="/payments" onSubmit={handleSubmit((data) => mutation.mutate(data))}>
+      mutation.mutate(payload, {
+        onSuccess: () => {
+          toast({ title: "Payment recorded" })
+          router.push("/payments")
+        },
+        onError: () => {
+          toast({ title: "Failed to record payment", variant: "destructive" })
+        },
+      })
+    })}>
       <FormErrorSummary errors={errors} />
       <FormSection title="Payment Details">
         <FormSelectField label="Customer" error={errors.customerId} options={customerOptions} value={watch("customerId")} onValueChange={(v) => setValue("customerId", v)} required placeholder="Select customer" />

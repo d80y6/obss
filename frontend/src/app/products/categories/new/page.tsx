@@ -20,7 +20,6 @@ const categorySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
   parentCategoryId: z.string().optional(),
-  sortOrder: z.coerce.number().default(0),
 })
 
 type CategoryForm = z.infer<typeof categorySchema>
@@ -44,7 +43,7 @@ export default function NewCategoryPage() {
     formState: { errors },
   } = useForm<CategoryForm>({
     resolver: zodResolver(categorySchema),
-    defaultValues: { sortOrder: 0 },
+    defaultValues: { description: "" },
   })
 
   const createMutation = useMutation({
@@ -53,7 +52,7 @@ export default function NewCategoryPage() {
         name: data.name,
         description: data.description || null,
         parentCategoryId: data.parentCategoryId || null,
-        sortOrder: data.sortOrder,
+        sortOrder: 0,
       })
       return res.data
     },
@@ -92,23 +91,14 @@ export default function NewCategoryPage() {
           registration={register("description")}
           placeholder="Category description"
         />
-        <div className="grid gap-4 md:grid-cols-2">
-          <FormSelectField
-            label="Parent Category"
-            error={errors.parentCategoryId}
-            options={categoryOptions}
-            value=""
-            onValueChange={(v) => setValue("parentCategoryId", v)}
-            placeholder="No parent"
-          />
-          <FormField
-            label="Sort Order"
-            error={errors.sortOrder}
-            registration={register("sortOrder")}
-            type="number"
-            placeholder="0"
-          />
-        </div>
+        <FormSelectField
+          label="Parent Category"
+          error={errors.parentCategoryId}
+          options={categoryOptions}
+          value=""
+          onValueChange={(v) => setValue("parentCategoryId", v)}
+          placeholder="No parent"
+        />
       </FormSection>
       <FormActions backHref="/products/categories" loading={createMutation.isPending} submitLabel="Create Category" />
     </FormPageLayout>

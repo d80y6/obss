@@ -4,23 +4,13 @@ import { useParams } from "next/navigation"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { StatusBadge } from "@/components/shared/StatusBadge"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { queryKeys } from "@/lib/query-keys"
-import type { OrderFulfillmentDto } from "@/api/generated"
+import { useOrderFulfillment } from "@/api/hooks/useOrderFulfillment"
 
 export default function OrderTrackingPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: fulfillment } = useQuery({
-    queryKey: queryKeys.orders.fulfillment(id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/orders/orders/${id}/fulfillment`)
-      return res.data as OrderFulfillmentDto
-    },
-    enabled: !!id,
-  })
+  const { data: fulfillment } = useOrderFulfillment(id)
 
   return (
     <div className="flex-1 space-y-6 p-6">

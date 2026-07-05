@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/toast"
 import { LoadingState } from "@/components/shared/LoadingState"
 import { ErrorFallback } from "@/components/shared/ErrorFallback"
 import api from "@/services/api"
-import { CategoryDto } from "@/types/api"
+import type { CategoryDto } from "@/api/generated"
 import { useEffect } from "react"
 
 const categorySchema = z.object({
@@ -62,8 +62,8 @@ export default function EditCategoryPage() {
     if (category) {
       reset({
         name: category.name,
-        description: category.description,
-        parentCategoryId: category.parentId || "",
+        description: category.description ?? "",
+        parentCategoryId: category.parentCategoryId || "",
       })
     }
   }, [category, reset])
@@ -90,7 +90,7 @@ export default function EditCategoryPage() {
   if (error || !category) return <div className="flex-1 p-6"><ErrorFallback message="Failed to load category" /></div>
 
   const categoryOptions = (categories ?? [])
-    .filter((c) => c.id !== id && !c.parentId)
+    .filter((c) => c.id !== id && !c.parentCategoryId)
     .map((c) => ({ label: c.name, value: c.id }))
 
   return (

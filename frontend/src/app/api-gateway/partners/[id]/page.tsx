@@ -8,7 +8,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { ApiKeyDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { ApiKeyDto } from "@/api/generated"
 import { usePartner } from "@/api/hooks/use-api-gateway"
 
 export default function PartnerDetailPage() {
@@ -25,14 +26,7 @@ export default function PartnerDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: ["audit", "entity", "Partner", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Partner/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("Partner", id)
 
   const tabs = [
     {

@@ -6,7 +6,7 @@ import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useTenants } from "@/api/hooks/useTenants"
-import { TenantDto } from "@/types/api"
+import type { TenantDto } from "@/api/generated"
 import { Building2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 

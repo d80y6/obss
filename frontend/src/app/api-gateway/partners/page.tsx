@@ -8,7 +8,7 @@ import { SearchBar } from "@/components/shared/SearchBar"
 import { FilterBar } from "@/components/shared/FilterBar"
 import { Card, CardContent } from "@/components/ui/card"
 import { usePartners } from "@/api/hooks/use-api-gateway"
-import { PartnerDto } from "@/types/api"
+import type { PartnerDto } from "@/api/generated"
 import { Handshake } from "lucide-react"
 import { useRouter } from "next/navigation"
 

@@ -7,7 +7,8 @@ import { EntityTabs } from "@/components/shared/EntityTabs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { NotificationTemplateDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { NotificationTemplateDto } from "@/api/generated"
 import { FileText } from "lucide-react"
 
 export default function NotificationTemplateDetailPage() {
@@ -23,14 +24,7 @@ export default function NotificationTemplateDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: ["audit", "entity", "NotificationTemplate", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/NotificationTemplate/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("NotificationTemplate", id)
 
   const tabs = [
     {

@@ -5,7 +5,7 @@ import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useScheduledReports } from "@/api/hooks/use-reporting"
-import { ScheduledReportDto } from "@/types/api"
+import type { ScheduledReportDto } from "@/api/generated"
 import { Clock } from "lucide-react"
 import { useRouter } from "next/navigation"
 

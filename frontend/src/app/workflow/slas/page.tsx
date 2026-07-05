@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { WorkflowSlaDto } from "@/types/api"
+import type { WorkflowSlaDto } from "@/api/generated"
 import { ListTodo } from "lucide-react"
 import { useRouter } from "next/navigation"
 

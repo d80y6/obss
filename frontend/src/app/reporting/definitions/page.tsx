@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent } from "@/components/ui/card"
 import { useReportDefinitions } from "@/api/hooks/use-reporting"
-import { ReportDefinitionDto } from "@/types/api"
+import type { ReportDefinitionDto } from "@/api/generated"
 import { FileText } from "lucide-react"
 import { useRouter } from "next/navigation"
 

@@ -7,23 +7,19 @@ import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useNetworkElement } from "@/api/hooks/useNetworkElement"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { NetworkElementDto, NetworkConnectionDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { NetworkElementDto } from "@/api/generated"
+import type { NetworkConnectionDto } from "@/api/generated"
 
 export default function NetworkElementDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: element, isLoading, error: elementError } = useQuery({
-    queryKey: queryKeys.networks.elements.detail(id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/network/elements/${id}`)
-      return res.data as NetworkElementDto
-    },
-    enabled: !!id,
-  })
+  const { data: element, isLoading, error: elementError } = useNetworkElement(id)
 
   const { data: connections, error: connectionsError } = useQuery({
     queryKey: queryKeys.networks.elements.connections(id),
@@ -34,14 +30,7 @@ export default function NetworkElementDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("NetworkElement", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/NetworkElement/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("NetworkElement", id)
 
   const connColumns: Column<NetworkConnectionDto>[] = [
     { id: "connectedElementName", header: "Connected To", accessorKey: "connectedElementName" },
@@ -58,15 +47,20 @@ export default function NetworkElementDetailPage() {
         <EntityMetadata
           title="Element Details"
           loading={isLoading}
+          columns={2}
           fields={[
             { label: "Name", value: element?.name ?? "-" },
+            { label: "Hostname", value: element?.hostname ?? "-" },
+            { label: "IP Address", value: element?.ipAddress ?? "-" },
             { label: "Type", value: element?.elementType ?? "-" },
-            { label: "Model", value: element?.model ?? "-" },
             { label: "Vendor", value: element?.vendor ?? "-" },
+            { label: "Model", value: element?.model ?? "-" },
             { label: "Status", value: element ? <StatusBadge status={element.status} /> : "-" },
             { label: "Location", value: element?.location ?? "-" },
-            { label: "IP Address", value: element?.ipAddress ?? "-" },
             { label: "Firmware", value: element?.softwareVersion ?? "-" },
+            { label: "Serial Number", value: element?.serialNumber ?? "-" },
+            { label: "Managed", value: element ? (element.isManaged ? "Yes" : "No") : "-" },
+            { label: "Created", value: element?.createdAt ? new Date(element.createdAt).toLocaleDateString() : "-" },
           ]}
         />
       ),
@@ -97,16 +91,17 @@ export default function NetworkElementDetailPage() {
         <Card>
           <CardHeader><CardTitle className="text-base">Audit Trail</CardTitle></CardHeader>
           <CardContent>
-            {(!auditEntries || auditEntries.length === 0) ? (
-              <p className="text-sm text-muted-foreground">No audit entries.</p>
-            ) : (
-              auditEntries.map((e) => (
-                <div key={e.id} className="border-b py-3">
-                  <span className="font-medium">{e.action}</span>
-                  <span className="text-sm text-muted-foreground ml-2">{new Date(e.performedAt).toLocaleString()}</span>
-                </div>
-              ))
-            )}
+            <DataTable
+              columns={[
+                { id: "action", header: "Action", accessorKey: "action" },
+                { id: "performedByName", header: "Actor", accessorKey: "performedByName" },
+                { id: "performedAt", header: "Timestamp", cell: (row) => row.performedAt ? new Date(row.performedAt).toLocaleString() : "-" },
+              ]}
+              data={auditEntries ?? []}
+              emptyTitle="No audit entries"
+              rowKey={(row) => row.id}
+              error={auditError ? "Failed to load data." : undefined}
+            />
           </CardContent>
         </Card>
       ),
@@ -115,7 +110,14 @@ export default function NetworkElementDetailPage() {
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <EntityHeader title={element?.name ?? "Network Element"} subtitle={`${element?.elementType ?? ""} - ${element?.vendor ?? ""}`} status={element?.status} backHref="/network/elements" loading={isLoading} />
+      <EntityHeader
+        title={element?.name ?? "Network Element"}
+        subtitle={element ? `${element.hostname || element.ipAddress}` : undefined}
+        status={element?.status}
+        backHref="/network/elements"
+        editHref={`/network/elements/${id}/edit`}
+        loading={isLoading}
+      />
       <EntityTabs tabs={tabs} defaultTab="overview" />
     </div>
   )

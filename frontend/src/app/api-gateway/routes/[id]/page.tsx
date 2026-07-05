@@ -8,7 +8,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { ApiRouteDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { ApiRouteDto } from "@/api/generated"
 import { useApiRoute } from "@/api/hooks/use-api-gateway"
 
 export default function ApiRouteDetailPage() {
@@ -16,14 +17,7 @@ export default function ApiRouteDetailPage() {
   const id = params.id as string
   const { data: route, isLoading } = useApiRoute(id)
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: ["audit", "entity", "ApiRoute", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/ApiRoute/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("ApiRoute", id)
 
   const tabs = [
     {

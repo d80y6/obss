@@ -2,17 +2,10 @@
 
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import { api } from "@/api/client"
+import { useNotificationPreferences } from "@/api/hooks/use-notifications"
 
 export default function NotificationPreferencesPage() {
-  const { data: preferences, isLoading } = useQuery({
-    queryKey: ["notification-preferences"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/notifications/preferences")
-      return res.data
-    },
-  })
+  const { data: preferences, isLoading } = useNotificationPreferences()
 
   return (
     <div className="flex-1 space-y-6 p-6">

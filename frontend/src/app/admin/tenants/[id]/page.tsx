@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { TenantDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { TenantDto } from "@/api/generated"
 
 export default function TenantDetailPage() {
   const params = useParams()
@@ -24,14 +25,7 @@ export default function TenantDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("Tenant", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Tenant/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("Tenant", id)
 
   const tabs = [
     {

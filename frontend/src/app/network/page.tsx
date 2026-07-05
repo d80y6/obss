@@ -3,7 +3,7 @@
 import { PageHeader } from "@/components/shared/PageHeader"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Cable, Radio, ListTodo, Waves } from "lucide-react"
+import { Cable, Radio, ListTodo, Waves, Network } from "lucide-react"
 import Link from "next/link"
 
 export default function NetworkPage() {
@@ -29,12 +29,21 @@ export default function NetworkPage() {
             </CardHeader>
           </Card>
         </Link>
+        <Link href="/network/subnets">
+          <Card className="transition-colors hover:bg-muted/50 cursor-pointer">
+            <CardHeader>
+              <Network className="h-8 w-8 mb-2 text-primary" />
+              <CardTitle>Subnets</CardTitle>
+              <p className="text-sm text-muted-foreground">IP subnets and VLAN assignments</p>
+            </CardHeader>
+          </Card>
+        </Link>
         <Link href="/network/vlans">
           <Card className="transition-colors hover:bg-muted/50 cursor-pointer">
             <CardHeader>
               <Waves className="h-8 w-8 mb-2 text-primary" />
               <CardTitle>VLANs</CardTitle>
-              <p className="text-sm text-muted-foreground">Virtual LANs and subnets</p>
+              <p className="text-sm text-muted-foreground">Virtual LANs</p>
             </CardHeader>
           </Card>
         </Link>

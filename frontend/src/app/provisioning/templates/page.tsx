@@ -6,7 +6,7 @@ import { DataTable, Column } from "@/components/shared/DataTable"
 import { SearchBar } from "@/components/shared/SearchBar"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { useProvisioningTemplates } from "@/api/hooks/use-provisioning-templates"
-import { ProvisioningTemplateDto } from "@/types/api"
+import type { ProvisioningTemplateDto } from "@/api/generated"
 import { FileJson } from "lucide-react"
 import { useRouter } from "next/navigation"
 

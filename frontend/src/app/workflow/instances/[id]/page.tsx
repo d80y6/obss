@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { WorkflowInstanceDto, AuditEntryDto, WorkflowTaskDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { WorkflowInstanceDto, WorkflowTaskDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import { Play, CheckCircle, XCircle } from "lucide-react"
 
@@ -31,14 +32,7 @@ export default function WorkflowInstanceDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("WorkflowInstance", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/WorkflowInstance/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("WorkflowInstance", id)
 
   const executeTask = useMutation({
     mutationFn: async (taskId: string) => {

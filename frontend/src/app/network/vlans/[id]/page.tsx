@@ -3,36 +3,48 @@
 import { useParams } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
+import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
-import { useQuery } from "@tanstack/react-query"
-import { api } from "@/api/client"
-import { NetworkElementDto } from "@/types/api"
+import { useVlan } from "@/api/hooks/useVlan"
+import type { VlanDto } from "@/api/generated/dto"
 
 export default function VlanDetailPage() {
   const params = useParams()
   const id = params.id as string
-  const { data: item, isLoading } = useQuery({
-    queryKey: ["network", "vlans", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/network/vlans/${id}`)
-      return res.data as NetworkElementDto
+  const { data: vlan, isLoading } = useVlan(id)
+
+  const tabs = [
+    {
+      id: "overview",
+      label: "Overview",
+      content: (
+        <EntityMetadata
+          title="VLAN Details"
+          loading={isLoading}
+          columns={2}
+          fields={[
+            { label: "VLAN ID", value: vlan?.vlanId?.toString() ?? "-" },
+            { label: "Name", value: vlan?.name ?? "-" },
+            { label: "Description", value: vlan?.description ?? "-" },
+            { label: "Subnet", value: vlan?.subnet ?? "-" },
+            { label: "Status", value: vlan ? <StatusBadge status={vlan.status} /> : "-" },
+            { label: "Created", value: vlan?.createdAt ? new Date(vlan.createdAt).toLocaleDateString() : "-" },
+          ]}
+        />
+      ),
     },
-    enabled: !!id,
-  })
+  ]
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <EntityHeader title={item?.name ?? "VLAN"} subtitle={item?.elementType}
-        status={item?.status} backHref="/network/vlans" loading={isLoading} />
-      <EntityMetadata loading={isLoading} fields={[
-        { label: "Name", value: item?.name ?? "-" },
-        { label: "Status", value: item ? <StatusBadge status={item.status} /> : "-" },
-        { label: "Location", value: item?.location ?? "-" },
-        { label: "IP Address", value: item?.ipAddress ?? "-" },
-        { label: "Model", value: item?.model ?? "-" },
-        { label: "Vendor", value: item?.vendor ?? "-" },
-        { label: "Serial Number", value: item?.serialNumber ?? "-" },
-      ]} />
+      <EntityHeader
+        title={vlan?.name ?? "VLAN"}
+        subtitle={`VLAN ${vlan?.vlanId ?? ""}`}
+        status={vlan?.status}
+        backHref="/network/vlans"
+        loading={isLoading}
+      />
+      <EntityTabs tabs={tabs} defaultTab="overview" />
     </div>
   )
 }

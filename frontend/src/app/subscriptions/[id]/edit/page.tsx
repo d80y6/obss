@@ -41,10 +41,10 @@ export default function EditSubscriptionPage() {
 
   const offerChangeMutation = useMutation({
     mutationFn: async (offerId: string) => {
-      const selectedOffer = offers?.find((o) => o.id === offerId)
+      const selectedOffer = offers?.items.find((o) => o.id === offerId)
       await api.put(`/api/v1/subscriptions/subscriptions/${id}/offer`, {
         newOfferId: offerId,
-        newPrice: selectedOffer?.price ?? 0,
+        newPrice: selectedOffer?.pricings?.[0]?.recurringPrice ?? selectedOffer?.pricings?.[0]?.oneTimePrice ?? 0,
       })
     },
     onSuccess: () => {
@@ -65,8 +65,8 @@ export default function EditSubscriptionPage() {
   if (isLoading) return <div className="flex-1 p-6"><LoadingState rows={3} /></div>
   if (error || !sub) return <div className="flex-1 p-6"><ErrorFallback message="Failed to load subscription" /></div>
 
-  const offerOptions = (offers ?? []).map((o) => ({
-    label: `${o.name} (${o.currency} ${o.price})`,
+  const offerOptions = (offers?.items ?? []).map((o) => ({
+    label: `${o.name} (${o.pricings?.[0]?.currency ?? "USD"} ${o.pricings?.[0]?.recurringPrice ?? o.pricings?.[0]?.oneTimePrice ?? 0})`,
     value: o.id,
   }))
 

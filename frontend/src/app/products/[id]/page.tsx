@@ -8,17 +8,23 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProduct } from "@/api/hooks/useProduct"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import { useDeleteProduct } from "@/api/hooks/useDeleteProduct"
+import { toast } from "@/components/ui/toast"
 import type { OfferDto } from "@/api/generated"
-import type { AuditEntryDto } from "@/types/api"
 
 export default function ProductDetailPage() {
   const params = useParams()
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const id = params.id as string
 
   const { data: product, isLoading } = useProduct(id)
+  const deleteProduct = useDeleteProduct()
 
   const { data: offers, error: offersError } = useQuery({
     queryKey: queryKeys.products.offers(id),
@@ -29,20 +35,17 @@ export default function ProductDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("Product", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Product/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("Product", id)
 
   const offerColumns: Column<OfferDto>[] = [
     { id: "name", header: "Name", accessorKey: "name" },
-    { id: "price", header: "Price", cell: (row) => `${row.currency} ${row.price}` },
+    { id: "offerType", header: "Type", accessorKey: "offerType" },
     { id: "billingPeriod", header: "Billing", accessorKey: "billingPeriod" },
-    { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
+    { id: "price", header: "Price", cell: (row) => {
+      const p = row.pricings?.[0]
+      return p ? `${p.currency} ${(p.recurringPrice || p.oneTimePrice || p.usagePrice || 0).toFixed(2)}` : "-"
+    }},
+    { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.isActive ? "Active" : "Inactive"} /> },
   ]
 
   const tabs = [
@@ -59,7 +62,7 @@ export default function ProductDetailPage() {
             { label: "Description", value: product?.description ?? "-" },
             { label: "Product Type", value: product?.productType ?? "-" },
             { label: "Tax Category", value: product?.taxCategory ?? "-" },
-            { label: "Status", value: product ? <StatusBadge status={product.status} /> : "-" },
+            { label: "Status", value: product ? <StatusBadge status={product.lifecycleStatus} /> : "-" },
             { label: "Created", value: product?.createdAt ? new Date(product.createdAt).toLocaleDateString() : "-" },
             { label: "Updated", value: product?.updatedAt ? new Date(product.updatedAt).toLocaleDateString() : "-" },
           ]}
@@ -116,10 +119,24 @@ export default function ProductDetailPage() {
     <div className="flex-1 space-y-6 p-6">
       <EntityHeader
         title={product?.name ?? "Product"}
-        subtitle={product?.description}
-        status={product?.status}
+        subtitle={product?.description ?? undefined}
+        status={product?.lifecycleStatus}
         backHref="/products"
         editHref={`/products/${id}/edit`}
+        onDelete={() => {
+          if (confirm("Are you sure you want to delete this product?")) {
+            deleteProduct.mutate(id, {
+              onSuccess: () => {
+                toast({ title: "Product deleted", description: "Product has been deleted." })
+                queryClient.invalidateQueries({ queryKey: queryKeys.products.lists() })
+                router.push("/products")
+              },
+              onError: () => {
+                toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" })
+              },
+            })
+          }
+        }}
         loading={isLoading}
       />
 

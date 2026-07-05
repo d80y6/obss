@@ -7,10 +7,9 @@ import { SearchBar } from "@/components/shared/SearchBar"
 import { FilterBar } from "@/components/shared/FilterBar"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useQuery } from "@tanstack/react-query"
-import { queryKeys } from "@/lib/query-keys"
-import { api } from "@/api/client"
-import { AuditEntryDto, AuditAlertDto } from "@/types/api"
+import { useAuditEntries } from "@/api/hooks/use-audit-entries"
+import { useAuditAlerts } from "@/api/hooks/use-audit-alerts"
+import type { AuditEntryDto, AuditAlertDto } from "@/api/generated/dto"
 import { ScrollText, AlertTriangle, Download } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -64,24 +63,9 @@ export default function AuditPage() {
     pageSize: String(pageSize),
   }
 
-  const { data: entries, isLoading, error } = useQuery({
-    queryKey: queryKeys.audit.entries.list(filters),
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v) })
-      const res = await api.get(`/api/v1/audit/entries?${params.toString()}`)
-      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
-      return { items: res.data as AuditEntryDto[], total }
-    },
-  })
+  const { data: entries, isLoading, error } = useAuditEntries(filters)
 
-  const { data: alerts } = useQuery({
-    queryKey: ["audit-alerts"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/audit/alerts")
-      return res.data as AuditAlertDto[]
-    },
-  })
+  const { data: alerts } = useAuditAlerts()
 
   const handleExportCsv = () => {
     const params = new URLSearchParams()
@@ -127,19 +111,19 @@ export default function AuditPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
-            <p className="text-2xl font-bold">{entries?.items?.length ?? 0}</p>
+            <p className="text-2xl font-bold">{(entries ?? []).length}</p>
             <p className="text-sm text-muted-foreground">Total Entries</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-2xl font-bold">{new Set(entries?.items?.map((e) => e.performedByName) ?? []).size}</p>
+            <p className="text-2xl font-bold">{new Set((entries ?? []).map((e) => e.performedByName)).size}</p>
             <p className="text-sm text-muted-foreground">Unique Actors</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <p className="text-2xl font-bold">{new Set(entries?.items?.map((e) => e.entityType) ?? []).size}</p>
+            <p className="text-2xl font-bold">{new Set((entries ?? []).map((e) => e.entityType)).size}</p>
             <p className="text-sm text-muted-foreground">Entity Types</p>
           </CardContent>
         </Card>
@@ -156,7 +140,7 @@ export default function AuditPage() {
           />
           <DataTable
             columns={columns}
-            data={entries?.items ?? []}
+            data={entries ?? []}
             loading={isLoading}
             error={error ? "Failed to load data." : undefined}
             emptyTitle="No audit entries"
@@ -165,7 +149,7 @@ export default function AuditPage() {
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
             onRowClick={(row) => router.push(`/audit/${row.id}`)}
-            pagination={{ page, pageSize, total: entries?.total ?? entries?.items?.length ?? 0, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
+            pagination={{ page, pageSize, total: (entries ?? []).length, onPageChange: setPage, onPageSizeChange: (s) => { setPageSize(s); setPage(1) } }}
           />
         </CardContent>
       </Card>

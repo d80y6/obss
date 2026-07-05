@@ -53,7 +53,7 @@ const modules: NavItem[] = [
   { href: "/rating", label: "Rating", icon: Scale },
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/collections", label: "Collections", icon: Settings },
-  { href: "/services", label: "Services", icon: Network },
+  { href: "/service-inventory", label: "Services", icon: Network },
   { href: "/network", label: "Network", icon: Cable },
   { href: "/provisioning", label: "Provisioning", icon: Settings },
   { href: "/workflow", label: "Workflow", icon: Waypoints },

@@ -5,9 +5,8 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { BillingJobDto } from "@/types/api"
+import { useBillingJobs } from "@/api/hooks/useBillingJobs"
+import type { BillingJobDto } from "@/api/generated"
 import { Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -16,14 +15,12 @@ export default function BillingJobsPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["billing-jobs", page, pageSize],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/billing/jobs?page=${page}&pageSize=${pageSize}`)
-      const total = res.headers['x-total-count'] ? parseInt(res.headers['x-total-count'], 10) : null
-      return { items: res.data as BillingJobDto[], total }
-    },
-  })
+  const filters: Record<string, string> = {
+    page: String(page),
+    pageSize: String(pageSize),
+  }
+
+  const { data, isLoading, error } = useBillingJobs(filters)
 
   const columns: Column<BillingJobDto>[] = [
     { id: "name", header: "Name", accessorKey: "name" },

@@ -15,7 +15,7 @@ import { toast } from "@/components/ui/toast"
 import api from "@/services/api"
 import { useCustomers } from "@/api/hooks/useCustomers"
 import { useOffers } from "@/api/hooks/useOffers"
-import { SubscriptionDto } from "@/types/api"
+import type { SubscriptionDto } from "@/api/generated"
 
 const subscriptionSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
@@ -45,18 +45,18 @@ export default function NewSubscriptionPage() {
   const createMutation = useMutation({
     mutationFn: async (data: SubscriptionForm) => {
       const customer = customers?.items.find((c) => c.id === data.customerId)
-      const offer = offers?.find((o) => o.id === data.offerId)
+      const offer = offers?.items.find((o) => o.id === data.offerId)
       const res = await api.post<SubscriptionDto>("/api/v1/subscriptions/subscriptions", {
         customerId: data.customerId,
         customerName: customer ? customer.displayName : "",
         orderId: "00000000-0000-0000-0000-000000000000",
         orderItemId: "00000000-0000-0000-0000-000000000000",
-        productId: offer?.productId ?? data.offerId,
+        productId: data.offerId,
         offerId: data.offerId,
         offerName: offer?.name ?? "",
         billingPeriod: offer?.billingPeriod ?? "",
-        currency: offer?.currency ?? "USD",
-        price: offer?.price ?? 0,
+        currency: offer?.pricings?.[0]?.currency ?? "USD",
+        price: offer?.pricings?.[0]?.recurringPrice ?? offer?.pricings?.[0]?.oneTimePrice ?? 0,
         quantity: parseInt(data.quantity),
         startDate: data.startDate,
         endDate: data.endDate || null,
@@ -81,8 +81,8 @@ export default function NewSubscriptionPage() {
     value: c.id,
   }))
 
-  const offerOptions = (offers ?? []).map((o) => ({
-    label: `${o.name} (${o.currency} ${o.price})`,
+  const offerOptions = (offers?.items ?? []).map((o) => ({
+    label: `${o.name} (${o.pricings?.[0]?.currency ?? "USD"} ${o.pricings?.[0]?.recurringPrice ?? o.pricings?.[0]?.oneTimePrice ?? 0})`,
     value: o.id,
   }))
 

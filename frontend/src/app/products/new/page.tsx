@@ -11,19 +11,18 @@ import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
 import { useCreateProduct } from "@/api/hooks/useCreateProduct"
-import type { CreateProductCommand } from "@/api/generated"
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().optional(),
   productType: z.string().min(1, "Product type is required"),
-  isShippable: z.boolean().default(false),
-  taxable: z.boolean().default(true),
   taxCategory: z.string().min(1, "Tax category is required"),
   categoryId: z.string().optional(),
+  isShippable: z.boolean().optional(),
+  taxable: z.boolean().optional(),
 })
 
-type ProductForm = z.infer<typeof productSchema>
+type ProductForm = z.input<typeof productSchema>
 
 const productTypes = [
   { label: "Physical", value: "Physical" },
@@ -46,25 +45,27 @@ export default function NewProductPage() {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
     defaultValues: { isShippable: false, taxable: true },
   })
 
+  const isShippable = watch("isShippable")
+  const taxable = watch("taxable")
+
   const onSubmit = (data: ProductForm) => {
-    const payload: CreateProductCommand = {
+    createProduct.mutate({
       name: data.name,
-      description: data.description,
-      productType: data.productType as CreateProductCommand["productType"],
-      isShippable: data.isShippable,
-      taxable: data.taxable,
+      description: data.description || null,
+      productType: data.productType,
+      isShippable: data.isShippable ?? false,
+      taxable: data.taxable ?? true,
       taxCategory: data.taxCategory,
       categoryId: data.categoryId || null,
       specifications: null,
-    }
-
-    createProduct.mutate(payload, {
+    } as Parameters<typeof createProduct.mutate>[0], {
       onSuccess: (product) => {
         toast({ title: "Product created", description: `${product.name} has been created successfully.` })
         router.push("/products")
@@ -88,7 +89,6 @@ export default function NewProductPage() {
         />
         <FormField
           label="Description"
-          required
           error={errors.description}
           registration={register("description")}
           placeholder="Product description"
@@ -112,6 +112,26 @@ export default function NewProductPage() {
             onValueChange={(v) => setValue("taxCategory", v)}
             placeholder="Select tax category"
           />
+        </div>
+      </FormSection>
+      <FormSection title="Product Settings">
+        <div className="flex items-center gap-6">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              {...register("isShippable")}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <span className="text-sm font-medium">Shippable</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              {...register("taxable")}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+            <span className="text-sm font-medium">Taxable</span>
+          </label>
         </div>
       </FormSection>
       <FormActions backHref="/products" loading={createProduct.isPending} submitLabel="Create Product" />

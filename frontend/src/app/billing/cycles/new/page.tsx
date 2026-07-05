@@ -2,7 +2,6 @@
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { z } from "zod"
 import { FormPageLayout } from "@/forms/FormPageLayout"
 import { FormSection } from "@/forms/FormSection"
@@ -10,8 +9,7 @@ import { FormField, FormSelectField } from "@/forms/FormField"
 import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
-import api from "@/services/api"
-import { queryKeys } from "@/lib/query-keys"
+import { useCreateBillingCycle } from "@/api/hooks/useCreateBillingCycle"
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -31,33 +29,27 @@ const frequencyOptions = [
 
 export default function NewBillingCyclePage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
 
-  const mutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      const res = await api.post("/api/v1/billing/cycles", {
-        customerId: "00000000-0000-0000-0000-000000000000",
-        billingPeriod: data.frequency,
-        lastBillingDate: data.periodStart,
-        nextBillingDate: data.periodEnd,
-      })
-      return res.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.billing.cycles.all })
-      toast({ title: "Billing cycle created" })
-      router.push("/billing/cycles")
-    },
-    onError: () => {
-      toast({ title: "Failed to create billing cycle", variant: "destructive" })
-    },
-  })
+  const mutation = useCreateBillingCycle()
 
   return (
-    <FormPageLayout title="New Billing Cycle" backHref="/billing/cycles" onSubmit={handleSubmit((data) => mutation.mutate(data))}>
+    <FormPageLayout title="New Billing Cycle" backHref="/billing/cycles" onSubmit={handleSubmit((data) => mutation.mutate({
+      customerId: "00000000-0000-0000-0000-000000000000",
+      billingPeriod: data.frequency,
+      lastBillingDate: data.periodStart,
+      nextBillingDate: data.periodEnd,
+    }, {
+      onSuccess: () => {
+        toast({ title: "Billing cycle created" })
+        router.push("/billing/cycles")
+      },
+      onError: () => {
+        toast({ title: "Failed to create billing cycle", variant: "destructive" })
+      },
+    }))}>
       <FormErrorSummary errors={errors} />
       <FormSection title="Cycle Details">
         <FormField label="Name" error={errors.name} registration={register("name")} placeholder="e.g. Monthly Billing" required />

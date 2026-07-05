@@ -6,7 +6,7 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api/client"
-import type { AlertRuleDto } from "@/types/api"
+import type { AlertRuleDto } from "@/api/generated/dto"
 
 export default function AlertRuleDetailPage() {
   const params = useParams()

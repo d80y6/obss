@@ -7,47 +7,18 @@ import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { queryKeys } from "@/lib/query-keys"
-import { api } from "@/api/client"
-import { NotificationDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import { useNotification, useMarkNotificationRead } from "@/api/hooks/use-notifications"
 import { toast } from "@/components/ui/toast"
 
 export default function NotificationDetailPage() {
   const params = useParams()
   const id = params.id as string
-  const queryClient = useQueryClient()
+  const { data: notification, isLoading } = useNotification(id)
 
-  const { data: notification, isLoading } = useQuery({
-    queryKey: ["notifications", id],
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/notifications/notifications/${id}`)
-      return res.data as NotificationDto
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries } = useAuditLog("Notification", id)
 
-  const { data: auditEntries } = useQuery({
-    queryKey: queryKeys.audit.entity("Notification", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Notification/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
-
-  const markReadMutation = useMutation({
-    mutationFn: async () => {
-      const res = await api.post(`/api/v1/notifications/notifications/${id}/read`)
-      return res.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications", id] })
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list({}) })
-      toast({ title: "Marked as read" })
-    },
-    onError: () => toast({ title: "Error", description: "Failed to mark as read.", variant: "destructive" }),
-  })
+  const markReadMutation = useMarkNotificationRead()
 
   const tabs = [
     {
@@ -75,7 +46,7 @@ export default function NotificationDetailPage() {
             </CardContent>
           </Card>
           {!notification?.readAt && (
-            <Button onClick={() => markReadMutation.mutate()} disabled={markReadMutation.isPending}>
+            <Button onClick={() => markReadMutation.mutate(id)} disabled={markReadMutation.isPending}>
               Mark as Read
             </Button>
           )}

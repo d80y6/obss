@@ -8,7 +8,7 @@ import { SearchBar } from "@/components/shared/SearchBar"
 import { FilterBar } from "@/components/shared/FilterBar"
 import { Card, CardContent } from "@/components/ui/card"
 import { useApiRoutes } from "@/api/hooks/use-api-gateway"
-import { ApiRouteDto } from "@/types/api"
+import type { ApiRouteDto } from "@/api/generated"
 import { Waypoints } from "lucide-react"
 import { useRouter } from "next/navigation"
 

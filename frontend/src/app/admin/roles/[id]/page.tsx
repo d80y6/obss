@@ -17,7 +17,8 @@ import { useRole } from "@/api/hooks/useRole"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { IamUserDto, AuditEntryDto } from "@/types/api"
+import { useAuditLog } from "@/api/hooks/useAuditLog"
+import type { IamUserDto } from "@/api/generated"
 
 export default function RoleDetailPage() {
   const params = useParams()
@@ -33,14 +34,7 @@ export default function RoleDetailPage() {
     },
   })
 
-  const { data: auditEntries, error: auditError } = useQuery({
-    queryKey: queryKeys.audit.entity("Role", id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/audit/entities/Role/${id}`)
-      return res.data as AuditEntryDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: auditEntries, error: auditError } = useAuditLog("Role", id)
 
   const usersWithRole = (users ?? []).filter((u) => u.role === role?.name)
 

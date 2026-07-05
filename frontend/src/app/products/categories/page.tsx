@@ -6,7 +6,7 @@ import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent } from "@/components/ui/card"
 import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
-import { CategoryDto } from "@/types/api"
+import type { CategoryDto } from "@/api/generated"
 import { ListTree } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -25,7 +25,6 @@ export default function CategoriesPage() {
   const columns: Column<CategoryDto>[] = [
     { id: "name", header: "Name", accessorKey: "name", sortable: true },
     { id: "description", header: "Description", accessorKey: "description" },
-    { id: "productCount", header: "Products", cell: (row) => String(row.productCount) },
   ]
 
   return (

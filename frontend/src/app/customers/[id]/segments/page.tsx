@@ -6,10 +6,11 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
-import { SegmentDto } from "@/types/api"
+import { useCustomerSegments } from "@/api/hooks/useCustomerSegments"
+import type { SegmentDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 
 export default function CustomerSegmentsPage() {
@@ -18,14 +19,7 @@ export default function CustomerSegmentsPage() {
   const queryClient = useQueryClient()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  const { data: segments, isLoading } = useQuery({
-    queryKey: queryKeys.customers.segments(id),
-    queryFn: async () => {
-      const res = await api.get(`/api/v1/crm/segments?customerId=${id}`)
-      return res.data as SegmentDto[]
-    },
-    enabled: !!id,
-  })
+  const { data: segments, isLoading } = useCustomerSegments(id)
 
   const assignMutation = useMutation({
     mutationFn: async (segmentId: string) => {

@@ -5,9 +5,8 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
-import { WorkflowInstanceDto } from "@/types/api"
+import { useWorkflowInstances } from "@/api/hooks/use-workflow-instances"
+import type { WorkflowInstanceDto } from "@/api/generated"
 import { PlayCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -15,13 +14,7 @@ export default function WorkflowInstancesPage() {
   const router = useRouter()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["workflow-instances-list"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/workflow/instances")
-      return res.data as WorkflowInstanceDto[]
-    },
-  })
+  const { data, isLoading, error } = useWorkflowInstances()
 
   const columns: Column<WorkflowInstanceDto>[] = [
     { id: "definition", header: "Definition", accessorKey: "workflowDefinitionName", sortable: true },
