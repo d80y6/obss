@@ -8,10 +8,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { usePayment } from "@/api/hooks/usePayment"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import api from "@/services/api"
-import { queryKeys } from "@/lib/query-keys"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
+import { useCompletePayment } from "@/api/hooks/useCompletePayment"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
 import Link from "next/link"
@@ -20,25 +18,11 @@ import { CheckCircle, RotateCcw } from "lucide-react"
 export default function PaymentDetailPage() {
   const params = useParams()
   const id = params.id as string
-  const queryClient = useQueryClient()
-
   const { data: payment, isLoading } = usePayment(id)
 
   const { data: auditEntries } = useAuditLog("Payment", id)
 
-  const completeMutation = useMutation({
-    mutationFn: async () => {
-      await api.post(`/api/v1/payments/payments/${id}/complete`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.payments.detail(id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.payments.all })
-      toast({ title: "Payment completed" })
-    },
-    onError: () => {
-      toast({ title: "Failed to complete payment", variant: "destructive" })
-    },
-  })
+  const completeMutation = useCompletePayment(id)
 
   const tabs = [
     {
@@ -101,7 +85,12 @@ export default function PaymentDetailPage() {
       />
       {payment && payment.status === "PENDING" && (
         <div className="flex gap-2">
-          <Button variant="default" size="sm" onClick={() => completeMutation.mutate()}>
+          <Button variant="default" size="sm" onClick={() => {
+            completeMutation.mutate(undefined, {
+              onSuccess: () => toast({ title: "Payment completed" }),
+              onError: () => toast({ title: "Failed to complete payment", variant: "destructive" }),
+            })
+          }}>
             <CheckCircle className="mr-1 h-4 w-4" /> Complete
           </Button>
         </div>

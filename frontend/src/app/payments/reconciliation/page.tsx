@@ -14,11 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
 import { useReconciliation } from "@/api/hooks/useReconciliation"
-import type { ReconciliationDto, PaymentDto } from "@/api/generated"
+import { useUnmatchedTransactions } from "@/api/hooks/useUnmatchedTransactions"
+import { usePayments } from "@/api/hooks/usePayments"
+import { useAutoReconcile } from "@/api/hooks/useAutoReconcile"
+import type { ReconciliationDto } from "@/api/generated"
+import type { ReconciliationItemDto } from '@/api/generated/dto'
 import { ArrowLeftRight, Upload, Wand2, CheckCircle } from "lucide-react"
 import { toast } from "@/components/ui/toast"
 import {
@@ -35,29 +39,11 @@ export default function ReconciliationPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [matchSelections, setMatchSelections] = useState<Record<string, string>>({})
 
-  const { data: reconciliations, isLoading } = useQuery({
-    queryKey: queryKeys.payments.reconciliation.list({}),
-    queryFn: async () => {
-      const res = await api.get("/api/v1/payments/payments/reconciliation")
-      return res.data as ReconciliationDto[]
-    },
-  })
+  const { data: reconciliations, isLoading } = useReconciliation()
 
-  const { data: unmatched } = useQuery({
-    queryKey: ["payment-reconciliation-unmatched"],
-    queryFn: async () => {
-      const res = await api.get("/api/v1/payments/payments/reconciliation/unmatched")
-      return res.data as unknown[]
-    },
-  })
+  const { data: unmatched } = useUnmatchedTransactions()
 
-  const { data: payments } = useQuery({
-    queryKey: queryKeys.payments.list({ status: "COMPLETED", pageSize: "1000" }),
-    queryFn: async () => {
-      const res = await api.get("/api/v1/payments/payments?status=COMPLETED&pageSize=1000")
-      return res.data as PaymentDto[]
-    },
-  })
+  const { data: payments } = usePayments({ status: "COMPLETED", pageSize: "1000" })
 
   const importMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -70,7 +56,7 @@ export default function ReconciliationPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.reconciliation.all })
-      queryClient.invalidateQueries({ queryKey: ["payment-reconciliation-unmatched"] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments.unmatched })
       toast({ title: "Statement imported" })
     },
     onError: () => {
@@ -78,20 +64,7 @@ export default function ReconciliationPage() {
     },
   })
 
-  const autoReconcileMutation = useMutation({
-    mutationFn: async () => {
-      const res = await api.post("/api/v1/payments/payments/reconciliation/auto")
-      return res.data
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.payments.reconciliation.all })
-      queryClient.invalidateQueries({ queryKey: ["payment-reconciliation-unmatched"] })
-      toast({ title: "Auto-reconciliation completed" })
-    },
-    onError: () => {
-      toast({ title: "Failed to auto-reconcile", variant: "destructive" })
-    },
-  })
+  const autoReconcileMutation = useAutoReconcile()
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -105,7 +78,7 @@ export default function ReconciliationPage() {
       await api.post(`/api/v1/payments/payments/reconciliation/${transactionId}/match`, { paymentId })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["payment-reconciliation-unmatched"] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.payments.unmatched })
       queryClient.invalidateQueries({ queryKey: queryKeys.payments.reconciliation.all })
       toast({ title: "Transaction matched" })
     },
@@ -156,11 +129,11 @@ export default function ReconciliationPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(unmatched as Array<{ id: string; amount?: number; date?: string; description?: string }>).map((tx) => (
+                {(unmatched as ReconciliationItemDto[])?.map((tx) => (
                   <TableRow key={tx.id}>
-                    <TableCell>{tx.description || tx.id.substring(0, 8)}</TableCell>
+                    <TableCell>{tx.description || tx.externalReference || tx.id.substring(0, 8)}</TableCell>
                     <TableCell>${(tx.amount ?? 0).toLocaleString()}</TableCell>
-                    <TableCell>{tx.date ? new Date(tx.date).toLocaleDateString() : "-"}</TableCell>
+                    <TableCell>{tx.transactionDate ? new Date(tx.transactionDate).toLocaleDateString() : "-"}</TableCell>
                     <TableCell>
                       <Select
                         value={matchSelections[tx.id] || ""}
@@ -170,7 +143,7 @@ export default function ReconciliationPage() {
                           <SelectValue placeholder="Select payment..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {(payments ?? []).map((p) => (
+                          {(payments?.items ?? []).map((p) => (
                             <SelectItem key={p.id} value={p.id}>
                               {p.paymentNumber} - {p.customerName} ({p.currency ?? ""} {(p.amount ?? 0).toLocaleString()})
                             </SelectItem>
