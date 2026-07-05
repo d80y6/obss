@@ -12,6 +12,8 @@ import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { useCompletePayment } from "@/api/hooks/useCompletePayment"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
+import { DataTable, Column } from "@/components/shared/DataTable"
+import type { PaymentAllocationDto } from '@/api/generated/dto'
 import Link from "next/link"
 import { CheckCircle, RotateCcw } from "lucide-react"
 
@@ -23,6 +25,12 @@ export default function PaymentDetailPage() {
   const { data: auditEntries } = useAuditLog("Payment", id)
 
   const completeMutation = useCompletePayment(id)
+
+  const allocationColumns: Column<PaymentAllocationDto>[] = [
+    { id: "invoiceId", header: "Invoice ID", cell: (row) => row.invoiceId.substring(0, 8) + "..." },
+    { id: "amount", header: "Amount", cell: (row) => formatCurrency(row.amount) },
+    { id: "createdAt", header: "Allocated At", cell: (row) => new Date(row.createdAt).toLocaleDateString() },
+  ]
 
   const tabs = [
     {
@@ -44,6 +52,25 @@ export default function PaymentDetailPage() {
             { label: "Created", value: payment?.createdAt ? new Date(payment.createdAt).toLocaleDateString() : "-" },
           ]}
         />
+      ),
+    },
+    {
+      id: "allocations",
+      label: `Allocations (${payment?.allocations?.length ?? 0})`,
+      content: (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Payment Allocations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataTable
+              columns={allocationColumns}
+              data={payment?.allocations ?? []}
+              emptyTitle="No allocations"
+              rowKey={(row) => row.id}
+            />
+          </CardContent>
+        </Card>
       ),
     },
     {

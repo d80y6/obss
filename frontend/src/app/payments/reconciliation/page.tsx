@@ -33,8 +33,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useRef, ChangeEvent } from "react"
+import { useRouter } from "next/navigation"
 
 export default function ReconciliationPage() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [matchSelections, setMatchSelections] = useState<Record<string, string>>({})
@@ -185,6 +187,7 @@ export default function ReconciliationPage() {
             emptyTitle="No reconciliation records"
             emptyIcon={ArrowLeftRight}
             rowKey={(row) => row.id}
+            onRowClick={(row) => router.push(`/payments/reconciliation/${row.id}`)}
           />
         </CardContent>
       </Card>
