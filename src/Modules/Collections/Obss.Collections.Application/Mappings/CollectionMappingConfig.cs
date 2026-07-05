@@ -22,5 +22,8 @@ public static class CollectionMappingConfig
             .Map(dest => dest.Status, src => src.Status.ToString())
             .Map(dest => dest.Frequency, src => src.Frequency.ToString())
             .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<DunningPolicy, DunningPolicyDto>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id);
     }
 }

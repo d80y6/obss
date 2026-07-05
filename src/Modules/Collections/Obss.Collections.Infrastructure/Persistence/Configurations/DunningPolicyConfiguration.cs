@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Obss.Collections.Domain.Entities;
 
@@ -45,7 +47,16 @@ public sealed class DunningPolicyConfiguration : IEntityTypeConfiguration<Dunnin
             .HasColumnName("escalation_after_days")
             .IsRequired();
 
-        builder.Ignore(p => p.DunningFees);
+        builder.Property(p => p.DunningFees)
+            .HasColumnName("dunning_fees")
+            .HasColumnType("jsonb")
+            .HasConversion(
+                v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                v => JsonSerializer.Deserialize<Dictionary<int, decimal>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<int, decimal>())
+            .Metadata.SetValueComparer(new ValueComparer<Dictionary<int, decimal>>(
+                (c1, c2) => c1!.SequenceEqual(c2!),
+                c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key, v.Value)),
+                c => c.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)));
 
         builder.HasIndex(p => p.TenantId)
             .HasDatabaseName("ix_dunning_policies_tenant_id");

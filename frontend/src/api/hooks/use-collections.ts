@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { queryKeys } from "@/lib/query-keys"
 import { api } from "@/api/client"
-import type { CollectionActionDto, CollectionCaseDto, PaymentArrangementDto } from '@/api/generated/dto'
+import type { CollectionActionDto, CollectionCaseDto, PaymentArrangementDto, DunningPolicyDto } from '@/api/generated/dto'
+import type { RecordArrangementPaymentCommand } from '@/api/generated'
 
 export function useCollectionCases(filters: Record<string, string> = {}) {
   return useQuery({
@@ -121,6 +122,105 @@ export function useAgingReport() {
     queryFn: async () => {
       const res = await api.get("/api/v1/collections/reports/aging")
       return res.data
+    },
+  })
+}
+
+export function useDunningPolicies(filters: Record<string, string> = {}) {
+  return useQuery({
+    queryKey: queryKeys.collections.dunningPolicies.list(filters),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v) })
+      const res = await api.get(`/api/v1/collections/dunning-policies?${params.toString()}`)
+      return res.data as DunningPolicyDto[]
+    },
+  })
+}
+
+export function useDunningPolicy(id: string) {
+  return useQuery({
+    queryKey: queryKeys.collections.dunningPolicies.detail(id),
+    queryFn: async () => {
+      const res = await api.get(`/api/v1/collections/dunning-policies/${id}`)
+      return res.data as DunningPolicyDto
+    },
+    enabled: !!id,
+  })
+}
+
+export function useCreateDunningPolicy() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      const res = await api.post("/api/v1/collections/dunning-policies", data)
+      return res.data as DunningPolicyDto
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.collections.dunningPolicies.all })
+    },
+  })
+}
+
+export function useUpdateDunningPolicy() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, ...data }: Record<string, unknown>) => {
+      const res = await api.put(`/api/v1/collections/dunning-policies/${id}`, data)
+      return res.data as DunningPolicyDto
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.collections.dunningPolicies.detail(variables.id as string) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.collections.dunningPolicies.all })
+    },
+  })
+}
+
+export function useDeleteDunningPolicy() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/api/v1/collections/dunning-policies/${id}`)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.collections.dunningPolicies.all })
+    },
+  })
+}
+
+export function useRecordArrangementPayment() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: RecordArrangementPaymentCommand) => {
+      const res = await api.post(`/api/v1/collections/arrangements/${data.paymentArrangementId}/payments`, data)
+      return res.data as CollectionCaseDto
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.collections.cases.all })
+    },
+  })
+}
+
+export function useCollectionDashboard() {
+  return useQuery({
+    queryKey: queryKeys.collections.dashboard(),
+    queryFn: async () => {
+      const [casesRes, agingRes] = await Promise.all([
+        api.get("/api/v1/collections/cases"),
+        api.get("/api/v1/collections/reports/aging"),
+      ])
+      const cases = casesRes.data as CollectionCaseDto[]
+      const aging = agingRes.data as { totalCustomers: number; totalCases: number; grandTotalOverdue: number }
+      return {
+        openCases: cases.filter((c) => c.status === "Open" || c.status === "InProgress").length,
+        activeArrangements: cases.reduce((sum, c) =>
+          sum + c.paymentArrangements.filter((pa) => pa.status === "Active").length, 0),
+        dunningNoticesSent: cases.reduce((sum, c) =>
+          sum + c.actions.filter((a) => a.actionType === "DunningNotice").length, 0),
+        totalOverdue: aging?.grandTotalOverdue ?? 0,
+        totalCustomers: aging?.totalCustomers ?? 0,
+        totalCases: aging?.totalCases ?? 0,
+      }
     },
   })
 }

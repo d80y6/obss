@@ -26,6 +26,8 @@ import {
   Waypoints,
   LogOut,
   ChevronLeft,
+  ChevronDown,
+  BarChart3,
   FileSpreadsheet,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -54,7 +56,6 @@ const modules: NavItem[] = [
   { href: "/payments/gateways", label: "Gateways", icon: CreditCard },
   { href: "/rating", label: "Rating", icon: Scale },
   { href: "/tickets", label: "Tickets", icon: Ticket },
-  { href: "/collections", label: "Collections", icon: Settings },
   { href: "/service-inventory", label: "Services", icon: Network },
   { href: "/network", label: "Network", icon: Cable },
   { href: "/provisioning", label: "Provisioning", icon: Settings },
@@ -69,6 +70,7 @@ export function ModuleSidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
+  const [collectionsOpen, setCollectionsOpen] = useState(false)
 
   return (
     <aside
@@ -111,6 +113,71 @@ export function ModuleSidebar() {
             </Link>
           )
         })}
+
+        {!collapsed && (
+          <div>
+            <button
+              onClick={() => setCollectionsOpen(!collectionsOpen)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                pathname.startsWith("/collections") ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              )}
+            >
+              <Settings className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-left">Collections</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform",
+                  collectionsOpen && "rotate-180"
+                )}
+              />
+            </button>
+            {collectionsOpen && (
+              <div className="ml-2 space-y-1 border-l pl-2">
+                <Link
+                  href="/collections"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/collections" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <Settings className="h-4 w-4 shrink-0" />
+                  <span>Collections</span>
+                </Link>
+                <Link
+                  href="/collections/dashboard"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/collections/dashboard" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <LayoutDashboard className="h-4 w-4 shrink-0" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/collections/dunning-policies"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/collections/dunning-policies" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <FileText className="h-4 w-4 shrink-0" />
+                  <span>Dunning Policies</span>
+                </Link>
+                <Link
+                  href="/collections/reports/aging"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/collections/reports/aging" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <BarChart3 className="h-4 w-4 shrink-0" />
+                  <span>Aging Report</span>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       <div className="border-t p-4 space-y-2">

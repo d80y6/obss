@@ -3,14 +3,19 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.Collections.Application.Commands.AddCollectionAction;
+using Obss.Collections.Application.Commands.CreateDunningPolicy;
 using Obss.Collections.Application.Commands.CreatePaymentArrangement;
+using Obss.Collections.Application.Commands.DeleteDunningPolicy;
 using Obss.Collections.Application.Commands.OpenCollectionCase;
 using Obss.Collections.Application.Commands.RecordArrangementPayment;
 using Obss.Collections.Application.Commands.ResolveCollectionCase;
 using Obss.Collections.Application.Commands.SendDunningNotice;
+using Obss.Collections.Application.Commands.UpdateDunningPolicy;
 using Obss.Collections.Application.Queries.GetAgingReport;
 using Obss.Collections.Application.Queries.GetCollectionCaseById;
 using Obss.Collections.Application.Queries.GetCollectionCases;
+using Obss.Collections.Application.Queries.GetDunningPolicies;
+using Obss.Collections.Application.Queries.GetDunningPolicyById;
 
 namespace Obss.Collections.Api.Endpoints;
 
@@ -93,6 +98,48 @@ public static class CollectionEndpoints
             var result = await mediator.Send(query);
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/dunning-policies", async ([AsParameters] GetDunningPoliciesQuery query, IMediator mediator) =>
+        {
+            var result = await mediator.Send(query);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/dunning-policies/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetDunningPolicyByIdQuery(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapPost("/dunning-policies", async (CreateDunningPolicyCommand command, IMediator mediator) =>
+        {
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/collections/dunning-policies/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPut("/dunning-policies/{id:guid}", async (Guid id, UpdateDunningPolicyCommand command, IMediator mediator) =>
+        {
+            if (id != command.Id)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/dunning-policies/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new DeleteDunningPolicyCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
         });
     }

@@ -18,13 +18,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { useOrder } from "@/api/hooks/useOrder"
+import { useValidateOrder } from "@/api/hooks/useValidateOrder"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { formatCurrency } from "@/lib/formatters"
 import { toast } from "@/components/ui/toast"
-import { CheckCircle, Send, XCircle, Trash2 } from "lucide-react"
+import { CheckCircle, Send, XCircle, Trash2, FileCheck } from "lucide-react"
 
 export default function OrderDetailPage() {
   const params = useParams()
@@ -92,6 +93,8 @@ export default function OrderDetailPage() {
       toast({ title: "Error", description: "Failed to delete order.", variant: "destructive" })
     },
   })
+
+  const validateMutation = useValidateOrder()
 
   const { data: auditEntries } = useAuditLog("Order", id)
 
@@ -271,6 +274,15 @@ export default function OrderDetailPage() {
         )}
         <Button variant="outline" size="sm" onClick={() => router.push(`/orders/${id}/tracking`)}>
           View Tracking
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => validateMutation.mutate(id)}
+          disabled={validateMutation.isPending}
+        >
+          <FileCheck className="h-4 w-4 mr-1" />
+          {validateMutation.isPending ? "Validating..." : "Validate"}
         </Button>
         {canCancel && (
           <Button

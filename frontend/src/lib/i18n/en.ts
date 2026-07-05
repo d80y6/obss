@@ -212,6 +212,12 @@ export const en = {
     ar: "العربية",
     toggle: "Switch language",
   },
+  collections: {
+    title: "Collections",
+    dashboard: "Dashboard",
+    dunningPolicies: "Dunning Policies",
+    agingReport: "Aging Report",
+  },
   status: {
     ACTIVE: "Active",
     INACTIVE: "Inactive",

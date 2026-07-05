@@ -31,6 +31,7 @@ public sealed class GetAgingReportQueryHandler : IRequestHandler<GetAgingReportQ
 
         var bucketDtos = new List<AgingBucketDto>();
         var totalCases = 0;
+        var totalCustomers = 0;
         var grandTotal = 0m;
 
         foreach (var config in bucketConfigs)
@@ -40,25 +41,27 @@ public sealed class GetAgingReportQueryHandler : IRequestHandler<GetAgingReportQ
                 .ToList();
 
             var bucketCaseCount = data.Sum(d => d.Value.CaseCount);
+            var bucketCustomerCount = data.Sum(d => d.Value.CustomerCount);
             var bucketAmount = data.Sum(d => d.Value.TotalAmount);
 
             bucketDtos.Add(new AgingBucketDto(
                 config.Name,
                 config.Min,
                 config.Max == int.MaxValue ? 9999 : config.Max,
-                0,
+                bucketCustomerCount,
                 bucketCaseCount,
                 bucketAmount,
                 currency));
 
             totalCases += bucketCaseCount;
+            totalCustomers += bucketCustomerCount;
             grandTotal += bucketAmount;
         }
 
         return Result.Success(new AgingReportDto(
             DateTime.UtcNow,
             bucketDtos,
-            0,
+            totalCustomers,
             totalCases,
             grandTotal,
             currency));

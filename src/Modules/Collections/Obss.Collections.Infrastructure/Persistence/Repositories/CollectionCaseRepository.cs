@@ -24,6 +24,18 @@ public sealed class CollectionCaseRepository : EfRepository<CollectionCase>, ICo
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<CollectionCase>> FindPagedAsync(Expression<Func<CollectionCase, bool>> predicate, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(c => c.Actions)
+            .Include(c => c.PaymentArrangements)
+            .Where(predicate)
+            .OrderByDescending(c => c.OpenedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<CollectionCase?> GetByIdWithDetailsAsync(Guid caseId, CancellationToken cancellationToken = default)
     {
         return await DbSet
@@ -86,7 +98,7 @@ public sealed class CollectionCaseRepository : EfRepository<CollectionCase>, ICo
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<Dictionary<int, (int CaseCount, decimal TotalAmount)>> GetAgingBucketsAsync(string currency, CancellationToken cancellationToken = default)
+    public async Task<Dictionary<int, (int CaseCount, int CustomerCount, decimal TotalAmount)>> GetAgingBucketsAsync(string currency, CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
         var cases = await DbSet
@@ -94,7 +106,8 @@ public sealed class CollectionCaseRepository : EfRepository<CollectionCase>, ICo
             .Select(c => new
             {
                 LastActionOrOpened = c.LastActionAt ?? c.OpenedAt,
-                c.TotalOverdueAmount
+                c.TotalOverdueAmount,
+                c.CustomerId
             })
             .ToListAsync(cancellationToken);
 
@@ -102,6 +115,6 @@ public sealed class CollectionCaseRepository : EfRepository<CollectionCase>, ICo
             .GroupBy(c => (int)(now - c.LastActionOrOpened).TotalDays)
             .ToDictionary(
                 g => g.Key < 0 ? 0 : g.Key,
-                g => (g.Count(), g.Sum(c => c.TotalOverdueAmount)));
+                g => (g.Count(), g.Select(c => c.CustomerId).Distinct().Count(), g.Sum(c => c.TotalOverdueAmount)));
     }
 }

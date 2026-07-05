@@ -4,7 +4,7 @@ namespace Obss.Collections.Domain.Entities;
 
 public class DunningPolicy : AggregateRoot<Guid>
 {
-    private readonly Dictionary<int, decimal> _dunningFees = [];
+    private Dictionary<int, decimal> _dunningFees = [];
 
     private DunningPolicy() { }
 
@@ -56,6 +56,22 @@ public class DunningPolicy : AggregateRoot<Guid>
             dunningFees,
             daysBetweenActions,
             escalationAfterDays);
+    }
+
+    public void UpdateDetails(
+        string name,
+        string description,
+        int maxDunningLevel,
+        Dictionary<int, decimal> dunningFees,
+        int daysBetweenActions,
+        int escalationAfterDays)
+    {
+        Name = name;
+        Description = description;
+        MaxDunningLevel = maxDunningLevel;
+        _dunningFees = dunningFees ?? [];
+        DaysBetweenActions = daysBetweenActions;
+        EscalationAfterDays = escalationAfterDays;
     }
 
     public void Activate()

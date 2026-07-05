@@ -212,6 +212,12 @@ export const ar = {
     ar: "العربية",
     toggle: "تبديل اللغة",
   },
+  collections: {
+    title: "التحصيلات",
+    dashboard: "لوحة التحكم",
+    dunningPolicies: "سياسات التحصيل",
+    agingReport: "تقرير التقادم",
+  },
   status: {
     ACTIVE: "نشط",
     INACTIVE: "غير نشط",

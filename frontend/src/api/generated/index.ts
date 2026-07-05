@@ -39,6 +39,8 @@ export type RegisterApiRouteCommand = components["schemas"]["RegisterApiRouteCom
 export type RegisterPartnerCommand = components["schemas"]["RegisterPartnerCommand"];
 export type OpenCollectionCaseCommand = components["schemas"]["OpenCollectionCaseCommand"];
 export type CreatePaymentArrangementCommand = components["schemas"]["CreatePaymentArrangementCommand"];
+export type AddCollectionActionCommand = components["schemas"]["AddCollectionActionCommand"];
+export type RecordArrangementPaymentCommand = components["schemas"]["RecordArrangementPaymentCommand"];
 export type CreateAlertRuleCommand = components["schemas"]["CreateAlertRuleCommand"];
 export type RecordCapacityCommand = components["schemas"]["RecordCapacityCommand"];
 export type ApplyPromotionCommand = components["schemas"]["ApplyPromotionCommand"];
@@ -58,6 +60,7 @@ export type CancelSubscriptionCommand = components["schemas"]["CancelSubscriptio
 export type SuspendSubscriptionCommand = components["schemas"]["SuspendSubscriptionCommand"];
 export type AddContactCommand = components["schemas"]["AddContactCommand"];
 export type AddNoteCommand = components["schemas"]["AddNoteCommand"];
+export type AddOrderItemCommand = components["schemas"]["AddOrderItemCommand"];
 export type ValidateConfigurationQuery = components["schemas"]["ValidateConfigurationQuery"];
 
 export type CompleteOrderFulfillmentCommand = components["schemas"]["CompleteOrderFulfillmentCommand"];
@@ -98,7 +101,7 @@ export type {
   SlaDefinitionDto, RatingRuleDto, PromotionDto, UsageRecordDto,
   ReportDefinitionDto, ReportExecutionDto, DashboardWidgetDto, ScheduledReportDto,
   NotificationDto, NotificationPreferenceDto, NotificationTemplateDto, ApiKeyDto, ApiRouteDto,
-  PartnerDto, CollectionCaseDto, CollectionActionDto, PaymentArrangementDto,
+  PartnerDto, CollectionCaseDto, CollectionActionDto, PaymentArrangementDto, DunningPolicyDto,
   CreditNoteDto, DisputeDto, InvoiceLineItemDto, OrderItemDto,
   WorkflowStepDto, WorkflowTaskDto, ProvisioningTemplateStepDto,
   ProvisioningTemplateParameterDto, ProvisioningLogEntryDto,

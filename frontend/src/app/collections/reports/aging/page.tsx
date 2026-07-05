@@ -49,6 +49,37 @@ export default function AgingReportPage() {
           />
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Aging Distribution</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(!data || data.length === 0) ? (
+            <p className="text-sm text-muted-foreground">No data.</p>
+          ) : (
+            <div className="space-y-4">
+              {data.map((bucket) => {
+                const maxAmount = Math.max(...data.map((b) => b.totalOverdueAmount))
+                const pct = maxAmount > 0 ? (bucket.totalOverdueAmount / maxAmount) * 100 : 0
+                return (
+                  <div key={bucket.bucketName} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>{bucket.bucketName}</span>
+                      <span className="font-medium">{bucket.currency ?? ""} {bucket.totalOverdueAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="h-4 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

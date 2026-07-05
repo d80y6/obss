@@ -310,6 +310,14 @@ export const queryKeys = {
       actions: (id: string) => [...queryKeys.collections.cases.detail(id), "actions"] as const,
       arrangements: (id: string) => [...queryKeys.collections.cases.detail(id), "arrangements"] as const,
     },
+    dunningPolicies: {
+      all: ["collections", "dunning-policies"] as const,
+      lists: () => [...queryKeys.collections.dunningPolicies.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.collections.dunningPolicies.lists(), filters] as const,
+      detail: (id: string) => [...queryKeys.collections.dunningPolicies.all, "detail", id] as const,
+    },
+    dashboard: () => ["collections", "dashboard"] as const,
     reports: {
       all: ["collections", "reports"] as const,
       aging: () => [...queryKeys.collections.reports.all, "aging"] as const,

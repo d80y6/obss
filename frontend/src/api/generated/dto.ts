@@ -1315,6 +1315,18 @@ export interface PaymentArrangementDto {
   defaultedAt: string | null;
 }
 
+export interface DunningPolicyDto {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  maxDunningLevel: number;
+  dunningFees: Record<number, number>;
+  daysBetweenActions: number;
+  escalationAfterDays: number;
+}
+
 // API Gateway
 export interface ApiRouteDto {
   id: string;

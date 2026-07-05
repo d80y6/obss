@@ -13,6 +13,6 @@ public interface ICollectionCaseRepository : IRepository<CollectionCase>
     Task<IReadOnlyList<CollectionCase>> GetByDunningLevelAsync(int level, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<CollectionCase>> GetActiveCasesAsync(CancellationToken cancellationToken = default);
     Task<CollectionCase?> GetByCustomerWithActiveArrangementAsync(Guid customerId, CancellationToken cancellationToken = default);
-    Task<Dictionary<int, (int CaseCount, decimal TotalAmount)>> GetAgingBucketsAsync(string currency, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<CollectionCase>> FindAsync(Expression<Func<CollectionCase, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<Dictionary<int, (int CaseCount, int CustomerCount, decimal TotalAmount)>> GetAgingBucketsAsync(string currency, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CollectionCase>> FindPagedAsync(Expression<Func<CollectionCase, bool>> predicate, int page, int pageSize, CancellationToken cancellationToken = default);
 }
