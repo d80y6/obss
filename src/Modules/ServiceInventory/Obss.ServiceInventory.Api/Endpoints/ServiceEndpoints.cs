@@ -8,7 +8,10 @@ using Obss.ServiceInventory.Application.Commands.CompleteDiscoveryJob;
 using Obss.ServiceInventory.Application.Commands.CreateService;
 using Obss.ServiceInventory.Application.Commands.CreateTopology;
 using Obss.ServiceInventory.Application.Commands.DecommissionService;
+using Obss.ServiceInventory.Application.Commands.RemoveTopologyLink;
+using Obss.ServiceInventory.Application.Commands.ResumeService;
 using Obss.ServiceInventory.Application.Commands.StartDiscoveryJob;
+using Obss.ServiceInventory.Application.Commands.UpdateService;
 using Obss.ServiceInventory.Application.Commands.SuspendService;
 using Obss.ServiceInventory.Application.Queries.GetDiscoveryJobs;
 using Obss.ServiceInventory.Application.Queries.GetDownstreamServices;
@@ -82,6 +85,33 @@ public static class ServiceEndpoints
             var result = await mediator.Send(new DecommissionServiceCommand(id));
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/services/{id:guid}/resume", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new ResumeServiceCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPatch("/services/{id:guid}", async (Guid id, UpdateServiceCommand command, IMediator mediator) =>
+        {
+            if (id != command.ServiceId)
+                return (IResult)TypedResults.BadRequest();
+
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/services/topology/{topologyId:guid}/links/{linkId:guid}", async (Guid topologyId, Guid linkId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new RemoveTopologyLinkCommand(topologyId, linkId));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
         });
 

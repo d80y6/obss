@@ -12,6 +12,13 @@ public sealed class ServiceTopologyRepository : EfRepository<ServiceTopology>, I
     {
     }
 
+    public async Task<ServiceTopology?> GetByIdWithLinksAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(t => t.Links)
+            .FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
+    }
+
     public async Task<ServiceTopology?> GetByServiceIdWithLinksAsync(Guid serviceId, CancellationToken cancellationToken = default)
     {
         return await DbSet
