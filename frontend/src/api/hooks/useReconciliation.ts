@@ -3,12 +3,14 @@ import { queryKeys } from "@/lib/query-keys"
 import { api } from "@/api/client"
 import type { ReconciliationDto } from '@/api/generated/dto'
 
-export function useReconciliation() {
+export function useReconciliation(filters: Record<string, string> = {}) {
   return useQuery({
-    queryKey: queryKeys.payments.reconciliation.list({}),
+    queryKey: queryKeys.payments.reconciliation.list(filters),
     queryFn: async () => {
-      const res = await api.get("/api/v1/payments/reconciliation")
-      return res.data as ReconciliationDto
+      const params = new URLSearchParams()
+      Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v) })
+      const res = await api.get(`/api/v1/payments/payments/reconciliation?${params.toString()}`)
+      return res.data as ReconciliationDto[]
     },
   })
 }
