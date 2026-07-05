@@ -89,10 +89,9 @@ export default function ReconciliationPage() {
 
   const reconciliationColumns: Column<ReconciliationDto>[] = [
     { id: "id", header: "ID", cell: (row) => row.id.substring(0, 8) + "..." },
-    { id: "statementDate", header: "Statement Date", cell: (row) => new Date(row.statementDate).toLocaleDateString() },
-    { id: "totalAmount", header: "Total", cell: (row) => `$${(row.totalAmount ?? 0).toLocaleString()}` },
-    { id: "matchedCount", header: "Matched", accessorKey: "matchedCount" },
-    { id: "unmatchedCount", header: "Unmatched", accessorKey: "unmatchedCount" },
+    { id: "importDate", header: "Import Date", cell: (row) => new Date(row.importDate).toLocaleDateString() },
+    { id: "totalImportAmount", header: "Total", cell: (row) => `${row.currency ?? ""} ${(row.totalImportAmount ?? 0).toLocaleString()}` },
+    { id: "totalReconciledAmount", header: "Reconciled", accessorKey: "totalReconciledAmount" },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
   ]
 

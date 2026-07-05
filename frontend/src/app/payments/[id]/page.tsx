@@ -37,7 +37,7 @@ export default function PaymentDetailPage() {
             { label: "Invoice", value: payment?.invoiceNumber ?? "-" },
             { label: "Customer", value: payment?.customerName ?? "-" },
             { label: "Amount", value: payment ? formatCurrency(payment.amount, payment.currency) : "-" },
-            { label: "Method", value: payment?.method?.replace(/_/g, " ") ?? "-" },
+            { label: "Method", value: payment?.paymentMethod?.replace(/_/g, " ") ?? "-" },
             { label: "Status", value: payment ? <StatusBadge status={payment.status} /> : "-" },
             { label: "Transaction ID", value: payment?.transactionId ?? "-" },
             { label: "Paid At", value: payment?.paidAt ? new Date(payment.paidAt).toLocaleString() : "-" },

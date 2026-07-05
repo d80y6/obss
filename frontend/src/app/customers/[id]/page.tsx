@@ -532,7 +532,7 @@ export default function CustomerDetailPage() {
               columns={[
                 { id: "paymentNumber", header: "Payment #", accessorKey: "paymentNumber" },
                 { id: "amount", header: "Amount", cell: (row) => `${row.currency ?? ""} ${(row.amount ?? 0).toLocaleString()}` },
-                { id: "method", header: "Method", cell: (row) => (row.method ?? "").replace(/_/g, " ") },
+                { id: "method", header: "Method", cell: (row) => (row.paymentMethod ?? "").replace(/_/g, " ") },
                 { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} /> },
                 { id: "paidAt", header: "Date", cell: (row) => new Date(row.paidAt || row.createdAt).toLocaleDateString() },
               ]}

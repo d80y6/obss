@@ -10,10 +10,10 @@ export default function PaymentSummaryPage() {
 
   const stats = [
     { label: "Total Payments", value: data?.totalPayments ?? 0, icon: Activity, color: "text-blue-600" },
-    { label: "Total Amount", value: data ? `${data.currency ?? "USD"} ${(data.totalAmount ?? 0).toLocaleString()}` : "-", icon: DollarSign, color: "text-green-600" },
-    { label: "Completed", value: data ? `${data.currency ?? "USD"} ${(data.totalCompletedAmount ?? 0).toLocaleString()}` : "-", icon: TrendingUp, color: "text-emerald-600" },
-    { label: "Refunded", value: data ? `${data.currency ?? "USD"} ${(data.totalRefundedAmount ?? 0).toLocaleString()}` : "-", icon: TrendingDown, color: "text-red-600" },
-    { label: "Net", value: data ? `${data.currency ?? "USD"} ${(data.netAmount ?? 0).toLocaleString()}` : "-", icon: DollarSign, color: "text-purple-600" },
+    { label: "Total Amount", value: data ? `${(data.totalAmount ?? 0).toLocaleString()}` : "-", icon: DollarSign, color: "text-green-600" },
+    { label: "Completed", value: data ? `${(data.totalCompletedAmount ?? 0).toLocaleString()}` : "-", icon: TrendingUp, color: "text-emerald-600" },
+    { label: "Refunded", value: data ? `${(data.totalRefundedAmount ?? 0).toLocaleString()}` : "-", icon: TrendingDown, color: "text-red-600" },
+    { label: "Net", value: data ? `${(data.netAmount ?? 0).toLocaleString()}` : "-", icon: DollarSign, color: "text-purple-600" },
     { label: "Pending", value: data?.pendingCount ?? 0, icon: Activity, color: "text-amber-600" },
     { label: "Failed", value: data?.failedCount ?? 0, icon: Activity, color: "text-red-600" },
     { label: "Refunded (count)", value: data?.refundedCount ?? 0, icon: TrendingDown, color: "text-orange-600" },

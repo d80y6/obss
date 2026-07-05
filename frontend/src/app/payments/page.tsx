@@ -53,7 +53,7 @@ export default function PaymentsPage() {
     { id: "paymentNumber", header: "Payment #", accessorKey: "paymentNumber" },
     { id: "customerName", header: "Customer", accessorKey: "customerName" },
     { id: "amount", header: "Amount", cell: (row) => `${row.currency ?? ""} ${(row.amount ?? 0).toLocaleString()}` },
-    { id: "method", header: "Method", cell: (row) => (row.method ?? "").replace(/_/g, " ") },
+    { id: "method", header: "Method", cell: (row) => (row.paymentMethod ?? "").replace(/_/g, " ") },
     { id: "status", header: "Status", cell: (row) => <StatusBadge status={row.status} />, sortable: true },
     { id: "paidAt", header: "Date", cell: (row) => new Date(row.paidAt || row.createdAt).toLocaleDateString() },
   ]
