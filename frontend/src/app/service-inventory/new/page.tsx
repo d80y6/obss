@@ -5,7 +5,6 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation } from "@tanstack/react-query"
 import { z } from "zod"
 import { FormPageLayout } from "@/forms/FormPageLayout"
 import { FormSection } from "@/forms/FormSection"
@@ -13,7 +12,8 @@ import { FormField, FormSelectField } from "@/forms/FormField"
 import { FormActions } from "@/forms/FormActions"
 import { FormErrorSummary } from "@/forms/FormErrorSummary"
 import { toast } from "@/components/ui/toast"
-import api from "@/services/api"
+import { api } from "@/api/client"
+import { useCreateService } from "@/api/hooks/use-service-inventory"
 import type { CustomerDto, SubscriptionDto } from "@/api/generated"
 import { Button } from "@/components/ui/button"
 import { Plus, X } from "lucide-react"
@@ -54,31 +54,27 @@ export default function NewServicePage() {
 
   const [selectedCustomerId, selectedServiceType] = watch(["customerId", "serviceType"])
 
-  const createService = useMutation({
-    mutationFn: async (data: ServiceFormData & { attributes: Record<string, string> }) => {
-      const res = await api.post("/api/v1/service-inventory/services", {
-        customerId: data.customerId,
-        subscriptionId: data.subscriptionId,
-        serviceType: data.serviceType,
-        serviceIdentifier: data.serviceIdentifier,
-        location: "",
-        configuration: JSON.stringify(data.attributes),
-      })
-      return res.data
-    },
-    onSuccess: () => {
-      toast({ title: "Service created" })
-      router.push("/service-inventory")
-    },
-    onError: () => {
-      toast({ title: "Failed to create service", variant: "destructive" })
-    },
-  })
+  const createService = useCreateService()
 
   const onSubmit = (data: ServiceFormData) => {
     const attrMap: Record<string, string> = {}
     attributes.forEach((a) => { if (a.key) attrMap[a.key] = a.value })
-    createService.mutate({ ...data, attributes: attrMap })
+    createService.mutate({
+      customerId: data.customerId,
+      subscriptionId: data.subscriptionId,
+      serviceType: data.serviceType,
+      serviceIdentifier: data.serviceIdentifier,
+      location: "",
+      configuration: JSON.stringify(attrMap),
+    }, {
+      onSuccess: () => {
+        toast({ title: "Service created" })
+        router.push("/service-inventory")
+      },
+      onError: () => {
+        toast({ title: "Failed to create service", variant: "destructive" })
+      },
+    })
   }
 
   const addAttribute = () => setAttributes([...attributes, { key: "", value: "" }])
