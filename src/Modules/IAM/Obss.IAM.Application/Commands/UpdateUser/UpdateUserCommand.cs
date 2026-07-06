@@ -9,4 +9,10 @@ public sealed record UpdateUserCommand(
     string FirstName,
     string LastName,
     string? PhoneNumber,
-    string? CountryCode) : IRequest<Result<UserDto>>;
+    string? CountryCode,
+    string? Title,
+    string? MiddleName,
+    DateTime? BirthDate,
+    string? NationalId,
+    string? PreferredLanguage,
+    string? Gender) : IRequest<Result<UserDto>>;

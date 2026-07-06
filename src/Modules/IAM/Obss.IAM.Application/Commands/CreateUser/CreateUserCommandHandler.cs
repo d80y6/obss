@@ -48,7 +48,13 @@ public sealed class CreateUserCommandHandler : IRequestHandler<CreateUserCommand
             request.FirstName,
             request.LastName,
             phoneNumber,
-            request.ExternalId);
+            request.ExternalId,
+            request.Title,
+            request.MiddleName,
+            request.BirthDate,
+            request.NationalId,
+            request.PreferredLanguage,
+            request.Gender);
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

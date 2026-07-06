@@ -33,6 +33,13 @@ public sealed class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand
         }
 
         user.UpdateProfile(request.FirstName, request.LastName, phoneNumber);
+        user.UpdatePartyProfile(
+            request.Title,
+            request.MiddleName,
+            request.BirthDate,
+            request.NationalId,
+            request.PreferredLanguage,
+            request.Gender);
         await _userRepository.UpdateAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

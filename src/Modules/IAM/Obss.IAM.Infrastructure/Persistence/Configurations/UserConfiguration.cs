@@ -69,6 +69,29 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasColumnName("external_id")
             .HasMaxLength(200);
 
+        builder.Property(u => u.Title)
+            .HasColumnName("title")
+            .HasMaxLength(50);
+
+        builder.Property(u => u.MiddleName)
+            .HasColumnName("middle_name")
+            .HasMaxLength(100);
+
+        builder.Property(u => u.BirthDate)
+            .HasColumnName("birth_date");
+
+        builder.Property(u => u.NationalId)
+            .HasColumnName("national_id")
+            .HasMaxLength(50);
+
+        builder.Property(u => u.PreferredLanguage)
+            .HasColumnName("preferred_language")
+            .HasMaxLength(50);
+
+        builder.Property(u => u.Gender)
+            .HasColumnName("gender")
+            .HasMaxLength(50);
+
         builder.Property(u => u.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();

@@ -24,6 +24,7 @@ public static class IamModuleRegistration
         UserEndpoints.Map(group);
         TenantEndpoints.Map(group);
         RoleEndpoints.Map(group);
+        PartyRoleEndpoints.Map(group);
 
         return app;
     }

@@ -16,7 +16,13 @@ public class User : AggregateRoot<Guid>
         string firstName,
         string lastName,
         PhoneNumber? phoneNumber,
-        string? externalId)
+        string? externalId,
+        string? title,
+        string? middleName,
+        DateTime? birthDate,
+        string? nationalId,
+        string? preferredLanguage,
+        string? gender)
         : base(id)
     {
         TenantId = tenantId;
@@ -26,6 +32,12 @@ public class User : AggregateRoot<Guid>
         LastName = lastName;
         PhoneNumber = phoneNumber;
         ExternalId = externalId;
+        Title = title;
+        MiddleName = middleName;
+        BirthDate = birthDate;
+        NationalId = nationalId;
+        PreferredLanguage = preferredLanguage;
+        Gender = gender;
         IsActive = true;
         EmailVerified = false;
         CreatedAt = DateTime.UtcNow;
@@ -43,6 +55,12 @@ public class User : AggregateRoot<Guid>
     public bool EmailVerified { get; private set; }
     public DateTime? LastLoginAt { get; private set; }
     public string? ExternalId { get; private set; }
+    public string? Title { get; private set; }
+    public string? MiddleName { get; private set; }
+    public DateTime? BirthDate { get; private set; }
+    public string? NationalId { get; private set; }
+    public string? PreferredLanguage { get; private set; }
+    public string? Gender { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -56,7 +74,13 @@ public class User : AggregateRoot<Guid>
         string firstName,
         string lastName,
         PhoneNumber? phoneNumber = null,
-        string? externalId = null)
+        string? externalId = null,
+        string? title = null,
+        string? middleName = null,
+        DateTime? birthDate = null,
+        string? nationalId = null,
+        string? preferredLanguage = null,
+        string? gender = null)
     {
         return new User(
             Guid.NewGuid(),
@@ -66,7 +90,13 @@ public class User : AggregateRoot<Guid>
             firstName,
             lastName,
             phoneNumber,
-            externalId);
+            externalId,
+            title,
+            middleName,
+            birthDate,
+            nationalId,
+            preferredLanguage,
+            gender);
     }
 
     public void Activate()
@@ -103,6 +133,23 @@ public class User : AggregateRoot<Guid>
         FirstName = firstName;
         LastName = lastName;
         PhoneNumber = phoneNumber;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdatePartyProfile(
+        string? title = null,
+        string? middleName = null,
+        DateTime? birthDate = null,
+        string? nationalId = null,
+        string? preferredLanguage = null,
+        string? gender = null)
+    {
+        if (title is not null) Title = title;
+        if (middleName is not null) MiddleName = middleName;
+        if (birthDate.HasValue) BirthDate = birthDate;
+        if (nationalId is not null) NationalId = nationalId;
+        if (preferredLanguage is not null) PreferredLanguage = preferredLanguage;
+        if (gender is not null) Gender = gender;
         UpdatedAt = DateTime.UtcNow;
     }
 

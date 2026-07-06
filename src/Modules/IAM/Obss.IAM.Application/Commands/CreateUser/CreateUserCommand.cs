@@ -12,4 +12,10 @@ public sealed record CreateUserCommand(
     string LastName,
     string? PhoneNumber,
     string? CountryCode,
-    string? ExternalId) : IRequest<Result<UserDto>>;
+    string? ExternalId,
+    string? Title,
+    string? MiddleName,
+    DateTime? BirthDate,
+    string? NationalId,
+    string? PreferredLanguage,
+    string? Gender) : IRequest<Result<UserDto>>;
