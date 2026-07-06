@@ -1,16 +1,22 @@
 using System.Net;
-using Serilog;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Domain.Exceptions;
+using ValidationException = Obss.SharedKernel.Domain.Exceptions.ValidationException;
 
 namespace Obss.Host.Middleware;
 
 public sealed class ExceptionHandlingMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
 
-    public ExceptionHandlingMiddleware(RequestDelegate next)
+    public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -19,55 +25,52 @@ public sealed class ExceptionHandlingMiddleware
         {
             await _next(context);
         }
+        catch (FluentValidation.ValidationException ex)
+        {
+            _logger.LogWarning(ex, "FluentValidation failed");
+            var error = TmfErrorResponse.FromValidationException(ex);
+            await WriteErrorResponse(context, StatusCodes.Status400BadRequest, error);
+        }
         catch (ValidationException ex)
         {
-            Log.Warning(ex, "Validation failed");
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = "Validation failed",
-                details = ex.Message
-            });
+            _logger.LogWarning(ex, "Domain validation failed");
+            var error = TmfErrorResponse.Create(StatusCodes.Status400BadRequest, "VALIDATION_ERROR", "Validation failed", ex.Message);
+            await WriteErrorResponse(context, StatusCodes.Status400BadRequest, error);
         }
         catch (NotFoundException ex)
         {
-            Log.Warning(ex, "Resource not found");
-            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = "Resource not found",
-                details = ex.Message
-            });
+            _logger.LogWarning(ex, "Resource not found");
+            var error = TmfErrorResponse.Create(StatusCodes.Status404NotFound, "NOT_FOUND", "Resource not found", ex.Message);
+            await WriteErrorResponse(context, StatusCodes.Status404NotFound, error);
         }
         catch (UnauthorizedException ex)
         {
-            Log.Warning(ex, "Unauthorized");
-            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = "Unauthorized",
-                details = ex.Message
-            });
+            _logger.LogWarning(ex, "Unauthorized");
+            var error = TmfErrorResponse.Create(StatusCodes.Status401Unauthorized, "UNAUTHORIZED", "Unauthorized", ex.Message);
+            await WriteErrorResponse(context, StatusCodes.Status401Unauthorized, error);
         }
         catch (ConflictException ex)
         {
-            Log.Warning(ex, "Conflict");
-            context.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = "Conflict",
-                details = ex.Message
-            });
+            _logger.LogWarning(ex, "Conflict");
+            var error = TmfErrorResponse.Create(StatusCodes.Status409Conflict, "CONFLICT", "Conflict", ex.Message);
+            await WriteErrorResponse(context, StatusCodes.Status409Conflict, error);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Unhandled exception");
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            await context.Response.WriteAsJsonAsync(new
-            {
-                error = "An unexpected error occurred",
-                details = ex.Message
-            });
+            _logger.LogError(ex, "Unhandled exception");
+            var error = TmfErrorResponse.Create(StatusCodes.Status500InternalServerError, "INTERNAL_ERROR", "An unexpected error occurred", ex.Message);
+            await WriteErrorResponse(context, StatusCodes.Status500InternalServerError, error);
         }
+    }
+
+    private static async Task WriteErrorResponse(HttpContext context, int statusCode, TmfErrorResponse error)
+    {
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/json";
+        var json = JsonSerializer.Serialize(error, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        });
+        await context.Response.WriteAsync(json);
     }
 }
