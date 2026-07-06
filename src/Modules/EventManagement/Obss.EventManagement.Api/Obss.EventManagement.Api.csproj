@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.EventManagement.Application\Obss.EventManagement.Application.csproj" />
+    <ProjectReference Include="..\Obss.EventManagement.Infrastructure\Obss.EventManagement.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
