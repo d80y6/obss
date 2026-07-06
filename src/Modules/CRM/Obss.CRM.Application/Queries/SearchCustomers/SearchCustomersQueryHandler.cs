@@ -23,8 +23,8 @@ public sealed class SearchCustomersQueryHandler : IRequestHandler<SearchCustomer
             request.Status,
             request.CustomerType,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var totalCount = await _customerRepository.GetFilteredCountAsync(

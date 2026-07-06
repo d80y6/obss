@@ -10,8 +10,8 @@ public interface ICustomerRepository : IRepository<Customer>
         string? status,
         string? customerType,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Contact>> GetContactsByCustomerAsync(Guid customerId, CancellationToken cancellationToken = default);

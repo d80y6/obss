@@ -10,5 +10,5 @@ public sealed record SearchCustomersQuery(
     string? Status,
     string? CustomerType,
     string? SearchTerm,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<PaginatedResult<CustomerDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<PaginatedResult<CustomerDto>>>;

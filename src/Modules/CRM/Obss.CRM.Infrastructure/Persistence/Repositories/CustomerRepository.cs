@@ -17,8 +17,8 @@ public sealed class CustomerRepository : EfRepository<Customer>, ICustomerReposi
         string? status,
         string? customerType,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -49,8 +49,8 @@ public sealed class CustomerRepository : EfRepository<Customer>, ICustomerReposi
 
         query = query
             .OrderBy(c => c.DisplayName)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

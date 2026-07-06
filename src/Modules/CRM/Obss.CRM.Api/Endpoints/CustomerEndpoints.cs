@@ -39,6 +39,8 @@ using Obss.CRM.Application.Queries.GetCustomerSegments;
 using Obss.CRM.Application.Queries.GetNotesByCustomer;
 using Obss.CRM.Application.Queries.GetSegmentById;
 using Obss.CRM.Application.Queries.SearchCustomers;
+using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Infrastructure;
 
 namespace Obss.CRM.Api.Endpoints;
 
@@ -68,8 +70,8 @@ public static class CustomerEndpoints
             if (!result.IsSuccess)
                 return (IResult)TypedResults.BadRequest(result.Error);
 
-            httpContext.Response.Headers.Append("X-Total-Count", result.Value.TotalCount.ToString());
-            httpContext.Response.Headers.Append("X-Result-Count", result.Value.Items.Count.ToString());
+            var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
+            httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
         });
 
