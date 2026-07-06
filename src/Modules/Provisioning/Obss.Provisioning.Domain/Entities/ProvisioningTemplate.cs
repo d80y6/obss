@@ -13,13 +13,15 @@ public class ProvisioningTemplate : AggregateRoot<Guid>
         string? description,
         string serviceType,
         string action,
-        Guid workflowDefinitionId)
+        Guid workflowDefinitionId,
+        Guid? serviceSpecificationId = null)
         : base(id)
     {
         TenantId = tenantId;
         Name = name;
         Description = description;
         ServiceType = serviceType;
+        ServiceSpecificationId = serviceSpecificationId;
         Action = action;
         WorkflowDefinitionId = workflowDefinitionId;
         IsActive = true;
@@ -30,6 +32,7 @@ public class ProvisioningTemplate : AggregateRoot<Guid>
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public string ServiceType { get; private set; } = string.Empty;
+    public Guid? ServiceSpecificationId { get; private set; }
     public string Action { get; private set; } = string.Empty;
     public Guid WorkflowDefinitionId { get; private set; }
     public bool IsActive { get; private set; }
@@ -41,7 +44,8 @@ public class ProvisioningTemplate : AggregateRoot<Guid>
         string? description,
         string serviceType,
         string action,
-        Guid workflowDefinitionId)
+        Guid workflowDefinitionId,
+        Guid? serviceSpecificationId = null)
     {
         return new ProvisioningTemplate(
             Guid.NewGuid(),
@@ -50,7 +54,8 @@ public class ProvisioningTemplate : AggregateRoot<Guid>
             description,
             serviceType,
             action,
-            workflowDefinitionId);
+            workflowDefinitionId,
+            serviceSpecificationId);
     }
 
     public void Activate()

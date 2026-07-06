@@ -33,6 +33,8 @@ public sealed class ProvisioningTemplateConfiguration : IEntityTypeConfiguration
             .HasMaxLength(100)
             .IsRequired();
 
+        builder.Property(t => t.ServiceSpecificationId).HasColumnName("service_specification_id");
+
         builder.Property(t => t.Action)
             .HasColumnName("action")
             .HasMaxLength(50)

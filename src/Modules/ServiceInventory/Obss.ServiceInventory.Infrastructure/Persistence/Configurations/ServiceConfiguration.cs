@@ -33,6 +33,8 @@ public sealed class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.Property(s => s.ServiceSpecificationId).HasColumnName("service_specification_id");
+
         builder.Property(s => s.ServiceIdentifier)
             .HasColumnName("service_identifier")
             .HasMaxLength(200)

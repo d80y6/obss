@@ -22,7 +22,8 @@ public class ProductSpecification : AggregateRoot<Guid>, ITenantEntity
         string productNumber,
         LifecycleStatus lifecycleStatus,
         DateTime? validFrom,
-        DateTime? validTo)
+        DateTime? validTo,
+        Guid? serviceSpecificationId = null)
         : base(id)
     {
         TenantId = tenantId;
@@ -36,6 +37,7 @@ public class ProductSpecification : AggregateRoot<Guid>, ITenantEntity
         ValidTo = validTo;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        ServiceSpecificationId = serviceSpecificationId;
 
         AddDomainEvent(new ProductSpecificationCreatedDomainEvent(id, tenantId, name));
     }
@@ -51,6 +53,7 @@ public class ProductSpecification : AggregateRoot<Guid>, ITenantEntity
     public DateTime? ValidTo { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public Guid? ServiceSpecificationId { get; private set; }
 
     public IReadOnlyCollection<ProductSpecificationCharacteristic> Characteristics => _characteristics.AsReadOnly();
     public IReadOnlyCollection<ProductSpecificationRelationship> Relationships => _relationships.AsReadOnly();
@@ -61,7 +64,8 @@ public class ProductSpecification : AggregateRoot<Guid>, ITenantEntity
         string? description,
         string? brand,
         string? version,
-        string productNumber)
+        string productNumber,
+        Guid? serviceSpecificationId = null)
     {
         return new ProductSpecification(
             Guid.NewGuid(),
@@ -73,7 +77,8 @@ public class ProductSpecification : AggregateRoot<Guid>, ITenantEntity
             productNumber,
             LifecycleStatus.Draft,
             null,
-            null);
+            null,
+            serviceSpecificationId);
     }
 
     public void Activate()

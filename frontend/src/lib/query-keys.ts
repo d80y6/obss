@@ -409,4 +409,40 @@ export const queryKeys = {
       list: () => [...queryKeys.gateway.partners.all, "list"] as const,
     },
   },
+  serviceCatalog: {
+    all: ["service-catalog"] as const,
+    categories: {
+      all: ["service-catalog", "categories"] as const,
+      lists: () => [...queryKeys.serviceCatalog.categories.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) => [...queryKeys.serviceCatalog.categories.lists(), filters] as const,
+      details: () => [...queryKeys.serviceCatalog.categories.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.serviceCatalog.categories.details(), id] as const,
+    },
+    candidates: {
+      all: ["service-catalog", "candidates"] as const,
+      lists: () => [...queryKeys.serviceCatalog.candidates.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) => [...queryKeys.serviceCatalog.candidates.lists(), filters] as const,
+      details: () => [...queryKeys.serviceCatalog.candidates.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.serviceCatalog.candidates.details(), id] as const,
+    },
+    specifications: {
+      all: ["service-catalog", "specifications"] as const,
+      lists: () => [...queryKeys.serviceCatalog.specifications.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) => [...queryKeys.serviceCatalog.specifications.lists(), filters] as const,
+      details: () => [...queryKeys.serviceCatalog.specifications.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.serviceCatalog.specifications.details(), id] as const,
+    },
+    characteristics: {
+      all: (specId: string) => ["service-catalog", "specifications", specId, "characteristics"] as const,
+      list: (specId: string) => [...queryKeys.serviceCatalog.characteristics.all(specId), "list"] as const,
+    },
+    characteristicValues: {
+      all: (specId: string, charId: string) => ["service-catalog", "specifications", specId, "characteristics", charId, "values"] as const,
+      list: (specId: string, charId: string) => [...queryKeys.serviceCatalog.characteristicValues.all(specId, charId), "list"] as const,
+    },
+    relationships: {
+      all: (specId: string) => ["service-catalog", "specifications", specId, "relationships"] as const,
+      list: (specId: string) => [...queryKeys.serviceCatalog.relationships.all(specId), "list"] as const,
+    },
+  },
 } as const

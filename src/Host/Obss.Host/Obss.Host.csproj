@@ -32,6 +32,7 @@
     <ProjectReference Include="..\..\Modules\ApiGateway\Obss.ApiGateway.Infrastructure\Obss.ApiGateway.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Modules\ApiGateway\Obss.ApiGateway.Domain\Obss.ApiGateway.Domain.csproj" />
     <ProjectReference Include="..\..\Modules\NumberInventory\Obss.NumberInventory.Api\Obss.NumberInventory.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\ServiceCatalog\Obss.ServiceCatalog.Api\Obss.ServiceCatalog.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

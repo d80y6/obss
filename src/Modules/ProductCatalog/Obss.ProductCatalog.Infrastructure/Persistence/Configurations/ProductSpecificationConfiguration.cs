@@ -41,6 +41,7 @@ public sealed class ProductSpecificationConfiguration : IEntityTypeConfiguration
         builder.Property(ps => ps.ValidTo).HasColumnName("valid_to");
         builder.Property(ps => ps.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(ps => ps.UpdatedAt).HasColumnName("updated_at").IsRequired();
+        builder.Property(ps => ps.ServiceSpecificationId).HasColumnName("service_specification_id");
 
         builder.HasMany(ps => ps.Characteristics)
             .WithOne()

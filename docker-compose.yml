@@ -53,7 +53,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-obss}
       POSTGRES_USER: ${POSTGRES_USER:-obss_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-obss_s3cur3_p@ss}
-      POSTGRES_MULTIPLE_DATABASES: obss_keycloak,obss_audit,obss_iam,obss_crm,obss_catalog,obss_orders,obss_subscriptions,obss_rating,obss_billing,obss_invoices,obss_payments,obss_collections,obss_service_inventory,obss_network_inventory,obss_provisioning,obss_workflow,obss_ticketing,obss_notifications,obss_reporting,obss_gateway, obss_number_inventory
+      POSTGRES_MULTIPLE_DATABASES: obss_keycloak,obss_audit,obss_iam,obss_crm,obss_catalog,obss_orders,obss_subscriptions,obss_rating,obss_billing,obss_invoices,obss_payments,obss_collections,obss_service_inventory,obss_network_inventory,obss_provisioning,obss_workflow,obss_ticketing,obss_notifications,obss_reporting,obss_gateway, obss_number_inventory, obss_service_catalog
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro

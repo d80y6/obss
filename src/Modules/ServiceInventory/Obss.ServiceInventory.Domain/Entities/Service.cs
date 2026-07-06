@@ -19,7 +19,8 @@ public class Service : AggregateRoot<Guid>
         ServiceType serviceType,
         string serviceIdentifier,
         string? location,
-        string? configuration)
+        string? configuration,
+        Guid? serviceSpecificationId = null)
         : base(id)
     {
         TenantId = tenantId;
@@ -32,6 +33,7 @@ public class Service : AggregateRoot<Guid>
         Configuration = configuration;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        ServiceSpecificationId = serviceSpecificationId;
     }
 
     public Guid TenantId { get; private set; }
@@ -47,6 +49,7 @@ public class Service : AggregateRoot<Guid>
     public string? Location { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public Guid? ServiceSpecificationId { get; private set; }
 
     public IReadOnlyCollection<ServiceResource> Resources => _resources.AsReadOnly();
 
@@ -57,7 +60,8 @@ public class Service : AggregateRoot<Guid>
         ServiceType serviceType,
         string serviceIdentifier,
         string? location = null,
-        string? configuration = null)
+        string? configuration = null,
+        Guid? serviceSpecificationId = null)
     {
         return new Service(
             Guid.NewGuid(),
@@ -67,7 +71,8 @@ public class Service : AggregateRoot<Guid>
             serviceType,
             serviceIdentifier,
             location,
-            configuration);
+            configuration,
+            serviceSpecificationId);
     }
 
     public void Activate()

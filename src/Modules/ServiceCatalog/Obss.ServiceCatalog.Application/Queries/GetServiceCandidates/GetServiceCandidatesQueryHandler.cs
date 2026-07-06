@@ -1,0 +1,27 @@
+using Mapster;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Obss.ServiceCatalog.Application.Abstractions;
+using Obss.ServiceCatalog.Application.DTOs;
+
+namespace Obss.ServiceCatalog.Application.Queries.GetServiceCandidates;
+
+internal sealed class GetServiceCandidatesQueryHandler(IServiceCandidateRepository repository) : IRequestHandler<GetServiceCandidatesQuery, (List<ServiceCandidateDto> Items, int TotalCount)>
+{
+    public async Task<(List<ServiceCandidateDto> Items, int TotalCount)> Handle(GetServiceCandidatesQuery request, CancellationToken cancellationToken)
+    {
+        var query = await repository.GetAllAsync(cancellationToken);
+        var items = query.AsQueryable();
+
+        if (!string.IsNullOrEmpty(request.Status))
+            items = items.Where(c => c.LifecycleStatus.ToString() == request.Status);
+
+        var total = await items.CountAsync(cancellationToken);
+        var result = await items
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToListAsync(cancellationToken);
+
+        return (result.Adapt<List<ServiceCandidateDto>>(), total);
+    }
+}
