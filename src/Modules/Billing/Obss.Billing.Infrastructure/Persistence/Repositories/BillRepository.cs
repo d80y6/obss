@@ -25,8 +25,8 @@ public sealed class BillRepository : EfRepository<Bill>, IBillRepository
         BillStatus? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -53,8 +53,8 @@ public sealed class BillRepository : EfRepository<Bill>, IBillRepository
 
         query = query
             .OrderByDescending(b => b.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

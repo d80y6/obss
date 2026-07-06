@@ -26,8 +26,8 @@ public sealed class GetTicketsQueryHandler : IRequestHandler<GetTicketsQuery, Re
             request.AssignedTo,
             request.FromDate,
             request.ToDate,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = tickets.Adapt<List<TicketSummaryDto>>();

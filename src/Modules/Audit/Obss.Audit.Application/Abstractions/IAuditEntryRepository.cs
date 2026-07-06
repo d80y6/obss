@@ -13,8 +13,8 @@ public interface IAuditEntryRepository : IRepository<AuditEntry>
         string? performedById,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<AuditEntry>> GetEntityTrailAsync(

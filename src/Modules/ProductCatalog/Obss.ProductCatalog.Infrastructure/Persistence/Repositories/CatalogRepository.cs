@@ -15,8 +15,8 @@ public sealed class CatalogRepository : EfRepository<Catalog>, ICatalogRepositor
     public async Task<IReadOnlyList<Catalog>> GetFilteredAsync(
         string? searchTerm,
         string? catalogType,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -35,8 +35,8 @@ public sealed class CatalogRepository : EfRepository<Catalog>, ICatalogRepositor
 
         return await query
             .OrderBy(c => c.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
     }
 

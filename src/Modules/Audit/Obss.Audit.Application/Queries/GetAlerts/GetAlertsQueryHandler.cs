@@ -27,8 +27,8 @@ public sealed class GetAlertsQueryHandler : IRequestHandler<GetAlertsQuery, Resu
             request.IsAcknowledged,
             request.FromDate,
             request.ToDate,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = alerts.Adapt<List<AuditAlertDto>>();

@@ -28,8 +28,8 @@ public sealed class GetAuditEntriesQueryHandler : IRequestHandler<GetAuditEntrie
             request.PerformedById,
             request.FromDate,
             request.ToDate,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = entries.Adapt<List<AuditEntryDto>>();

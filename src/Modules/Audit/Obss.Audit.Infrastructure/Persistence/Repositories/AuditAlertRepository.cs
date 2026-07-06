@@ -19,8 +19,8 @@ public sealed class AuditAlertRepository : EfRepository<AuditAlert>, IAuditAlert
         bool? isAcknowledged,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -57,8 +57,8 @@ public sealed class AuditAlertRepository : EfRepository<AuditAlert>, IAuditAlert
 
         query = query
             .OrderByDescending(a => a.DetectedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

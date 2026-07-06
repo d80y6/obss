@@ -11,11 +11,11 @@ public interface IPaymentRepository : IRepository<Payment>
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Payment>> GetByInvoiceAsync(Guid invoiceId, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<Refund>> GetRefundsFilteredAsync(Guid? paymentId, string? status, DateTime? fromDate, DateTime? toDate, int page = 1, int pageSize = 20, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Refund>> GetRefundsFilteredAsync(Guid? paymentId, string? status, DateTime? fromDate, DateTime? toDate, int offset = 0, int limit = 20, CancellationToken cancellationToken = default);
     Task<PaymentSummary> GetPaymentSummaryAsync(CancellationToken cancellationToken = default);
     Task<string> GenerateNextPaymentNumberAsync(CancellationToken cancellationToken = default);
 }

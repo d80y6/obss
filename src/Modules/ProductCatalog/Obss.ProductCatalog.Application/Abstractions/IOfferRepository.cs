@@ -16,7 +16,7 @@ public interface IOfferRepository : IRepository<Offer>
     Task<(IReadOnlyList<Offer> Items, int TotalCount)> GetFilteredAsync(
         OfferType? offerType,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 }

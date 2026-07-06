@@ -21,8 +21,8 @@ public sealed class GetUsageBySubscriptionQueryHandler : IRequestHandler<GetUsag
             request.SubscriptionId,
             request.From,
             request.To,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         return Result.Success(records.Adapt<IReadOnlyList<UsageRecordDto>>());

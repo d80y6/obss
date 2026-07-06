@@ -17,8 +17,8 @@ public sealed class WorkflowDefinitionRepository : EfRepository<WorkflowDefiniti
         string? category,
         bool? isActive,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -40,8 +40,8 @@ public sealed class WorkflowDefinitionRepository : EfRepository<WorkflowDefiniti
         query = query
             .OrderByDescending(w => w.Version)
             .ThenBy(w => w.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

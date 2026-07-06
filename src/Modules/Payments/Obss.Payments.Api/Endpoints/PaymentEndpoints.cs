@@ -21,6 +21,8 @@ using Obss.Payments.Application.Queries.GetRefunds;
 using Obss.Payments.Application.Queries.GetSupportedGateways;
 using Obss.Payments.Application.Queries.GetUnmatchedTransactions;
 using Obss.Payments.Application.DTOs;
+using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Infrastructure;
 
 namespace Obss.Payments.Api.Endpoints;
 
@@ -50,10 +52,10 @@ public static class PaymentEndpoints
             DateTime? fromDate,
             DateTime? toDate,
             IMediator mediator,
-            int page = 1,
-            int pageSize = 20) =>
+            HttpContext httpContext,
+            [AsParameters] TmfPaginationRequest pagination) =>
         {
-            var query = new GetPaymentsQuery(customerId, status, fromDate, toDate, page, pageSize);
+            var query = new GetPaymentsQuery(customerId, status, fromDate, toDate, pagination.Offset, pagination.Limit);
             var result = await mediator.Send(query);
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
@@ -93,10 +95,10 @@ public static class PaymentEndpoints
             DateTime? fromDate,
             DateTime? toDate,
             IMediator mediator,
-            int page = 1,
-            int pageSize = 20) =>
+            HttpContext httpContext,
+            [AsParameters] TmfPaginationRequest pagination) =>
         {
-            var query = new GetRefundsQuery(paymentId, status, fromDate, toDate, page, pageSize);
+            var query = new GetRefundsQuery(paymentId, status, fromDate, toDate, pagination.Offset, pagination.Limit);
             var result = await mediator.Send(query);
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
@@ -151,10 +153,10 @@ public static class PaymentEndpoints
             DateTime? fromDate,
             DateTime? toDate,
             IMediator mediator,
-            int page = 1,
-            int pageSize = 20) =>
+            HttpContext httpContext,
+            [AsParameters] TmfPaginationRequest pagination) =>
         {
-            var query = new GetReconciliationsQuery(status, fromDate, toDate, page, pageSize);
+            var query = new GetReconciliationsQuery(status, fromDate, toDate, pagination.Offset, pagination.Limit);
             var result = await mediator.Send(query);
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)

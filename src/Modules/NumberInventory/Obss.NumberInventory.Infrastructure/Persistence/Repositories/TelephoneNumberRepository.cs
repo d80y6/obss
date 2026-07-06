@@ -57,8 +57,8 @@ public sealed class TelephoneNumberRepository : EfRepository<TelephoneNumber>, I
         string? prefix,
         NumberStatus? status,
         NumberType? type,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -80,8 +80,8 @@ public sealed class TelephoneNumberRepository : EfRepository<TelephoneNumber>, I
 
         return await query
             .OrderByDescending(n => n.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
     }
 }

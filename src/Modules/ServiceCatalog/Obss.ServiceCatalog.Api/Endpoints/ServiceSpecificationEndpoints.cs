@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.ServiceCatalog.Application.Commands.ServiceSpecification.AddCharacteristic;
+using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Infrastructure;
 using Obss.ServiceCatalog.Application.Commands.ServiceSpecification.AddCharacteristicValue;
 using Obss.ServiceCatalog.Application.Commands.ServiceSpecification.AddSpecRelationship;
 using Obss.ServiceCatalog.Application.Commands.ServiceSpecification.CreateServiceSpecification;
@@ -18,7 +20,6 @@ using Obss.ServiceCatalog.Application.Queries.GetCharacteristics;
 using Obss.ServiceCatalog.Application.Queries.GetServiceSpecificationById;
 using Obss.ServiceCatalog.Application.Queries.GetServiceSpecifications;
 using Obss.ServiceCatalog.Application.Queries.GetSpecRelationships;
-using Obss.SharedKernel.Application.Abstractions;
 
 namespace Obss.ServiceCatalog.Api.Endpoints;
 
@@ -33,13 +34,11 @@ internal static class ServiceSpecificationEndpoints
             return Results.Created($"/api/v1/service-catalog/service-specifications/{id}", id);
         });
 
-        group.MapGet("/service-specifications", async (string? status, string? brand, int page, int pageSize, HttpContext context, IMediator mediator) =>
+        group.MapGet("/service-specifications", async ([AsParameters] GetServiceSpecificationsQuery query, IMediator mediator, HttpContext httpContext) =>
         {
-            var tenantId = context.RequestServices.GetRequiredService<ICurrentTenant>().TenantId!;
-            var query = new GetServiceSpecificationsQuery(tenantId, status, brand, page, pageSize);
             var (items, total) = await mediator.Send(query);
-            context.Response.Headers.Append("X-Total-Count", total.ToString());
-            context.Response.Headers.Append("X-Result-Count", items.Count.ToString());
+            var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
+            httpContext.Response.SetPaginationHeaders(paginationRequest, total);
             return Results.Ok(items);
         });
 

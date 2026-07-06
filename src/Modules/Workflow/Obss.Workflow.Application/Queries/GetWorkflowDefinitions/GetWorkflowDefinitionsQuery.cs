@@ -9,5 +9,5 @@ public sealed record GetWorkflowDefinitionsQuery(
     string? Category,
     bool? IsActive,
     string? SearchTerm,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<WorkflowDefinitionDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<WorkflowDefinitionDto>>>;

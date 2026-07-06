@@ -13,8 +13,8 @@ public interface ISubscriptionRepository : IRepository<Subscription>
         DateTime? fromDate,
         DateTime? toDate,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Subscription>> GetActiveByCustomerAsync(Guid customerId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Subscription>> GetSubscriptionsDueForRenewalAsync(DateTime upToDate, CancellationToken cancellationToken = default);

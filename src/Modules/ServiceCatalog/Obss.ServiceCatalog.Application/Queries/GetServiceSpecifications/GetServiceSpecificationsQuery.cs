@@ -7,6 +7,6 @@ public sealed record GetServiceSpecificationsQuery(
     string TenantId,
     string? Status = null,
     string? Brand = null,
-    int Page = 1,
-    int PageSize = 20
+    int Offset = 0,
+    int Limit = 20
 ) : IRequest<(List<ServiceSpecificationDto> Items, int TotalCount)>;

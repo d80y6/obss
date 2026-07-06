@@ -9,8 +9,8 @@ public interface IWorkflowInstanceRepository : IRepository<WorkflowInstance>
         string? status,
         string? entityType,
         Guid? entityId,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<WorkflowTaskInstance>> GetPendingTasksAsync(CancellationToken cancellationToken = default);

@@ -10,7 +10,7 @@ public interface INetworkElementRepository : IRepository<NetworkElement>
         string? type,
         string? status,
         string? location,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 }

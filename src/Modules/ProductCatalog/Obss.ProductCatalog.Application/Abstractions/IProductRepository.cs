@@ -12,7 +12,7 @@ public interface IProductRepository : IRepository<Product>
         ProductType? productType,
         LifecycleStatus? status,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 }

@@ -11,5 +11,5 @@ public sealed record GetAuditEntriesQuery(
     string? PerformedById,
     DateTime? FromDate,
     DateTime? ToDate,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<AuditEntryDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<AuditEntryDto>>>;

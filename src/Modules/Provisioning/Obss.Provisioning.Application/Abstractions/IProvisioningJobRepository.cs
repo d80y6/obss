@@ -10,8 +10,8 @@ public interface IProvisioningJobRepository : IRepository<ProvisioningJob>
         Guid? orderId,
         string? status,
         Guid? serviceId,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<ProvisioningJob>> GetQueuedJobsAsync(CancellationToken cancellationToken = default);
 }

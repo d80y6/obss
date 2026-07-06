@@ -26,8 +26,8 @@ public sealed class UsageRecordRepository : EfRepository<UsageRecord>, IUsageRec
         Guid subscriptionId,
         DateTime? from,
         DateTime? to,
-        int page = 1,
-        int pageSize = 50,
+        int offset = 0,
+        int limit = 50,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -42,8 +42,8 @@ public sealed class UsageRecordRepository : EfRepository<UsageRecord>, IUsageRec
 
         return await query
             .OrderByDescending(r => r.RecordedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
     }
 

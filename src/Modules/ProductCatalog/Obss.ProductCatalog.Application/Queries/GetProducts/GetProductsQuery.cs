@@ -11,5 +11,5 @@ public sealed record GetProductsQuery(
     ProductType? ProductType,
     LifecycleStatus? Status,
     string? SearchTerm,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<PaginatedResult<ProductDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<PaginatedResult<ProductDto>>>;

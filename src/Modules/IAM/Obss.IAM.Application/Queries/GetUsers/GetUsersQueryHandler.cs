@@ -22,8 +22,8 @@ public sealed class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, Result
             request.TenantId,
             request.IsActive,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = users.Adapt<List<UserDto>>();

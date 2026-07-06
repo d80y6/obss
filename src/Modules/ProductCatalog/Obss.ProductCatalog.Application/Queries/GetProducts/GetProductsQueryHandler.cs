@@ -23,8 +23,8 @@ public sealed class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, 
             request.ProductType,
             request.Status,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = new PaginatedResult<ProductDto>(

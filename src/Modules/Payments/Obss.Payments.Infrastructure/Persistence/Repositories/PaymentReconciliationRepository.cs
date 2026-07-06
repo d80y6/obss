@@ -36,8 +36,8 @@ public sealed class PaymentReconciliationRepository : EfRepository<PaymentReconc
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -55,8 +55,8 @@ public sealed class PaymentReconciliationRepository : EfRepository<PaymentReconc
 
         query = query
             .OrderByDescending(r => r.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

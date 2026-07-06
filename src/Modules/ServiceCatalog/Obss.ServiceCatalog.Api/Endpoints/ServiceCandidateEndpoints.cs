@@ -3,11 +3,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.ServiceCatalog.Application.Commands.ServiceCandidate.CreateServiceCandidate;
+using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Infrastructure;
 using Obss.ServiceCatalog.Application.Commands.ServiceCandidate.DeleteServiceCandidate;
 using Obss.ServiceCatalog.Application.Commands.ServiceCandidate.UpdateServiceCandidate;
 using Obss.ServiceCatalog.Application.Queries.GetServiceCandidateById;
 using Obss.ServiceCatalog.Application.Queries.GetServiceCandidates;
-using Obss.SharedKernel.Application.Abstractions;
 
 namespace Obss.ServiceCatalog.Api.Endpoints;
 
@@ -21,13 +22,11 @@ internal static class ServiceCandidateEndpoints
             return Results.Created($"/api/v1/service-catalog/service-candidates/{id}", id);
         });
 
-        group.MapGet("/service-candidates", async (string? status, Guid? categoryId, int page, int pageSize, HttpContext context, IMediator mediator) =>
+        group.MapGet("/service-candidates", async ([AsParameters] GetServiceCandidatesQuery query, IMediator mediator, HttpContext httpContext) =>
         {
-            var tenantId = context.RequestServices.GetRequiredService<ICurrentTenant>().TenantId!;
-            var query = new GetServiceCandidatesQuery(tenantId, categoryId, status, page, pageSize);
             var (items, total) = await mediator.Send(query);
-            context.Response.Headers.Append("X-Total-Count", total.ToString());
-            context.Response.Headers.Append("X-Result-Count", items.Count.ToString());
+            var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
+            httpContext.Response.SetPaginationHeaders(paginationRequest, total);
             return Results.Ok(items);
         });
 

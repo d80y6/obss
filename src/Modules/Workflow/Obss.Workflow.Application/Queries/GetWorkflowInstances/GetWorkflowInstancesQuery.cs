@@ -8,5 +8,5 @@ public sealed record GetWorkflowInstancesQuery(
     string? Status,
     string? EntityType,
     Guid? EntityId,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<WorkflowInstanceDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<WorkflowInstanceDto>>>;

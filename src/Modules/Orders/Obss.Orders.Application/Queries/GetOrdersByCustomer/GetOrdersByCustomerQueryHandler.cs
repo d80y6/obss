@@ -20,8 +20,8 @@ public sealed class GetOrdersByCustomerQueryHandler : IRequestHandler<GetOrdersB
     {
         var orders = await _orderRepository.GetByCustomerAsync(
             request.CustomerId,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var totalCount = await _orderRepository.GetCountAsync(request.CustomerId, null, null, null, cancellationToken);

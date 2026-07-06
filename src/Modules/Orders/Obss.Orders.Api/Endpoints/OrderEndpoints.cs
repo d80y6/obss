@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.Orders.Application.Commands.AddOrderItem;
+using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Infrastructure;
 using Obss.Orders.Application.Commands.ApproveOrder;
 using Obss.Orders.Application.Commands.CancelOrder;
 using Obss.Orders.Application.Commands.CompleteOrderFulfillment;
@@ -45,8 +47,8 @@ public static class OrderEndpoints
             if (!result.IsSuccess)
                 return (IResult)TypedResults.BadRequest(result.Error);
 
-            httpContext.Response.Headers.Append("X-Total-Count", result.Value.TotalCount.ToString());
-            httpContext.Response.Headers.Append("X-Result-Count", result.Value.Items.Count.ToString());
+            var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
+            httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
         });
 
@@ -59,8 +61,8 @@ public static class OrderEndpoints
             if (!result.IsSuccess)
                 return (IResult)TypedResults.BadRequest(result.Error);
 
-            httpContext.Response.Headers.Append("X-Total-Count", result.Value.TotalCount.ToString());
-            httpContext.Response.Headers.Append("X-Result-Count", result.Value.Items.Count.ToString());
+            var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
+            httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
         });
 

@@ -14,13 +14,13 @@ public interface IOrderRepository : IRepository<Order>
         DateTime? toDate = null,
         string? orderType = null,
         string? searchTerm = null,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Order>> GetByCustomerAsync(
         Guid customerId,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default);
     Task<int> GetCountAsync(
         Guid? customerId = null,

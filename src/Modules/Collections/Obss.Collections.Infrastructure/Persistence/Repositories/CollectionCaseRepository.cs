@@ -24,15 +24,15 @@ public sealed class CollectionCaseRepository : EfRepository<CollectionCase>, ICo
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<CollectionCase>> FindPagedAsync(Expression<Func<CollectionCase, bool>> predicate, int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CollectionCase>> FindPagedAsync(Expression<Func<CollectionCase, bool>> predicate, int offset, int limit, CancellationToken cancellationToken = default)
     {
         return await DbSet
             .Include(c => c.Actions)
             .Include(c => c.PaymentArrangements)
             .Where(predicate)
             .OrderByDescending(c => c.OpenedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
     }
 

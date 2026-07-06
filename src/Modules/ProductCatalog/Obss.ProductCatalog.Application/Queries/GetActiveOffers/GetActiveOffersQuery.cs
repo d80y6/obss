@@ -9,5 +9,5 @@ namespace Obss.ProductCatalog.Application.Queries.GetActiveOffers;
 public sealed record GetActiveOffersQuery(
     OfferType? OfferType,
     string? SearchTerm,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<PaginatedResult<OfferDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<PaginatedResult<OfferDto>>>;

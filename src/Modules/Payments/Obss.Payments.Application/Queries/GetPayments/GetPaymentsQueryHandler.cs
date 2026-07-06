@@ -22,8 +22,8 @@ public sealed class GetPaymentsQueryHandler : IRequestHandler<GetPaymentsQuery, 
             request.Status,
             request.FromDate,
             request.ToDate,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = payments.Adapt<List<PaymentDto>>();

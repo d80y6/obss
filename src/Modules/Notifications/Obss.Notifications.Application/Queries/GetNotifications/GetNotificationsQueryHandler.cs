@@ -27,8 +27,8 @@ public sealed class GetNotificationsQueryHandler
             request.Status,
             request.FromDate,
             request.ToDate,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = notifications.Adapt<List<NotificationDto>>();

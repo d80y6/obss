@@ -22,8 +22,8 @@ public sealed class GetNetworkElementsQueryHandler : IRequestHandler<GetNetworkE
             request.Type,
             request.Status,
             request.Location,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = elements.Adapt<List<NetworkElementDto>>();

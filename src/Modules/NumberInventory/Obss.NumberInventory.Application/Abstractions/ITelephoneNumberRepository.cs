@@ -23,7 +23,7 @@ public interface ITelephoneNumberRepository : IRepository<TelephoneNumber>
         string? prefix,
         NumberStatus? status,
         NumberType? type,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 }

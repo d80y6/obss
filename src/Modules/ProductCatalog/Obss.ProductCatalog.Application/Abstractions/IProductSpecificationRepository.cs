@@ -11,7 +11,7 @@ public interface IProductSpecificationRepository : IRepository<ProductSpecificat
         string? searchTerm,
         LifecycleStatus? status,
         string? brand,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 }

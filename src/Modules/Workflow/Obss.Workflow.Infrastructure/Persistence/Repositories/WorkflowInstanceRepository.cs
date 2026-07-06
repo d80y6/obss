@@ -16,8 +16,8 @@ public sealed class WorkflowInstanceRepository : EfRepository<WorkflowInstance>,
         string? status,
         string? entityType,
         Guid? entityId,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -34,8 +34,8 @@ public sealed class WorkflowInstanceRepository : EfRepository<WorkflowInstance>,
         query = query
             .OrderByDescending(i => i.StartedAt)
             .ThenByDescending(i => i.CreatedBy)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

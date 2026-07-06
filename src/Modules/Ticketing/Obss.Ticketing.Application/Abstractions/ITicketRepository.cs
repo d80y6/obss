@@ -17,8 +17,8 @@ public interface ITicketRepository : IRepository<Ticket>
         string? assignedTo,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Ticket>> GetOpenTicketsAsync(string? tenantId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Ticket>> GetSlaBreachedTicketsAsync(string? tenantId, CancellationToken cancellationToken = default);

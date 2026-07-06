@@ -20,8 +20,8 @@ public sealed class GetCatalogsQueryHandler : IRequestHandler<GetCatalogsQuery, 
         var items = await _repository.GetFilteredAsync(
             request.SearchTerm,
             request.CatalogType,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var totalCount = await _repository.GetTotalCountAsync(

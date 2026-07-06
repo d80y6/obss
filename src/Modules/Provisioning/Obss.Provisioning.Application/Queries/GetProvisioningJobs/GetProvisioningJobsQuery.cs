@@ -8,5 +8,5 @@ public sealed record GetProvisioningJobsQuery(
     Guid? OrderId,
     string? Status,
     Guid? ServiceId,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<ProvisioningJobDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<ProvisioningJobDto>>>;

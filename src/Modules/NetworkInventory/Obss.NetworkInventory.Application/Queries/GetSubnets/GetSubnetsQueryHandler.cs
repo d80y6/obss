@@ -33,8 +33,8 @@ public sealed class GetSubnetsQueryHandler : IRequestHandler<GetSubnetsQuery, Re
 
         var result = filtered
             .OrderBy(s => s.Name)
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip(request.Offset)
+            .Take(request.Limit)
             .ToList()
             .Adapt<List<SubnetDto>>();
 

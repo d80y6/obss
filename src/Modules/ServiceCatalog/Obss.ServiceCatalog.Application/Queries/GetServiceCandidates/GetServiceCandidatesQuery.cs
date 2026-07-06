@@ -7,6 +7,6 @@ public sealed record GetServiceCandidatesQuery(
     string TenantId,
     Guid? CategoryId = null,
     string? Status = null,
-    int Page = 1,
-    int PageSize = 20
+    int Offset = 0,
+    int Limit = 20
 ) : IRequest<(List<ServiceCandidateDto> Items, int TotalCount)>;

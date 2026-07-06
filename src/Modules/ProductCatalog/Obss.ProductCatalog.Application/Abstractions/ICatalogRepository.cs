@@ -8,8 +8,8 @@ public interface ICatalogRepository : IRepository<Catalog>
     Task<IReadOnlyList<Catalog>> GetFilteredAsync(
         string? searchTerm,
         string? catalogType,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 
     Task<int> GetTotalCountAsync(

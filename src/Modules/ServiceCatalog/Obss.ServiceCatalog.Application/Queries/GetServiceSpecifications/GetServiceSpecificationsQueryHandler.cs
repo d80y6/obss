@@ -21,8 +21,8 @@ internal sealed class GetServiceSpecificationsQueryHandler(IServiceSpecification
 
         var total = await items.CountAsync(cancellationToken);
         var result = await items
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
+            .Skip(request.Offset)
+            .Take(request.Limit)
             .ToListAsync(cancellationToken);
 
         return (result.Adapt<List<ServiceSpecificationDto>>(), total);

@@ -67,8 +67,8 @@ public sealed class OfferRepository : EfRepository<Offer>, IOfferRepository
     public async Task<(IReadOnlyList<Offer> Items, int TotalCount)> GetFilteredAsync(
         OfferType? offerType,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -93,8 +93,8 @@ public sealed class OfferRepository : EfRepository<Offer>, IOfferRepository
         var items = await query
             .OrderBy(o => o.SortOrder)
             .ThenBy(o => o.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);

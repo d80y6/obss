@@ -22,8 +22,8 @@ public sealed class GetWorkflowDefinitionsQueryHandler : IRequestHandler<GetWork
             request.Category,
             request.IsActive,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = definitions.Adapt<List<WorkflowDefinitionDto>>();

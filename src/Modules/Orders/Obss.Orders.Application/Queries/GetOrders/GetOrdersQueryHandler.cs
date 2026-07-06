@@ -32,8 +32,8 @@ public sealed class GetOrdersQueryHandler : IRequestHandler<GetOrdersQuery, Resu
             request.ToDate,
             request.OrderType,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var totalCount = await _orderRepository.GetCountAsync(

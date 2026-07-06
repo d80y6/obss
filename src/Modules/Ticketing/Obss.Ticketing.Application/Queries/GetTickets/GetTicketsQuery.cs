@@ -13,5 +13,5 @@ public sealed record GetTicketsQuery(
     string? AssignedTo,
     DateTime? FromDate,
     DateTime? ToDate,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<TicketSummaryDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<TicketSummaryDto>>>;

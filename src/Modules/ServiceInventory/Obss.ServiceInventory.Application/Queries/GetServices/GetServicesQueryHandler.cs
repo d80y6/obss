@@ -30,8 +30,8 @@ public sealed class GetServicesQueryHandler : IRequestHandler<GetServicesQuery, 
             request.CustomerId,
             serviceType,
             status,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = services.Adapt<List<ServiceDto>>();

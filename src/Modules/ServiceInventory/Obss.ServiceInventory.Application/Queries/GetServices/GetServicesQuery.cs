@@ -8,5 +8,5 @@ public sealed record GetServicesQuery(
     Guid? CustomerId,
     string? ServiceType,
     string? Status,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<ServiceDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<ServiceDto>>>;

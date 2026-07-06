@@ -7,5 +7,5 @@ namespace Obss.NetworkInventory.Application.Queries.GetSubnets;
 public sealed record GetSubnetsQuery(
     string? Status,
     int? VLANId,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<SubnetDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<SubnetDto>>>;

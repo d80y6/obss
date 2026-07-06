@@ -27,16 +27,16 @@ public sealed class SubscriptionRepository : EfRepository<Subscription>, ISubscr
         DateTime? fromDate,
         DateTime? toDate,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = BuildFilteredQuery(customerId, status, fromDate, toDate, searchTerm);
 
         query = query
             .OrderByDescending(s => s.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

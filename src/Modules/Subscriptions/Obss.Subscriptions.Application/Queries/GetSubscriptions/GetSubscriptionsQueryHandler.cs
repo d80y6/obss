@@ -24,8 +24,8 @@ public sealed class GetSubscriptionsQueryHandler : IRequestHandler<GetSubscripti
             request.FromDate,
             request.ToDate,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var totalCount = await _subscriptionRepository.GetFilteredCountAsync(

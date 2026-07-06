@@ -22,8 +22,8 @@ public sealed class NetworkElementRepository : EfRepository<NetworkElement>, INe
         string? type,
         string? status,
         string? location,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -45,8 +45,8 @@ public sealed class NetworkElementRepository : EfRepository<NetworkElement>, INe
 
         query = query
             .OrderBy(e => e.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

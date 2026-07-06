@@ -26,8 +26,8 @@ public sealed class PaymentRepository : EfRepository<Payment>, IPaymentRepositor
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -49,8 +49,8 @@ public sealed class PaymentRepository : EfRepository<Payment>, IPaymentRepositor
 
         query = query
             .OrderByDescending(p => p.PaidAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }
@@ -70,8 +70,8 @@ public sealed class PaymentRepository : EfRepository<Payment>, IPaymentRepositor
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default)
     {
         var query = Context.Set<Refund>().AsQueryable();
@@ -90,8 +90,8 @@ public sealed class PaymentRepository : EfRepository<Payment>, IPaymentRepositor
 
         query = query
             .OrderByDescending(r => r.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

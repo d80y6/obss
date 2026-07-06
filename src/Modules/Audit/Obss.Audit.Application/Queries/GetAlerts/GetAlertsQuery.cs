@@ -10,5 +10,5 @@ public sealed record GetAlertsQuery(
     bool? IsAcknowledged,
     DateTime? FromDate,
     DateTime? ToDate,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<AuditAlertDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<AuditAlertDto>>>;

@@ -11,8 +11,8 @@ public interface IServiceRepository : IRepository<Service>
         Guid? customerId,
         ServiceType? serviceType,
         ServiceStatus? status,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
     Task<int> CountFilteredAsync(
         Guid? customerId,

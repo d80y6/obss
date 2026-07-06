@@ -10,8 +10,8 @@ public interface IUsageRecordRepository : IRepository<UsageRecord>
         Guid subscriptionId,
         DateTime? from,
         DateTime? to,
-        int page = 1,
-        int pageSize = 50,
+        int offset = 0,
+        int limit = 50,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<UsageRecord>> GetByDateRangeAsync(
         DateTime from,

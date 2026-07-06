@@ -27,8 +27,8 @@ public sealed class ProductRepository : EfRepository<Product>, IProductRepositor
         ProductType? productType,
         LifecycleStatus? status,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -63,8 +63,8 @@ public sealed class ProductRepository : EfRepository<Product>, IProductRepositor
 
         var items = await query
             .OrderBy(p => p.Name)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
 
         return (items, totalCount);

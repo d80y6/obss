@@ -8,5 +8,5 @@ namespace Obss.ProductCatalog.Application.Queries.GetCatalogs;
 public sealed record GetCatalogsQuery(
     string? SearchTerm,
     string? CatalogType,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<PaginatedResult<CatalogDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<PaginatedResult<CatalogDto>>>;

@@ -12,8 +12,8 @@ public interface INotificationRepository : IRepository<Notification>
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Notification>> GetPendingAsync(

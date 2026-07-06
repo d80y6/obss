@@ -14,5 +14,5 @@ public interface ICollectionCaseRepository : IRepository<CollectionCase>
     Task<IReadOnlyList<CollectionCase>> GetActiveCasesAsync(CancellationToken cancellationToken = default);
     Task<CollectionCase?> GetByCustomerWithActiveArrangementAsync(Guid customerId, CancellationToken cancellationToken = default);
     Task<Dictionary<int, (int CaseCount, int CustomerCount, decimal TotalAmount)>> GetAgingBucketsAsync(string currency, CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<CollectionCase>> FindPagedAsync(Expression<Func<CollectionCase, bool>> predicate, int page, int pageSize, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CollectionCase>> FindPagedAsync(Expression<Func<CollectionCase, bool>> predicate, int offset, int limit, CancellationToken cancellationToken = default);
 }

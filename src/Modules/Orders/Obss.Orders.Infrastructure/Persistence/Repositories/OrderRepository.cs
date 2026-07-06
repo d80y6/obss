@@ -30,8 +30,8 @@ public sealed class OrderRepository : EfRepository<Order>, IOrderRepository
         DateTime? toDate = null,
         string? orderType = null,
         string? searchTerm = null,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -74,16 +74,16 @@ public sealed class OrderRepository : EfRepository<Order>, IOrderRepository
 
         query = query
             .OrderByDescending(o => o.OrderDate)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<Order>> GetByCustomerAsync(
         Guid customerId,
-        int page = 1,
-        int pageSize = 20,
+        int offset = 0,
+        int limit = 20,
         CancellationToken cancellationToken = default)
     {
         return await DbSet
@@ -91,8 +91,8 @@ public sealed class OrderRepository : EfRepository<Order>, IOrderRepository
             .Include(o => o.Fulfillment)
             .Where(o => o.CustomerId == customerId)
             .OrderByDescending(o => o.OrderDate)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .Skip(offset)
+            .Take(limit)
             .ToListAsync(cancellationToken);
     }
 

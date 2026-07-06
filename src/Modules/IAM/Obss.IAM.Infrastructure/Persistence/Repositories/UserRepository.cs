@@ -26,8 +26,8 @@ public sealed class UserRepository : EfRepository<User>, IUserRepository
         string? tenantId,
         bool? isActive,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -56,8 +56,8 @@ public sealed class UserRepository : EfRepository<User>, IUserRepository
 
         query = query
             .OrderBy(u => u.Username)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

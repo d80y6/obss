@@ -14,6 +14,8 @@ using Obss.Rating.Application.Queries.GetPromotions;
 using Obss.Rating.Application.Queries.GetRules;
 using Obss.Rating.Application.Queries.GetUnratedRecords;
 using Obss.Rating.Application.Queries.GetUsageBySubscription;
+using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Infrastructure;
 
 namespace Obss.Rating.Api.Endpoints;
 
@@ -57,11 +59,11 @@ public static class RatingEndpoints
             Guid subscriptionId,
             DateTime? from,
             DateTime? to,
-            int page,
-            int pageSize,
-            IMediator mediator) =>
+            IMediator mediator,
+            HttpContext httpContext,
+            [AsParameters] TmfPaginationRequest pagination) =>
         {
-            var query = new GetUsageBySubscriptionQuery(subscriptionId, from, to, page, pageSize);
+            var query = new GetUsageBySubscriptionQuery(subscriptionId, from, to, pagination.Offset, pagination.Limit);
             var result = await mediator.Send(query);
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)

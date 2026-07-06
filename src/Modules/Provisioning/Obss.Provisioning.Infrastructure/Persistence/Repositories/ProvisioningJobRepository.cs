@@ -23,8 +23,8 @@ public sealed class ProvisioningJobRepository : EfRepository<ProvisioningJob>, I
         Guid? orderId,
         string? status,
         Guid? serviceId,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet
@@ -42,8 +42,8 @@ public sealed class ProvisioningJobRepository : EfRepository<ProvisioningJob>, I
 
         query = query
             .OrderByDescending(j => j.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

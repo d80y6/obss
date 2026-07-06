@@ -19,8 +19,8 @@ public sealed class NotificationRepository : EfRepository<Notification>, INotifi
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -45,8 +45,8 @@ public sealed class NotificationRepository : EfRepository<Notification>, INotifi
 
         query = query
             .OrderByDescending(n => n.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

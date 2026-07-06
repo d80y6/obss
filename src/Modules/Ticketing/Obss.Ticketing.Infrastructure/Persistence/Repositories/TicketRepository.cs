@@ -34,8 +34,8 @@ public sealed class TicketRepository : EfRepository<Ticket>, ITicketRepository
         string? assignedTo,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsQueryable();
@@ -66,8 +66,8 @@ public sealed class TicketRepository : EfRepository<Ticket>, ITicketRepository
 
         query = query
             .OrderByDescending(t => t.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip(offset)
+            .Take(limit);
 
         return await query.ToListAsync(cancellationToken);
     }

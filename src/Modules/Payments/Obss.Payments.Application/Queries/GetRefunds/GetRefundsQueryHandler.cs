@@ -22,8 +22,8 @@ public sealed class GetRefundsQueryHandler : IRequestHandler<GetRefundsQuery, Re
             request.Status,
             request.FromDate,
             request.ToDate,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = refunds.Adapt<List<RefundDto>>();

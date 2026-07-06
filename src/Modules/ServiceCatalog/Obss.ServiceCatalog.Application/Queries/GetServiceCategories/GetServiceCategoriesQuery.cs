@@ -7,6 +7,6 @@ public sealed record GetServiceCategoriesQuery(
     string TenantId,
     Guid? ParentCategoryId = null,
     string? Status = null,
-    int Page = 1,
-    int PageSize = 20
+    int Offset = 0,
+    int Limit = 20
 ) : IRequest<(List<ServiceCategoryDto> Items, int TotalCount)>;

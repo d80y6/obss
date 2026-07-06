@@ -8,5 +8,5 @@ public sealed record GetUsageBySubscriptionQuery(
     Guid SubscriptionId,
     DateTime? From,
     DateTime? To,
-    int Page = 1,
-    int PageSize = 50) : IRequest<Result<IReadOnlyList<UsageRecordDto>>>;
+    int Offset = 0,
+    int Limit = 50) : IRequest<Result<IReadOnlyList<UsageRecordDto>>>;

@@ -22,8 +22,8 @@ public sealed class GetProductSpecificationsQueryHandler : IRequestHandler<GetPr
             request.SearchTerm,
             request.Status,
             request.Brand,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         return Result.Success(new PaginatedResult<ProductSpecificationDto>(

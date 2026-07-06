@@ -21,8 +21,8 @@ public sealed class GetProvisioningJobsQueryHandler : IRequestHandler<GetProvisi
             request.OrderId,
             request.Status,
             request.ServiceId,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         return Result.Success(jobs.Adapt<IReadOnlyList<ProvisioningJobDto>>());

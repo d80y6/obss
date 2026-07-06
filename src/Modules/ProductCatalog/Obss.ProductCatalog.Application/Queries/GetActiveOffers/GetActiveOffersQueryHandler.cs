@@ -21,8 +21,8 @@ public sealed class GetActiveOffersQueryHandler : IRequestHandler<GetActiveOffer
         var (items, totalCount) = await _offerRepository.GetFilteredAsync(
             request.OfferType,
             request.SearchTerm,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = new PaginatedResult<OfferDto>(

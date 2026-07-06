@@ -10,7 +10,7 @@ public interface IWorkflowDefinitionRepository : IRepository<WorkflowDefinition>
         string? category,
         bool? isActive,
         string? searchTerm,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 }

@@ -12,8 +12,8 @@ public interface IBillRepository : IRepository<Bill>
         BillStatus? status,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Bill>> GetOpenBillsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Bill>> GetBillsDueForGenerationAsync(DateTime upToDate, CancellationToken cancellationToken = default);

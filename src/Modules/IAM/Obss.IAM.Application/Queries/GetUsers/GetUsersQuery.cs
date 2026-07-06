@@ -8,5 +8,5 @@ public sealed record GetUsersQuery(
     string? TenantId,
     bool? IsActive,
     string? SearchTerm,
-    int Page = 1,
-    int PageSize = 20) : IRequest<Result<IReadOnlyList<UserDto>>>;
+    int Offset = 0,
+    int Limit = 20) : IRequest<Result<IReadOnlyList<UserDto>>>;

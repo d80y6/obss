@@ -12,8 +12,8 @@ public interface IAuditAlertRepository : IRepository<AuditAlert>
         bool? isAcknowledged,
         DateTime? fromDate,
         DateTime? toDate,
-        int page,
-        int pageSize,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<AuditAlert>> GetUnacknowledgedAsync(

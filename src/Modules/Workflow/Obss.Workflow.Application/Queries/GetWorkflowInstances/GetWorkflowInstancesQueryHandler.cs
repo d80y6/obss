@@ -21,8 +21,8 @@ public sealed class GetWorkflowInstancesQueryHandler : IRequestHandler<GetWorkfl
             request.Status,
             request.EntityType,
             request.EntityId,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var result = instances.Adapt<List<WorkflowInstanceDto>>();

@@ -21,8 +21,8 @@ public sealed class SearchNumbersQueryHandler : IRequestHandler<SearchNumbersQue
             request.Prefix,
             request.Status,
             request.Type,
-            request.Page,
-            request.PageSize,
+            request.Offset,
+            request.Limit,
             cancellationToken);
 
         var dto = numbers.Adapt<IReadOnlyList<TelephoneNumberDto>>();
