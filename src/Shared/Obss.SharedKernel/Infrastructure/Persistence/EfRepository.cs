@@ -98,6 +98,17 @@ public class EfRepository<T> : IRepository<T>
         return await ApplySpecification(specification).AnyAsync(cancellationToken);
     }
 
+    public virtual async Task<(IReadOnlyList<T> Items, int TotalCount)> GetPaginatedAsync(int offset, int limit, CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.AsQueryable();
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+        return (items, totalCount);
+    }
+
     protected virtual IQueryable<T> ApplySpecification(Specification<T> specification)
     {
         return SpecificationEvaluator.GetQuery(DbSet.AsQueryable(), specification);

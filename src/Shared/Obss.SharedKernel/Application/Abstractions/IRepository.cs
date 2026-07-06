@@ -9,4 +9,5 @@ public interface IRepository<T> where T : class
     Task DeleteAsync(T entity, CancellationToken cancellationToken = default);
     Task<int> CountAsync(CancellationToken cancellationToken = default);
     Task<bool> ExistsAsync(CancellationToken cancellationToken = default);
+    Task<(IReadOnlyList<T> Items, int TotalCount)> GetPaginatedAsync(int offset, int limit, CancellationToken cancellationToken = default);
 }
