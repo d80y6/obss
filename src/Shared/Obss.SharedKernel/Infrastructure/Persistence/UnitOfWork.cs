@@ -18,25 +18,29 @@ public sealed class UnitOfWork : IUnitOfWork
     {
         var dbContexts = _serviceProvider.GetServices<EfDbContext>();
         var logger = _serviceProvider.GetService<ILogger<UnitOfWork>>();
-        var total = 0;
-        var hasErrors = false;
+        var contextsWithChanges = dbContexts
+            .Where(c => c.ChangeTracker.HasChanges())
+            .ToList();
 
-        foreach (var ctx in dbContexts.Where(c => c.ChangeTracker.HasChanges()))
+        if (contextsWithChanges.Count > 1)
         {
-            try
-            {
-                total += await ctx.SaveChangesAsync(cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                hasErrors = true;
-                logger?.LogError(ex, "Failed to save changes in {DbContextType}", ctx.GetType().Name);
-            }
+            var contextNames = string.Join(", ", contextsWithChanges.Select(c => c.GetType().Name));
+            logger?.LogError(
+                "UnitOfWork detected {Count} DbContexts with changes: {ContextNames}. " +
+                "Each handler must save only its own module's context. " +
+                "Cross-module operations must use integration events.",
+                contextsWithChanges.Count, contextNames);
+
+            throw new InvalidOperationException(
+                $"UnitOfWork detected {contextsWithChanges.Count} DbContexts with pending changes: {contextNames}. " +
+                $"Each command handler must save only its own module's context. " +
+                "Cross-module operations must use integration events.");
         }
 
-        if (hasErrors)
+        var total = 0;
+        foreach (var ctx in contextsWithChanges)
         {
-            throw new InvalidOperationException("One or more database contexts failed to save changes. See inner logs for details.");
+            total += await ctx.SaveChangesAsync(cancellationToken);
         }
 
         return total;
