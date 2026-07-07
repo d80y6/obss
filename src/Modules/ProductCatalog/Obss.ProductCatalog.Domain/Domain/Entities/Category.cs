@@ -4,7 +4,7 @@ using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.ProductCatalog.Domain.Domain.Entities;
 
-public class Category : Entity<Guid>, ITenantEntity
+public class Category : AggregateRoot<Guid>, ITenantEntity
 {
     private Category() { }
 
