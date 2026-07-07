@@ -4,7 +4,7 @@ using Obss.Subscriptions.Domain.ValueObjects;
 
 namespace Obss.Subscriptions.Domain.Entities;
 
-public class SubscriptionEntitlement : Entity<Guid>
+public class SubscriptionEntitlement : AggregateRoot<Guid>
 {
     private SubscriptionEntitlement() { }
 
