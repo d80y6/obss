@@ -12,4 +12,8 @@ public sealed record SubscriptionSummaryDto(
     DateTime StartDate,
     DateTime? EndDate,
     DateTime? RenewalDate,
-    DateTime? ActivationDate);
+    DateTime? ActivationDate,
+    string? Name,
+    string? Description,
+    string? ExternalId,
+    string? Href);

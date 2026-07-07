@@ -17,7 +17,9 @@ public sealed record OrderItemDto(
     DateTime StartDate,
     DateTime? EndDate,
     bool IsActive,
-    string? ServiceType = null);
+    string? ServiceType = null,
+    string? Action = null,
+    string? ItemState = null);
 
 public sealed record OrderPaymentDto(
     Guid Id,

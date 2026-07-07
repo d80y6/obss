@@ -38,6 +38,8 @@ public class Subnet : AggregateRoot<Guid>
     public int VLANId { get; private set; }
     public string? Location { get; private set; }
     public SubnetStatus Status { get; private set; }
+    public string? Href { get; private set; }
+    public string? ExternalId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     public static Subnet Create(
@@ -50,6 +52,13 @@ public class Subnet : AggregateRoot<Guid>
         string? location = null)
     {
         return new Subnet(Guid.NewGuid(), tenantId, network, name, description, gateway, vlanId, location);
+    }
+
+    public void UpdateTmfDetails(string? externalId = null, string? description = null, string? href = null)
+    {
+        ExternalId = externalId ?? ExternalId;
+        Description = description ?? Description;
+        Href = href ?? Href;
     }
 
     public void Update(string name, string? description, string? gateway, int vlanId, string? location)

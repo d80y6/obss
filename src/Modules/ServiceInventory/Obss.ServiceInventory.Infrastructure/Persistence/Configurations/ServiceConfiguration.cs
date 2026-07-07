@@ -63,6 +63,60 @@ public sealed class ServiceConfiguration : IEntityTypeConfiguration<Service>
             .HasColumnName("location")
             .HasMaxLength(500);
 
+        builder.Property(s => s.Href)
+            .HasColumnName("href")
+            .HasMaxLength(500);
+
+        builder.Property(s => s.AtType)
+            .HasColumnName("at_type")
+            .HasMaxLength(100);
+
+        builder.Property(s => s.AtBaseType)
+            .HasColumnName("at_base_type")
+            .HasMaxLength(100);
+
+        builder.Property(s => s.AtSchemaLocation)
+            .HasColumnName("at_schema_location")
+            .HasMaxLength(500);
+
+        builder.Property(s => s.Name)
+            .HasColumnName("name")
+            .HasMaxLength(200);
+
+        builder.Property(s => s.Description)
+            .HasColumnName("description")
+            .HasMaxLength(2000);
+
+        builder.Property(s => s.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(200);
+
+        builder.Property(s => s.Place)
+            .HasColumnName("place")
+            .HasMaxLength(500);
+
+        builder.Property(s => s.Category)
+            .HasColumnName("category")
+            .HasMaxLength(100);
+
+        builder.Property(s => s.StartDate)
+            .HasColumnName("start_date");
+
+        builder.Property(s => s.CompletionDate)
+            .HasColumnName("completion_date");
+
+        builder.Property(s => s.RelatedPartyId)
+            .HasColumnName("related_party_id")
+            .HasMaxLength(100);
+
+        builder.Property(s => s.RelatedPartyName)
+            .HasColumnName("related_party_name")
+            .HasMaxLength(200);
+
+        builder.Property(s => s.RelatedPartyRole)
+            .HasColumnName("related_party_role")
+            .HasMaxLength(100);
+
         builder.Property(s => s.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();

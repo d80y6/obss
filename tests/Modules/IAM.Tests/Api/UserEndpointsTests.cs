@@ -81,7 +81,7 @@ public class UserEndpointsTests
     {
         var command = new CreateUserCommand("tenant1", "johndoe", "john@example.com", "John", "Doe", null, null, null);
         var userDto = new UserDto(Guid.NewGuid(), "tenant1", "johndoe", "john@example.com", "John", "Doe",
-            null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, []);
+            null, null, null, null, null, null, null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, []);
         _mediator.Send(command, Arg.Any<CancellationToken>())
             .Returns(Result.Success(userDto));
 
@@ -113,7 +113,7 @@ public class UserEndpointsTests
     {
         var userId = Guid.NewGuid();
         var userDto = new UserDto(userId, "tenant1", "johndoe", "john@example.com", "John", "Doe",
-            null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, []);
+            null, null, null, null, null, null, null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, []);
         _mediator.Send(Arg.Is<GetUserByIdQuery>(q => q.UserId == userId), Arg.Any<CancellationToken>())
             .Returns(Result.Success(userDto));
 
@@ -146,7 +146,7 @@ public class UserEndpointsTests
         var users = new List<UserDto>
         {
             new(Guid.NewGuid(), "tenant1", "user1", "user1@example.com", "User", "One",
-                null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, [])
+                null, null, null, null, null, null, null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, [])
         };
         _mediator.Send(query, Arg.Any<CancellationToken>())
             .Returns(Result.Success<IReadOnlyList<UserDto>>(users));
@@ -164,7 +164,7 @@ public class UserEndpointsTests
         var userId = Guid.NewGuid();
         var command = new UpdateUserCommand(userId, "NewName", "NewLast", null, null);
         var userDto = new UserDto(userId, "tenant1", "johndoe", "john@example.com", "NewName", "NewLast",
-            null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, []);
+            null, null, null, null, null, null, null, true, false, null, null, DateTime.UtcNow, DateTime.UtcNow, []);
         _mediator.Send(command, Arg.Any<CancellationToken>())
             .Returns(Result.Success(userDto));
 

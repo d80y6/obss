@@ -13,9 +13,9 @@ public sealed record CreateUserCommand(
     string? PhoneNumber,
     string? CountryCode,
     string? ExternalId,
-    string? Title,
-    string? MiddleName,
-    DateTime? BirthDate,
-    string? NationalId,
-    string? PreferredLanguage,
-    string? Gender) : IRequest<Result<UserDto>>;
+    string? Title = null,
+    string? MiddleName = null,
+    DateTime? BirthDate = null,
+    string? NationalId = null,
+    string? PreferredLanguage = null,
+    string? Gender = null) : IRequest<Result<UserDto>>;

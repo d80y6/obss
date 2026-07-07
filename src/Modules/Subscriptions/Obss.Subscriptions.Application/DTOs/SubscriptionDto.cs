@@ -25,8 +25,22 @@ public sealed record SubscriptionDto(
     DateTime? RenewalDate,
     DateTime CreatedAt,
     DateTime UpdatedAt,
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? AtSchemaLocation,
+    string? Name,
+    string? Description,
+    string? ExternalId,
+    string? CompletionDate,
     List<SubscriptionAddOnDto> AddOns,
-    List<SubscriptionServiceDto> Services);
+    List<SubscriptionServiceDto> Services,
+    List<RelatedPartyDto> RelatedParties);
+
+public sealed record RelatedPartyDto(
+    string PartyId,
+    string PartyName,
+    string Role);
 
 public sealed record SubscriptionAddOnDto(
     Guid Id,

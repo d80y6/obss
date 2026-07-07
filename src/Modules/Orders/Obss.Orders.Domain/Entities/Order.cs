@@ -5,10 +5,13 @@ using Obss.SharedKernel.Domain.ValueObjects;
 
 namespace Obss.Orders.Domain.Entities;
 
+public sealed record RelatedParty(string PartyId, string PartyName, string Role);
+
 public class Order : AggregateRoot<Guid>
 {
     private readonly List<OrderItem> _items = [];
     private readonly List<OrderPayment> _payments = [];
+    private readonly List<RelatedParty> _relatedParties = [];
 
     private Order() { }
 
@@ -71,9 +74,17 @@ public class Order : AggregateRoot<Guid>
     public string? NotificationContact { get; private set; }
     public string? ExternalId { get; private set; }
     public Guid? QuoteId { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "Order";
+    public string? AtBaseType { get; private set; } = "ProductOrder";
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? AtSchemaLocation { get; private set; }
+#pragma warning restore S1144
+    public string? CompletionDate { get; private set; }
 
     public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
     public IReadOnlyCollection<OrderPayment> Payments => _payments.AsReadOnly();
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 #pragma warning disable S1144, S2933, S3459, CS0649 // Used by EF Core via reflection
     private OrderFulfillment? _fulfillment;
 #pragma warning restore S1144, S2933, S3459, CS0649
@@ -309,6 +320,21 @@ public class Order : AggregateRoot<Guid>
         if (quoteId.HasValue) QuoteId = quoteId;
         if (billingAddress is not null) BillingAddress = billingAddress;
         if (shippingAddress is not null) ShippingAddress = shippingAddress;
+    }
+
+    public void SetHref(string href)
+    {
+        Href = href;
+    }
+
+    public void UpdateTmfDetails(string? completionDate = null, string? cancellationDate = null, string? cancelledBy = null)
+    {
+        if (completionDate is not null) CompletionDate = completionDate;
+    }
+
+    public void AddRelatedParty(string partyId, string partyName, string role)
+    {
+        _relatedParties.Add(new RelatedParty(partyId, partyName, role));
     }
 
     private static string GenerateOrderNumber()

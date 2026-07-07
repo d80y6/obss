@@ -44,6 +44,16 @@ public class ProvisioningJob : AggregateRoot<Guid>
     public DateTime? StartedAt { get; private set; }
     public DateTime? CompletedAt { get; private set; }
     public string? ErrorMessage { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "ProvisioningJob";
+    public string? AtBaseType { get; private set; } = "ResourceActivation";
+    public string? AtSchemaLocation { get; init; }
+    public string? ExternalId { get; private set; }
+    public string? Priority { get; private set; }
+    public string? CorrelationId { get; private set; }
+    public string? RelatedPartyId { get; init; }
+    public string? RelatedPartyName { get; init; }
+    public string? RelatedPartyRole { get; init; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -141,6 +151,15 @@ public class ProvisioningJob : AggregateRoot<Guid>
     public void AssignService(Guid serviceId)
     {
         ServiceId = serviceId;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateTmfDetails(string? externalId = null, string? priority = null, string? correlationId = null, string? href = null)
+    {
+        ExternalId = externalId ?? ExternalId;
+        Priority = priority ?? Priority;
+        CorrelationId = correlationId ?? CorrelationId;
+        Href = href ?? Href;
         UpdatedAt = DateTime.UtcNow;
     }
 

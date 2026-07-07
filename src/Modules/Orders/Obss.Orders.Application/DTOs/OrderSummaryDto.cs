@@ -15,4 +15,9 @@ public sealed record OrderSummaryDto(
     string? Channel,
     string? Priority,
     DateTime? RequestedStartDate,
-    DateTime? RequestedCompletionDate);
+    DateTime? RequestedCompletionDate,
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? CompletionDate,
+    List<RelatedPartyDto>? RelatedParties);

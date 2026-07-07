@@ -43,6 +43,8 @@ public class NetworkElement : AggregateRoot<Guid>
         ManagementIP = managementIp;
         SNMPCommunity = snmpCommunity;
         IsManaged = isManaged;
+        AtType = "NetworkElement";
+        AtBaseType = "Resource";
         CreatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new NetworkElementAddedDomainEvent(id, tenantId, name, elementType));
@@ -62,6 +64,17 @@ public class NetworkElement : AggregateRoot<Guid>
     public string? ManagementIP { get; private set; }
     public string? SNMPCommunity { get; private set; }
     public bool IsManaged { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; }
+    public string? AtBaseType { get; private set; }
+    public string? AtSchemaLocation { get; private set; }
+    public string? ExternalId { get; private set; }
+    public string? Description { get; private set; }
+    public string? ResourceCategory { get; private set; }
+    public DateTime? StartDate { get; private set; }
+    public string? RelatedPartyId { get; private set; }
+    public string? RelatedPartyName { get; private set; }
+    public string? RelatedPartyRole { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
@@ -141,6 +154,20 @@ public class NetworkElement : AggregateRoot<Guid>
     public void UpdateFirmware(string version)
     {
         SoftwareVersion = version;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateTmfDetails(string? externalId = null, string? description = null, string? resourceCategory = null, DateTime? startDate = null, string? href = null, string? atSchemaLocation = null, string? relatedPartyId = null, string? relatedPartyName = null, string? relatedPartyRole = null)
+    {
+        ExternalId = externalId ?? ExternalId;
+        Description = description ?? Description;
+        ResourceCategory = resourceCategory ?? ResourceCategory;
+        StartDate = startDate ?? StartDate;
+        Href = href ?? Href;
+        AtSchemaLocation = atSchemaLocation ?? AtSchemaLocation;
+        RelatedPartyId = relatedPartyId ?? RelatedPartyId;
+        RelatedPartyName = relatedPartyName ?? RelatedPartyName;
+        RelatedPartyRole = relatedPartyRole ?? RelatedPartyRole;
         UpdatedAt = DateTime.UtcNow;
     }
 

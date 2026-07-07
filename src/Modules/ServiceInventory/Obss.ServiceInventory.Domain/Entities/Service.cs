@@ -31,6 +31,9 @@ public class Service : AggregateRoot<Guid>
         Status = ServiceStatus.Pending;
         Location = location;
         Configuration = configuration;
+        AtType = "Service";
+        AtBaseType = "ServiceInventory";
+        AtSchemaLocation = "https://tmf-open-api-table.s3.amazonaws.com/schemas/TMF638-ServiceInventory-v4.0.0.json";
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
         ServiceSpecificationId = serviceSpecificationId;
@@ -50,6 +53,21 @@ public class Service : AggregateRoot<Guid>
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public Guid? ServiceSpecificationId { get; private set; }
+
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; }
+    public string? AtBaseType { get; private set; }
+    public string? AtSchemaLocation { get; private set; }
+    public string? Name { get; private set; }
+    public string? Description { get; private set; }
+    public string? ExternalId { get; private set; }
+    public string? Place { get; private set; }
+    public string? Category { get; private set; }
+    public DateTime? StartDate { get; private set; }
+    public DateTime? CompletionDate { get; private set; }
+    public string? RelatedPartyId { get; private set; }
+    public string? RelatedPartyName { get; private set; }
+    public string? RelatedPartyRole { get; private set; }
 
     public IReadOnlyCollection<ServiceResource> Resources => _resources.AsReadOnly();
 
@@ -154,6 +172,22 @@ public class Service : AggregateRoot<Guid>
                 $"Cannot set service to provisioning in '{Status}' status.");
 
         Status = ServiceStatus.Provisioning;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdateTmfDetails(string? name = null, string? description = null, string? externalId = null, string? place = null, string? category = null, DateTime? startDate = null, DateTime? completionDate = null, string? href = null, string? relatedPartyId = null, string? relatedPartyName = null, string? relatedPartyRole = null)
+    {
+        Name = name ?? Name;
+        Description = description ?? Description;
+        ExternalId = externalId ?? ExternalId;
+        Place = place ?? Place;
+        Category = category ?? Category;
+        StartDate = startDate ?? StartDate;
+        CompletionDate = completionDate ?? CompletionDate;
+        Href = href ?? Href;
+        RelatedPartyId = relatedPartyId ?? RelatedPartyId;
+        RelatedPartyName = relatedPartyName ?? RelatedPartyName;
+        RelatedPartyRole = relatedPartyRole ?? RelatedPartyRole;
         UpdatedAt = DateTime.UtcNow;
     }
 }

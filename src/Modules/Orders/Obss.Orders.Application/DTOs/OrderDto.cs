@@ -38,7 +38,15 @@ public sealed record OrderDto(
     string? NotificationContact,
     string? ExternalId,
     Guid? QuoteId,
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? AtSchemaLocation,
+    string? CompletionDate,
     DateTime CreatedAt,
     List<OrderItemDto> Items,
+    List<RelatedPartyDto>? RelatedParties,
     List<OrderPaymentDto> Payments,
     OrderFulfillmentDto? Fulfillment);
+
+public sealed record RelatedPartyDto(string PartyId, string PartyName, string Role);

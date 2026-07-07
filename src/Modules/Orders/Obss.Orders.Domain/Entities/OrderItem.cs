@@ -61,6 +61,10 @@ public class OrderItem : Entity<Guid>
     public DateTime? EndDate { get; private set; }
     public bool IsActive { get; private set; }
     public string? ServiceType { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? Action { get; private set; }
+    public string? ItemState { get; private set; }
+#pragma warning restore S1144
 
     public void Deactivate()
     {

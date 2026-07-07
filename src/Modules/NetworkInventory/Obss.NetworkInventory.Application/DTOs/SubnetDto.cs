@@ -10,4 +10,6 @@ public sealed record SubnetDto(
     int VLANId,
     string? Location,
     string Status,
+    string? Href,
+    string? ExternalId,
     DateTime CreatedAt);

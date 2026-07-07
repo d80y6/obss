@@ -5,10 +5,13 @@ using Obss.Subscriptions.Domain.ValueObjects;
 
 namespace Obss.Subscriptions.Domain.Entities;
 
+public sealed record RelatedParty(string PartyId, string PartyName, string Role);
+
 public class Subscription : AggregateRoot<Guid>
 {
     private readonly List<SubscriptionService> _services = [];
     private readonly List<SubscriptionAddOn> _addOns = [];
+    private readonly List<RelatedParty> _relatedParties = [];
 
     private Subscription() { }
 
@@ -71,9 +74,18 @@ public class Subscription : AggregateRoot<Guid>
     public DateTime? RenewalDate { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "Subscription";
+    public string? AtBaseType { get; private set; } = "ProductSubscription";
+    public string? AtSchemaLocation { get; private set; }
+    public string? Name { get; private set; }
+    public string? Description { get; private set; }
+    public string? ExternalId { get; private set; }
+    public string? CompletionDate { get; private set; }
 
     public IReadOnlyCollection<SubscriptionService> Services => _services.AsReadOnly();
     public IReadOnlyCollection<SubscriptionAddOn> AddOns => _addOns.AsReadOnly();
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 
     public static Subscription Create(
         string tenantId,
@@ -226,6 +238,29 @@ public class Subscription : AggregateRoot<Guid>
             addOn.Deactivate();
             UpdatedAt = DateTime.UtcNow;
         }
+    }
+
+    public void UpdateTmfDetails(
+        string? name = null,
+        string? description = null,
+        string? externalId = null,
+        string? completionDate = null,
+        string? href = null,
+        string? atSchemaLocation = null)
+    {
+        if (name is not null) Name = name;
+        if (description is not null) Description = description;
+        if (externalId is not null) ExternalId = externalId;
+        if (completionDate is not null) CompletionDate = completionDate;
+        if (href is not null) Href = href;
+        if (atSchemaLocation is not null) AtSchemaLocation = atSchemaLocation;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddRelatedParty(RelatedParty party)
+    {
+        _relatedParties.Add(party);
+        UpdatedAt = DateTime.UtcNow;
     }
 
     private static DateTime CalculateRenewalDate(DateTime fromDate, BillingPeriod billingPeriod)
