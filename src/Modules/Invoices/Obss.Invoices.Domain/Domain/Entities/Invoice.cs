@@ -274,17 +274,3 @@ public class InvoiceNote : Entity<Guid>
     public string Content { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
 }
-
-public sealed class InvoiceCancelledDomainEvent : DomainEvent, MediatR.INotification
-{
-    public InvoiceCancelledDomainEvent(Guid invoiceId, string invoiceNumber, string reason)
-    {
-        InvoiceId = invoiceId;
-        InvoiceNumber = invoiceNumber;
-        Reason = reason;
-    }
-
-    public Guid InvoiceId { get; }
-    public string InvoiceNumber { get; }
-    public string Reason { get; }
-}
