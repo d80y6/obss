@@ -1,10 +1,9 @@
 using Obss.NetworkInventory.Domain.ValueObjects;
-using Obss.SharedKernel.Domain.Common;
 using Obss.SharedKernel.Domain.ValueObjects;
 
 namespace Obss.NetworkInventory.Domain.Entities;
 
-public class OLT : AggregateRoot<Guid>
+public class OLT : NetworkElement
 {
     private readonly List<PONPort> _ponPorts = [];
 
@@ -23,38 +22,21 @@ public class OLT : AggregateRoot<Guid>
         int maxPONPorts,
         int maxONTPerPort,
         int maxBandwidth)
-        : base(id)
+        : base(
+            id, tenantId, name, hostname, ipAddress, ElementType.OLT,
+            vendor, model, softwareVersion, null, location,
+            null, null, false)
     {
-        TenantId = tenantId;
-        Name = name;
-        Hostname = hostname;
-        IPAddress = ipAddress;
-        Vendor = vendor;
-        Model = model;
-        SoftwareVersion = softwareVersion;
-        Location = location;
-        Status = ElementStatus.Active;
         MaxPONPorts = maxPONPorts;
         UsedPONPorts = 0;
         MaxONTPerPort = maxONTPerPort;
         MaxBandwidth = maxBandwidth;
-        CreatedAt = DateTime.UtcNow;
     }
 
-    public TenantId TenantId { get; private set; } = default!;
-    public string Name { get; private set; } = string.Empty;
-    public string Hostname { get; private set; } = string.Empty;
-    public string IPAddress { get; private set; } = string.Empty;
-    public string Vendor { get; private set; } = string.Empty;
-    public string Model { get; private set; } = string.Empty;
-    public string? SoftwareVersion { get; private set; }
-    public string? Location { get; private set; }
-    public ElementStatus Status { get; private set; }
     public int MaxPONPorts { get; private set; }
     public int UsedPONPorts { get; private set; }
     public int MaxONTPerPort { get; private set; }
     public int MaxBandwidth { get; private set; }
-    public DateTime CreatedAt { get; private set; }
 
     public IReadOnlyCollection<PONPort> PONPorts => _ponPorts.AsReadOnly();
 

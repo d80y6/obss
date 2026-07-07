@@ -10,9 +10,9 @@ public class NetworkElement : AggregateRoot<Guid>
     private readonly List<NetworkInterface> _interfaces = [];
     private readonly List<NetworkElementIpAddress> _ipAddresses = [];
 
-    private NetworkElement() { }
+    protected NetworkElement() { }
 
-    private NetworkElement(
+    protected NetworkElement(
         Guid id,
         TenantId tenantId,
         string name,
