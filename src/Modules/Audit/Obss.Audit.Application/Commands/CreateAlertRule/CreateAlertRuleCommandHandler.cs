@@ -1,6 +1,5 @@
 using Mapster;
 using MediatR;
-using Obss.Audit.Application.Abstractions;
 using Obss.Audit.Application.DTOs;
 using Obss.Audit.Domain.Entities;
 using Obss.Audit.Domain.ValueObjects;
@@ -11,12 +10,12 @@ namespace Obss.Audit.Application.Commands.CreateAlertRule;
 
 public sealed class CreateAlertRuleCommandHandler : IRequestHandler<CreateAlertRuleCommand, Result<AuditAlertRuleDto>>
 {
-    private readonly IAuditAlertRuleRepository _repository;
+    private readonly IRepository<AuditAlertRule> _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentTenant _currentTenant;
 
     public CreateAlertRuleCommandHandler(
-        IAuditAlertRuleRepository repository,
+        IRepository<AuditAlertRule> repository,
         IUnitOfWork unitOfWork,
         ICurrentTenant currentTenant)
     {

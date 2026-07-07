@@ -1,5 +1,7 @@
 namespace Obss.Billing.Application.DTOs;
 
+public sealed record RelatedPartyDto(string PartyId, string PartyName, string Role);
+
 public sealed record BillDto(
     Guid Id,
     string TenantId,
@@ -17,4 +19,10 @@ public sealed record BillDto(
     string Currency,
     DateTime CreatedAt,
     DateTime? FinalizedAt,
-    List<BillLineDto> Lines);
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? AtSchemaLocation,
+    string? ExternalId,
+    List<BillLineDto> Lines,
+    List<RelatedPartyDto>? RelatedParties);

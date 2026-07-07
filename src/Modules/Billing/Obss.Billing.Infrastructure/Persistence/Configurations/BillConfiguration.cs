@@ -85,10 +85,39 @@ public sealed class BillConfiguration : IEntityTypeConfiguration<Bill>
         builder.Property(b => b.FinalizedAt)
             .HasColumnName("finalized_at");
 
+        builder.Property(b => b.Href)
+            .HasColumnName("href")
+            .HasMaxLength(500);
+
+        builder.Property(b => b.AtType)
+            .HasColumnName("at_type")
+            .HasMaxLength(100);
+
+        builder.Property(b => b.AtBaseType)
+            .HasColumnName("at_base_type")
+            .HasMaxLength(100);
+
+        builder.Property(b => b.AtSchemaLocation)
+            .HasColumnName("at_schema_location")
+            .HasMaxLength(500);
+
+        builder.Property(b => b.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasMany(b => b.Lines)
             .WithOne()
             .HasForeignKey(l => l.BillId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.OwnsMany(b => b.RelatedParties, rp =>
+        {
+            rp.ToTable("bill_related_parties");
+            rp.WithOwner().HasForeignKey("bill_id");
+            rp.Property(r => r.PartyId).HasColumnName("party_id").HasMaxLength(100);
+            rp.Property(r => r.PartyName).HasColumnName("party_name").HasMaxLength(200);
+            rp.Property(r => r.Role).HasColumnName("role").HasMaxLength(50);
+        });
 
         builder.HasIndex(b => b.CustomerId)
             .HasDatabaseName("ix_bills_customer_id");
@@ -103,6 +132,9 @@ public sealed class BillConfiguration : IEntityTypeConfiguration<Bill>
             .HasDatabaseName("ix_bills_customer_id_status");
 
         builder.Navigation(b => b.Lines)
+            .AutoInclude();
+
+        builder.Navigation(b => b.RelatedParties)
             .AutoInclude();
     }
 }

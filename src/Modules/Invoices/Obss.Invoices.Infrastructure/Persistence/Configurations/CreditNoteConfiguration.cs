@@ -73,6 +73,10 @@ public sealed class CreditNoteConfiguration : IEntityTypeConfiguration<CreditNot
         builder.Property(cn => cn.AppliedAt)
             .HasColumnName("applied_at");
 
+        builder.Property(cn => cn.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasMany(cn => cn.Lines)
             .WithOne(cl => cl.CreditNote)
             .HasForeignKey(cl => cl.CreditNoteId)

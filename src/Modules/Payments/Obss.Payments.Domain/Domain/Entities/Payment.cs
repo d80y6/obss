@@ -5,10 +5,13 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.Payments.Domain.Entities;
 
+public sealed record RelatedParty(string PartyId, string PartyName, string Role);
+
 public class Payment : AggregateRoot<Guid>
 {
     private readonly List<PaymentAllocation> _allocations = [];
     private readonly List<Refund> _refunds = [];
+    private readonly List<RelatedParty> _relatedParties = [];
 
     private Payment() { }
 
@@ -51,11 +54,23 @@ public class Payment : AggregateRoot<Guid>
     public DateTime PaidAt { get; private set; }
     public DateTime? CompletedAt { get; private set; }
     public string? Notes { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? Href { get; private set; }
+    public string AtType { get; private set; } = "Payment";
+    public string AtBaseType { get; private set; } = "BillPayment";
+    public string? AtSchemaLocation { get; private set; }
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
     public IReadOnlyCollection<PaymentAllocation> Allocations => _allocations.AsReadOnly();
     public IReadOnlyCollection<Refund> Refunds => _refunds.AsReadOnly();
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
+
+    public void SetHref(string href) => Href = href;
+
+    public void AddRelatedParty(string partyId, string partyName, string role) => _relatedParties.Add(new RelatedParty(partyId, partyName, role));
 
     public static Payment Create(
         string tenantId,

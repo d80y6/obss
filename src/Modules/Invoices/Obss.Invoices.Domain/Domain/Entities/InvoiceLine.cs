@@ -46,6 +46,9 @@ public class InvoiceLine : Entity<Guid>
     public decimal TaxAmount { get; private set; }
     public decimal TaxRate { get; private set; }
     public string Currency { get; private set; } = string.Empty;
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public Invoice Invoice { get; private set; } = null!;
 }

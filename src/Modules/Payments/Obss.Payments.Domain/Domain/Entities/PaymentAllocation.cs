@@ -18,5 +18,8 @@ public class PaymentAllocation : Entity<Guid>
     public Guid PaymentId { get; private set; }
     public Guid InvoiceId { get; private set; }
     public decimal Amount { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
     public DateTime CreatedAt { get; private set; }
 }

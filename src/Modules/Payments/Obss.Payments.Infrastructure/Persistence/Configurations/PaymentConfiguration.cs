@@ -69,6 +69,26 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
             .HasColumnName("notes")
             .HasMaxLength(1000);
 
+        builder.Property(p => p.Href)
+            .HasColumnName("href")
+            .HasMaxLength(500);
+
+        builder.Property(p => p.AtType)
+            .HasColumnName("at_type")
+            .HasMaxLength(100);
+
+        builder.Property(p => p.AtBaseType)
+            .HasColumnName("at_base_type")
+            .HasMaxLength(100);
+
+        builder.Property(p => p.AtSchemaLocation)
+            .HasColumnName("at_schema_location")
+            .HasMaxLength(500);
+
+        builder.Property(p => p.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.Property(p => p.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();
@@ -76,6 +96,15 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.UpdatedAt)
             .HasColumnName("updated_at")
             .IsRequired();
+
+        builder.OwnsMany(p => p.RelatedParties, rp =>
+        {
+            rp.ToTable("payment_related_parties");
+            rp.WithOwner().HasForeignKey("payment_id");
+            rp.Property(r => r.PartyId).HasColumnName("party_id").HasMaxLength(100);
+            rp.Property(r => r.PartyName).HasColumnName("party_name").HasMaxLength(200);
+            rp.Property(r => r.Role).HasColumnName("role").HasMaxLength(50);
+        });
 
         builder.HasMany(p => p.Allocations)
             .WithOne()

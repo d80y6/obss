@@ -12,7 +12,8 @@ public sealed record RatingRuleDto(
     int Priority,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    List<RatingTierDto> Tiers);
+    List<RatingTierDto> Tiers,
+    string? ExternalId);
 
 public sealed record RatingTierDto(
     int FromUnit,

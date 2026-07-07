@@ -38,6 +38,10 @@ public sealed class CreditNoteLineConfiguration : IEntityTypeConfiguration<Credi
             .HasColumnType("decimal(18,4)")
             .IsRequired();
 
+        builder.Property(cl => cl.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasIndex(cl => cl.CreditNoteId)
             .HasDatabaseName("ix_credit_note_lines_credit_note_id");
 

@@ -77,6 +77,10 @@ public sealed class TaxRuleConfiguration : IEntityTypeConfiguration<TaxRule>
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.Property(r => r.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasIndex(r => r.TenantId)
             .HasDatabaseName("ix_tax_rules_tenant_id");
 

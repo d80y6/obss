@@ -57,6 +57,10 @@ public sealed class RatingRuleConfiguration : IEntityTypeConfiguration<RatingRul
             .HasColumnName("updated_at")
             .IsRequired();
 
+        builder.Property(r => r.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.OwnsMany(r => r.Tiers, tb =>
         {
             tb.ToTable("rating_rule_tiers");

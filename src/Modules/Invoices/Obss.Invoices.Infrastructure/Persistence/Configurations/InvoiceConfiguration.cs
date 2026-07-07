@@ -113,6 +113,35 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.Property(i => i.PaidAt)
             .HasColumnName("paid_at");
 
+        builder.Property(i => i.Href)
+            .HasColumnName("href")
+            .HasMaxLength(500);
+
+        builder.Property(i => i.AtType)
+            .HasColumnName("at_type")
+            .HasMaxLength(100);
+
+        builder.Property(i => i.AtBaseType)
+            .HasColumnName("at_base_type")
+            .HasMaxLength(100);
+
+        builder.Property(i => i.AtSchemaLocation)
+            .HasColumnName("at_schema_location")
+            .HasMaxLength(500);
+
+        builder.Property(i => i.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
+        builder.OwnsMany(i => i.RelatedParties, rp =>
+        {
+            rp.ToTable("invoice_related_parties");
+            rp.WithOwner().HasForeignKey("invoice_id");
+            rp.Property(r => r.PartyId).HasColumnName("party_id").HasMaxLength(100);
+            rp.Property(r => r.PartyName).HasColumnName("party_name").HasMaxLength(200);
+            rp.Property(r => r.Role).HasColumnName("role").HasMaxLength(50);
+        });
+
         builder.HasMany(i => i.Lines)
             .WithOne(l => l.Invoice)
             .HasForeignKey(l => l.InvoiceId)

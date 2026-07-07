@@ -2,7 +2,7 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.NetworkInventory.Domain.Entities;
 
-public class TopologyMap : AggregateRoot<Guid>
+public class TopologyMap : Entity<Guid>
 {
     private TopologyMap() { }
 

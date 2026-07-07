@@ -1,16 +1,17 @@
 using Mapster;
 using MediatR;
-using Obss.Audit.Application.Abstractions;
 using Obss.Audit.Application.DTOs;
+using Obss.Audit.Domain.Entities;
+using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Audit.Application.Queries.GetAlertRules;
 
 public sealed class GetAlertRulesQueryHandler : IRequestHandler<GetAlertRulesQuery, Result<IReadOnlyList<AuditAlertRuleDto>>>
 {
-    private readonly IAuditAlertRuleRepository _repository;
+    private readonly IRepository<AuditAlertRule> _repository;
 
-    public GetAlertRulesQueryHandler(IAuditAlertRuleRepository repository)
+    public GetAlertRulesQueryHandler(IRepository<AuditAlertRule> repository)
     {
         _repository = repository;
     }

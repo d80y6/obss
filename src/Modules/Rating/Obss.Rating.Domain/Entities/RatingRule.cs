@@ -41,6 +41,9 @@ public class RatingRule : AggregateRoot<Guid>
     public int Priority { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public IReadOnlyCollection<RatingTier> Tiers => _tiers.AsReadOnly();
 

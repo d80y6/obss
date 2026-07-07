@@ -1,5 +1,7 @@
 namespace Obss.Rating.Application.DTOs;
 
+public sealed record RelatedPartyDto(string PartyId, string PartyName, string Role);
+
 public sealed record UsageRecordDto(
     Guid Id,
     string TenantId,
@@ -19,4 +21,10 @@ public sealed record UsageRecordDto(
     string Currency,
     string? ErrorMessage,
     DateTime RecordedAt,
-    DateTime? RatedAt);
+    DateTime? RatedAt,
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? AtSchemaLocation,
+    string? ExternalId,
+    List<RelatedPartyDto>? RelatedParties);

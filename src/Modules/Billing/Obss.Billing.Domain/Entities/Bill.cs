@@ -5,9 +5,12 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.Billing.Domain.Entities;
 
+public sealed record RelatedParty(string PartyId, string PartyName, string Role);
+
 public class Bill : AggregateRoot<Guid>
 {
     private readonly List<BillLine> _lines = [];
+    private readonly List<RelatedParty> _relatedParties = [];
 
     private Bill() { }
 
@@ -50,8 +53,18 @@ public class Bill : AggregateRoot<Guid>
     public string Currency { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
     public DateTime? FinalizedAt { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "Bill";
+    public string? AtBaseType { get; private set; } = "CustomerBill";
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? AtSchemaLocation { get; private set; }
+#pragma warning restore S1144
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public IReadOnlyCollection<BillLine> Lines => _lines.AsReadOnly();
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 
     public static Bill Create(
         string tenantId,
@@ -164,4 +177,8 @@ public class Bill : AggregateRoot<Guid>
 
         Status = BillStatus.Closed;
     }
+
+    public void SetHref(string href) => Href = href;
+
+    public void AddRelatedParty(string partyId, string partyName, string role) => _relatedParties.Add(new RelatedParty(partyId, partyName, role));
 }

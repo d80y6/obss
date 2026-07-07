@@ -6,11 +6,14 @@ using Obss.SharedKernel.Domain.ValueObjects;
 
 namespace Obss.Invoices.Domain.Entities;
 
+public sealed record RelatedParty(string PartyId, string PartyName, string Role);
+
 public class Invoice : AggregateRoot<Guid>
 {
     private readonly List<InvoiceLine> _lines = [];
     private readonly List<InvoicePayment> _payments = [];
     private readonly List<InvoiceNote> _notes = [];
+    private readonly List<RelatedParty> _relatedParties = [];
 
     private Invoice() { }
 
@@ -67,10 +70,20 @@ public class Invoice : AggregateRoot<Guid>
     public DateTime UpdatedAt { get; private set; }
     public DateTime? SentAt { get; private set; }
     public DateTime? PaidAt { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "Invoice";
+    public string? AtBaseType { get; private set; } = "CustomerBill";
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? AtSchemaLocation { get; private set; }
+#pragma warning restore S1144
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public IReadOnlyCollection<InvoiceLine> Lines => _lines.AsReadOnly();
     public IReadOnlyCollection<InvoicePayment> Payments => _payments.AsReadOnly();
     public IReadOnlyCollection<InvoiceNote> NotesCollection => _notes.AsReadOnly();
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 
     public static Invoice Create(
         TenantId tenantId,
@@ -220,6 +233,10 @@ public class Invoice : AggregateRoot<Guid>
         Status = InvoiceStatus.Void;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void SetHref(string href) => Href = href;
+
+    public void AddRelatedParty(string partyId, string partyName, string role) => _relatedParties.Add(new RelatedParty(partyId, partyName, role));
 }
 
 public class InvoicePayment : Entity<Guid>

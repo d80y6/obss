@@ -8,7 +8,7 @@ namespace Obss.Host.Modules;
 
 public static class ModuleLoader
 {
-    private const string CategoryName = "ModuleLoader";
+    private const string _categoryName = "ModuleLoader";
 
     public static WebApplicationBuilder LoadModules(this WebApplicationBuilder builder, Assembly? entryAssembly = null)
     {
@@ -18,7 +18,7 @@ public static class ModuleLoader
             return builder;
 
         using var loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
-        var registrar = new ModuleRegistrar(builder.Services, loggerFactory.CreateLogger(CategoryName));
+        var registrar = new ModuleRegistrar(builder.Services, loggerFactory.CreateLogger(_categoryName));
 
         foreach (var assembly in GetModuleAssemblies(entryAssembly))
         {
@@ -38,7 +38,7 @@ public static class ModuleLoader
             return app;
 
         using var loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
-        var registrar = new ModuleRegistrar(loggerFactory.CreateLogger(CategoryName));
+        var registrar = new ModuleRegistrar(loggerFactory.CreateLogger(_categoryName));
 
         foreach (var assembly in GetModuleAssemblies(entryAssembly))
         {

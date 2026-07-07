@@ -39,6 +39,9 @@ public class TaxExemption : Entity<Guid>, ITenantEntity
     public DateTime ValidTo { get; private set; }
     public string ApprovedBy { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public static TaxExemption Create(
         string tenantId,

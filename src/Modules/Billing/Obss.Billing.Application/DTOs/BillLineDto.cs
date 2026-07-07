@@ -16,4 +16,5 @@ public sealed record BillLineDto(
     decimal TotalAmount,
     string Currency,
     DateTime LineDate,
-    string? Reference);
+    string? Reference,
+    string? ExternalId);

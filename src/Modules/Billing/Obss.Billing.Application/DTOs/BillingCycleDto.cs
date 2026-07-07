@@ -8,4 +8,5 @@ public sealed record BillingCycleDto(
     DateTime LastBillingDate,
     DateTime NextBillingDate,
     string Status,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? ExternalId);

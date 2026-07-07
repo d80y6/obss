@@ -13,4 +13,10 @@ public sealed record BillingAccountDto(
     string? Description,
     bool IsActive,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? AtSchemaLocation,
+    string? ExternalId,
+    List<RelatedPartyDto>? RelatedParties);

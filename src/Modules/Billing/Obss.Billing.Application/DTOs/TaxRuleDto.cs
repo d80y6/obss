@@ -15,4 +15,5 @@ public sealed record TaxRuleDto(
     int Priority,
     DateTime EffectiveFrom,
     DateTime? EffectiveTo,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? ExternalId);

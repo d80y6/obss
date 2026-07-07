@@ -96,6 +96,35 @@ public sealed class UsageRecordConfiguration : IEntityTypeConfiguration<UsageRec
         builder.Property(r => r.RatedAt)
             .HasColumnName("rated_at");
 
+        builder.Property(r => r.Href)
+            .HasColumnName("href")
+            .HasMaxLength(500);
+
+        builder.Property(r => r.AtType)
+            .HasColumnName("at_type")
+            .HasMaxLength(100);
+
+        builder.Property(r => r.AtBaseType)
+            .HasColumnName("at_base_type")
+            .HasMaxLength(100);
+
+        builder.Property(r => r.AtSchemaLocation)
+            .HasColumnName("at_schema_location")
+            .HasMaxLength(500);
+
+        builder.Property(r => r.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
+        builder.OwnsMany(u => u.RelatedParties, rp =>
+        {
+            rp.ToTable("usage_record_related_parties");
+            rp.WithOwner().HasForeignKey("usage_record_id");
+            rp.Property(r => r.PartyId).HasColumnName("party_id").HasMaxLength(100);
+            rp.Property(r => r.PartyName).HasColumnName("party_name").HasMaxLength(200);
+            rp.Property(r => r.Role).HasColumnName("role").HasMaxLength(50);
+        });
+
         builder.HasIndex(r => r.Status)
             .HasDatabaseName("ix_usage_records_status");
 

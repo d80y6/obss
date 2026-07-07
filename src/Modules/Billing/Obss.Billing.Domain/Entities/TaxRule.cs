@@ -54,6 +54,9 @@ public class TaxRule : AggregateRoot<Guid>, ITenantEntity
     public DateTime EffectiveFrom { get; private set; }
     public DateTime? EffectiveTo { get; private set; }
     public DateTime CreatedAt { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public static TaxRule Create(
         string tenantId,

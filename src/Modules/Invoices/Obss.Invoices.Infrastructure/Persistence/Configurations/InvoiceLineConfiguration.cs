@@ -67,6 +67,10 @@ public sealed class InvoiceLineConfiguration : IEntityTypeConfiguration<InvoiceL
             .HasMaxLength(3)
             .IsRequired();
 
+        builder.Property(il => il.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasIndex(il => il.InvoiceId)
             .HasDatabaseName("ix_invoice_lines_invoice_id");
 

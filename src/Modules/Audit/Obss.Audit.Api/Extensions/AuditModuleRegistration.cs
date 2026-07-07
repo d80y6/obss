@@ -18,7 +18,6 @@ public static class AuditModuleRegistration
     {
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<IAuditAlertRepository, AuditAlertRepository>();
-        services.AddScoped<IAuditAlertRuleRepository, AuditAlertRuleRepository>();
         services.AddHostedService<AuditRetentionJob>();
         services.AddHostedService<AuditAlertDetectionJob>();
         AuditMappingConfig.Configure();

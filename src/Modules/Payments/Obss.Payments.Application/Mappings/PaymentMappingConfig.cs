@@ -12,7 +12,8 @@ public static class PaymentMappingConfig
             .Map(dest => dest.PaymentMethod, src => src.PaymentMethod.ToString())
             .Map(dest => dest.Status, src => src.Status.ToString())
             .Map(dest => dest.Allocations, src => src.Allocations.Adapt<List<PaymentAllocationDto>>())
-            .Map(dest => dest.Refunds, src => src.Refunds.Adapt<List<RefundDto>>());
+            .Map(dest => dest.Refunds, src => src.Refunds.Adapt<List<RefundDto>>())
+            .Map(dest => dest.RelatedParties, src => src.RelatedParties.Adapt<List<RelatedPartyDto>>());
 
         TypeAdapterConfig<PaymentAllocation, PaymentAllocationDto>.NewConfig();
 

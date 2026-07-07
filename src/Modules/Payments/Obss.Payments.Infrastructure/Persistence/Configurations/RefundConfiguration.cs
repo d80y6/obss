@@ -24,6 +24,10 @@ public sealed class RefundConfiguration : IEntityTypeConfiguration<Refund>
             .HasPrecision(18, 2)
             .IsRequired();
 
+        builder.Property(r => r.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.Property(r => r.Reason)
             .HasColumnName("reason")
             .HasMaxLength(500)

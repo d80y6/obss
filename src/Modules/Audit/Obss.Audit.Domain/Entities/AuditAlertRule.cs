@@ -4,7 +4,7 @@ using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Audit.Domain.Entities;
 
-public sealed class AuditAlertRule : AggregateRoot<Guid>, ITenantEntity
+public sealed class AuditAlertRule : Entity<Guid>, ITenantEntity
 {
     private AuditAlertRule() { }
 

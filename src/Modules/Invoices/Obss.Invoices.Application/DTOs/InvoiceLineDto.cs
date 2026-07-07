@@ -12,4 +12,5 @@ public sealed record InvoiceLineDto(
     decimal TotalAmount,
     decimal TaxAmount,
     decimal TaxRate,
-    string Currency);
+    string Currency,
+    string? ExternalId);

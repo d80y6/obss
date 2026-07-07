@@ -23,9 +23,15 @@ public sealed record InvoiceDto(
     DateTime UpdatedAt,
     DateTime? SentAt,
     DateTime? PaidAt,
+    string? Href,
+    string? AtType,
+    string? AtBaseType,
+    string? AtSchemaLocation,
+    string? ExternalId,
     List<InvoiceLineDto> Lines,
     List<InvoicePaymentDto> Payments,
-    List<InvoiceNoteDto> NotesList);
+    List<InvoiceNoteDto> NotesList,
+    List<RelatedPartyDto>? RelatedParties);
 
 public sealed record InvoicePaymentDto(
     Guid Id,
@@ -39,3 +45,5 @@ public sealed record InvoiceNoteDto(
     Guid InvoiceId,
     string Content,
     DateTime CreatedAt);
+
+public sealed record RelatedPartyDto(string PartyId, string PartyName, string Role);

@@ -89,6 +89,10 @@ public sealed class PromotionConfiguration : IEntityTypeConfiguration<Promotion>
             .HasColumnName("updated_at")
             .IsRequired();
 
+        builder.Property(p => p.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasMany(p => p.Rules)
             .WithOne()
             .HasForeignKey(r => r.PromotionId)

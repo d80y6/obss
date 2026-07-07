@@ -54,6 +54,10 @@ public sealed class TaxExemptionConfiguration : IEntityTypeConfiguration<TaxExem
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.Property(e => e.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasIndex(e => e.CustomerId)
             .HasDatabaseName("ix_tax_exemptions_customer_id");
 

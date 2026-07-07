@@ -4,8 +4,12 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.Rating.Domain.Entities;
 
+public sealed record RelatedParty(string PartyId, string PartyName, string Role);
+
 public class UsageRecord : AggregateRoot<Guid>
 {
+    private readonly List<RelatedParty> _relatedParties = [];
+
     private UsageRecord() { }
 
     private UsageRecord(
@@ -58,6 +62,19 @@ public class UsageRecord : AggregateRoot<Guid>
     public string? ErrorMessage { get; private set; }
     public DateTime RecordedAt { get; private set; }
     public DateTime? RatedAt { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "UsageRecord";
+    public string? AtBaseType { get; private set; } = "Usage";
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? AtSchemaLocation { get; private set; }
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
+
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
+
+    public void SetHref(string href) => Href = href;
+
+    public void AddRelatedParty(string partyId, string partyName, string role) => _relatedParties.Add(new RelatedParty(partyId, partyName, role));
 
     public static UsageRecord Create(
         string tenantId,

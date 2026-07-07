@@ -81,6 +81,10 @@ public sealed class BillLineConfiguration : IEntityTypeConfiguration<BillLine>
             .HasColumnName("reference")
             .HasMaxLength(200);
 
+        builder.Property(l => l.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasIndex(l => l.BillId)
             .HasDatabaseName("ix_bill_lines_bill_id");
     }

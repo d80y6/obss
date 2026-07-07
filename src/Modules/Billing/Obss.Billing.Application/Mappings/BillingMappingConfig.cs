@@ -13,6 +13,7 @@ public static class BillingMappingConfig
             .Map(dest => dest.Status, src => src.Status.ToString())
             .Map(dest => dest.BillingPeriod, src => src.BillingPeriod.ToString())
             .Map(dest => dest.Lines, src => src.Lines.Adapt<List<BillLineDto>>())
+            .Map(dest => dest.RelatedParties, src => src.RelatedParties.Adapt<List<RelatedPartyDto>>())
             .Map(dest => dest.Id, src => src.Id);
 
         TypeAdapterConfig<BillLine, BillLineDto>.NewConfig()
@@ -33,6 +34,7 @@ public static class BillingMappingConfig
 
         TypeAdapterConfig<BillingAccount, BillingAccountDto>.NewConfig()
             .Map(dest => dest.AccountType, src => src.AccountType.ToString())
+            .Map(dest => dest.RelatedParties, src => src.RelatedParties.Adapt<List<RelatedPartyDto>>())
             .Map(dest => dest.Id, src => src.Id);
     }
 }

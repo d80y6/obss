@@ -10,4 +10,5 @@ public sealed record TaxExemptionDto(
     DateTime ValidFrom,
     DateTime ValidTo,
     string ApprovedBy,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? ExternalId);

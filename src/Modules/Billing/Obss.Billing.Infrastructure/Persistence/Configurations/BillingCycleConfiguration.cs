@@ -48,6 +48,10 @@ public sealed class BillingCycleConfiguration : IEntityTypeConfiguration<Billing
             .HasColumnName("created_at")
             .IsRequired();
 
+        builder.Property(c => c.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.HasIndex(c => c.CustomerId)
             .HasDatabaseName("ix_billing_cycles_customer_id");
 

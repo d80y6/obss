@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.Audit.Application.Abstractions;
+using Obss.Audit.Domain.Entities;
+using Obss.SharedKernel.Application.Abstractions;
 using Obss.Audit.Application.Commands.AcknowledgeAlert;
 using Obss.Audit.Application.Commands.CreateAlertRule;
 using Obss.Audit.Application.Commands.CreateAuditEntry;
@@ -147,7 +149,7 @@ public static class AuditEndpoints
                 : (IResult)TypedResults.BadRequest(result.Error);
         });
 
-        group.MapGet("/alert-rules/{id:guid}", async (Guid id, IAuditAlertRuleRepository repository) =>
+        group.MapGet("/alert-rules/{id:guid}", async (Guid id, IRepository<AuditAlertRule> repository) =>
         {
             var rule = await repository.GetByIdAsync(id);
             return rule is not null

@@ -55,6 +55,9 @@ public class BillLine : Entity<Guid>
     public string Currency { get; private set; } = string.Empty;
     public DateTime LineDate { get; private set; }
     public string? Reference { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public static BillLine CreateRecurring(
         Guid billId,

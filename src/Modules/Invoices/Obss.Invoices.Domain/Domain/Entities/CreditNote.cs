@@ -46,6 +46,9 @@ public class CreditNote : AggregateRoot<Guid>
     public string Currency { get; private set; } = string.Empty;
     public DateTime IssuedAt { get; private set; }
     public DateTime? AppliedAt { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
 
     public IReadOnlyCollection<CreditNoteLine> Lines => _lines.AsReadOnly();
 

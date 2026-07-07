@@ -20,11 +20,11 @@ public class CreateInvoiceFromBillCommandHandlerTests
             DateTime.UtcNow.AddMonths(-1), DateTime.UtcNow,
             DateTime.UtcNow.AddDays(15), "Finalized",
             100, 0, 5, 105, currency,
-            DateTime.UtcNow, DateTime.UtcNow, new List<BillLineDto>
+            DateTime.UtcNow, DateTime.UtcNow, null, null, null, null, null, new List<BillLineDto>
             {
                 new(Guid.NewGuid(), billId, "Recurring",
-                    "Monthly subscription", null, null, null, 1, 100, 0, 5, 0, 100, "USD", DateTime.UtcNow, null)
-            }));
+                    "Monthly subscription", null, null, null, 1, 100, 0, 5, 0, 100, "USD", DateTime.UtcNow, null, null)
+            }, null));
     }
 
     [Fact]

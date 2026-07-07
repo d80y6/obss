@@ -14,6 +14,7 @@ public sealed record CreditNoteDto(
     string Currency,
     DateTime IssuedAt,
     DateTime? AppliedAt,
+    string? ExternalId,
     List<CreditNoteLineDto> Lines);
 
 public sealed record CreditNoteLineDto(
@@ -22,4 +23,5 @@ public sealed record CreditNoteLineDto(
     Guid InvoiceLineId,
     string Description,
     decimal Amount,
-    decimal Quantity);
+    decimal Quantity,
+    string? ExternalId);

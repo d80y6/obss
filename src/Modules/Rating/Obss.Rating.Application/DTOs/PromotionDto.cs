@@ -19,4 +19,5 @@ public sealed record PromotionDto(
     int? MaxRedemptions,
     int CurrentRedemptions,
     DateTime CreatedAt,
-    List<PromotionRuleDto> Rules);
+    List<PromotionRuleDto> Rules,
+    string? ExternalId);

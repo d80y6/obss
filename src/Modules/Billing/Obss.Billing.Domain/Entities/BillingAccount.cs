@@ -5,6 +5,8 @@ namespace Obss.Billing.Domain.Entities;
 
 public class BillingAccount : AggregateRoot<Guid>
 {
+    private readonly List<RelatedParty> _relatedParties = [];
+
     private BillingAccount() { }
 
     public BillingAccount(Guid customerId, AccountType accountType, string name, decimal creditLimit, string currency)
@@ -33,6 +35,17 @@ public class BillingAccount : AggregateRoot<Guid>
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+    public string? Href { get; private set; }
+    public string? AtType { get; private set; } = "BillingAccount";
+    public string? AtBaseType { get; private set; } = "PartyAccount";
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? AtSchemaLocation { get; private set; }
+#pragma warning restore S1144
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? ExternalId { get; private set; }
+#pragma warning restore S1144
+
+    public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 
     public void UpdateDetails(string name, decimal creditLimit, string currency, string? description)
     {
@@ -61,4 +74,8 @@ public class BillingAccount : AggregateRoot<Guid>
         ValidUntil = validUntil;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void SetHref(string href) => Href = href;
+
+    public void AddRelatedParty(string partyId, string partyName, string role) => _relatedParties.Add(new RelatedParty(partyId, partyName, role));
 }

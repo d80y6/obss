@@ -52,9 +52,6 @@ builder.Host.UseDefaultServiceProvider((context, options) =>
 builder.Host.UseSerilog((context, config) =>
     config.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.Configure<HostOptions>(options =>
-    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore);
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi(options =>
 {
@@ -106,16 +103,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var keycloakSection = builder.Configuration.GetSection("Keycloak");
-        options.Authority = keycloakSection["Authority"];
+        var authority = keycloakSection["Authority"] ?? throw new InvalidOperationException("Keycloak:Authority is required");
+        options.Authority = authority;
         options.Audience = keycloakSection["Audience"];
         options.RequireHttpsMetadata = bool.TryParse(keycloakSection["RequireHttpsMetadata"], out var https) && https;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = true,
+            ValidIssuer = authority,
+            ValidateAudience = true,
+            ValidAudience = keycloakSection["Audience"],
             ValidateLifetime = true,
             RoleClaimType = "role",
             NameClaimType = "preferred_username"
+        };
+        options.Backchannel = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(10)
         };
     });
 
@@ -136,9 +140,15 @@ builder.Services.AddApiVersioning(options =>
 
 builder.Services.AddSharedKernelServices(builder.Configuration);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found. Set POSTGRES_CONNECTION_STRING or appsettings ConnectionStrings:DefaultConnection.");
+var pgPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string not found. Set POSTGRES_CONNECTION_STRING environment variable or ConnectionStrings:DefaultConnection in configuration.");
+
+if (!string.IsNullOrEmpty(pgPassword) && !connectionString.Contains("Password=", StringComparison.OrdinalIgnoreCase))
+{
+    connectionString = $"{connectionString};Password={pgPassword}";
+}
 
 string DbConn(string dbName)
 {
@@ -260,8 +270,27 @@ builder.Services.AddNumberInventoryModule();
 builder.Services.AddServiceCatalogModule();
 builder.Services.AddEventModule();
 
+var pgConnString = connectionString;
 builder.Services.AddHealthChecks()
-    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379");
+    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379")
+    .AddRabbitMQ(async (_) =>
+    {
+        var config = builder.Configuration.GetSection("RabbitMq");
+        var factory = new RabbitMQ.Client.ConnectionFactory
+        {
+            HostName = config["Host"] ?? "localhost",
+            Port = int.TryParse(config["Port"], out var port) ? port : 5672,
+            UserName = config["Username"] ?? "guest",
+            Password = config["Password"] ?? "guest",
+            VirtualHost = config["VirtualHost"] ?? "/",
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
+        };
+        return await factory.CreateConnectionAsync();
+    }, "rabbitmq");
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<Obss.IAM.Infrastructure.Persistence.IamDbContext>("postgresql");
 
 var infraAsms = new[] {
     typeof(Obss.IAM.Infrastructure.Persistence.IamDbContext).Assembly,
@@ -318,14 +347,7 @@ app.UseAuthentication();
 app.UseMiddleware<ApiKeyAuthMiddleware>();
 app.UseAuthorization();
 app.UseMiddleware<RateLimitingMiddleware>();
-app.Use(async (context, next) =>
-{
-    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
-    context.Response.Headers["X-Frame-Options"] = "DENY";
-    context.Response.Headers["X-XSS-Protection"] = "0";
-    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-    await next();
-});
+app.UseMiddleware<SecurityHeadersMiddleware>();
 
 app.MapAuditEndpoints();
 app.MapIamEndpoints();

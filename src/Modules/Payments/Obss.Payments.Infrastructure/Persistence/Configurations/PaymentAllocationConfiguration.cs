@@ -23,6 +23,10 @@ public sealed class PaymentAllocationConfiguration : IEntityTypeConfiguration<Pa
             .HasColumnName("invoice_id")
             .IsRequired();
 
+        builder.Property(pa => pa.ExternalId)
+            .HasColumnName("external_id")
+            .HasMaxLength(100);
+
         builder.Property(pa => pa.Amount)
             .HasColumnName("amount")
             .HasPrecision(18, 2)
