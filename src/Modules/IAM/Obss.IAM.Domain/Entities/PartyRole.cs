@@ -75,4 +75,17 @@ public class PartyRole : AggregateRoot<Guid>
         ValidUntil = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void UpdateDetails(string? name, string? description, DateTime? validFrom, DateTime? validUntil)
+    {
+        if (name is not null)
+            Name = name;
+        if (description is not null)
+            Description = description;
+        if (validFrom.HasValue)
+            ValidFrom = validFrom;
+        if (validUntil.HasValue)
+            ValidUntil = validUntil;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

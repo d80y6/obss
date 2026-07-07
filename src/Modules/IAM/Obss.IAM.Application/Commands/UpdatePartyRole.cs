@@ -40,6 +40,7 @@ public sealed class UpdatePartyRoleCommandHandler : IRequestHandler<UpdatePartyR
         if (partyRole is null)
             return Result.Failure<PartyRoleDto>(Error.NotFound(nameof(PartyRole), request.Id));
 
+        partyRole.UpdateDetails(request.Name, request.Description, request.ValidFrom, request.ValidUntil);
         await _repository.UpdateAsync(partyRole, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
