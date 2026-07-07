@@ -1,7 +1,10 @@
+using System.Linq;
+
 namespace Obss.SharedKernel.Application.Abstractions;
 
 public interface IRepository<T> where T : class
 {
+    IQueryable<T> GetQueryable();
     Task<T?> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default) where TId : notnull;
     Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<T> AddAsync(T entity, CancellationToken cancellationToken = default);

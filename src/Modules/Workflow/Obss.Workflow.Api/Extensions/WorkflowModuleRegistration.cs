@@ -19,7 +19,6 @@ public static class WorkflowModuleRegistration
         services.AddScoped<IWorkflowDefinitionRepository, WorkflowDefinitionRepository>();
         services.AddScoped<IWorkflowInstanceRepository, WorkflowInstanceRepository>();
         services.AddScoped<IWorkflowSlaRepository, WorkflowSlaRepository>();
-        services.AddScoped<IWorkflowMetricRepository, WorkflowMetricRepository>();
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
 
         services.AddHostedService<WorkflowTaskExecutionJob>();

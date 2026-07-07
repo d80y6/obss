@@ -17,6 +17,8 @@ public class EfRepository<T> : IRepository<T>
         DbSet = context.Set<T>();
     }
 
+    public virtual IQueryable<T> GetQueryable() => DbSet.AsQueryable();
+
     public virtual async Task<T?> GetByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         where TId : notnull
     {

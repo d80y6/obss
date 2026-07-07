@@ -1,17 +1,19 @@
 using Mapster;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Application.Contracts;
-using Obss.Workflow.Application.Abstractions;
 using Obss.Workflow.Application.DTOs;
+using Obss.Workflow.Domain.Entities;
 using Obss.Workflow.Domain.ValueObjects;
 
 namespace Obss.Workflow.Application.Queries.GetWorkflowMetrics;
 
 public sealed class GetWorkflowMetricsQueryHandler : IRequestHandler<GetWorkflowMetricsQuery, Result<IReadOnlyList<WorkflowMetricDto>>>
 {
-    private readonly IWorkflowMetricRepository _repository;
+    private readonly IRepository<WorkflowMetric> _repository;
 
-    public GetWorkflowMetricsQueryHandler(IWorkflowMetricRepository repository)
+    public GetWorkflowMetricsQueryHandler(IRepository<WorkflowMetric> repository)
     {
         _repository = repository;
     }
@@ -25,13 +27,23 @@ public sealed class GetWorkflowMetricsQueryHandler : IRequestHandler<GetWorkflow
             metricType = parsed;
         }
 
-        var metrics = await _repository.GetMetricsAsync(
-            request.WorkflowDefinitionId,
-            metricType,
-            request.From,
-            request.To,
-            cancellationToken);
+        var query = _repository.GetQueryable();
 
+        if (request.WorkflowDefinitionId.HasValue)
+            query = query.Where(m => m.WorkflowDefinitionId == request.WorkflowDefinitionId.Value);
+
+        if (metricType.HasValue)
+            query = query.Where(m => m.MetricType == metricType.Value);
+
+        if (request.From.HasValue)
+            query = query.Where(m => m.TimeBucket >= request.From.Value);
+
+        if (request.To.HasValue)
+            query = query.Where(m => m.TimeBucket <= request.To.Value);
+
+        query = query.OrderByDescending(m => m.TimeBucket);
+
+        var metrics = await query.ToListAsync(cancellationToken);
         var result = metrics.Adapt<List<WorkflowMetricDto>>();
         return Result.Success<IReadOnlyList<WorkflowMetricDto>>(result);
     }
