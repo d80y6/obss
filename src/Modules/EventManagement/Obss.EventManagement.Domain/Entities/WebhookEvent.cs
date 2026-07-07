@@ -2,7 +2,7 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.EventManagement.Domain.Entities;
 
-public class WebhookEvent : Entity<Guid>
+public class WebhookEvent : AggregateRoot<Guid>
 {
     private WebhookEvent() { }
 
