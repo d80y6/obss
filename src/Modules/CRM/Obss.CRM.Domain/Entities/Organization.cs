@@ -3,7 +3,7 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.CRM.Domain.Entities;
 
-public class Organization : AggregateRoot<Guid>
+public class Organization : Entity<Guid>
 {
     private Organization() { }
 

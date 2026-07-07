@@ -3,7 +3,7 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.CRM.Domain.Entities;
 
-public class Individual : AggregateRoot<Guid>
+public class Individual : Entity<Guid>
 {
     private readonly List<IdentityDocument> _documents = [];
 
