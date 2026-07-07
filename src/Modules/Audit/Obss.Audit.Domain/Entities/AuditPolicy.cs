@@ -3,7 +3,7 @@ using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Audit.Domain.Entities;
 
-public sealed class AuditPolicy : AggregateRoot<Guid>, ITenantEntity
+public sealed class AuditPolicy : Entity<Guid>, ITenantEntity
 {
     private AuditPolicy() { }
 
