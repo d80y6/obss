@@ -110,6 +110,14 @@ COPY ["src/Modules/NumberInventory/Obss.NumberInventory.Domain/Obss.NumberInvent
 COPY ["src/Modules/NumberInventory/Obss.NumberInventory.Application/Obss.NumberInventory.Application.csproj", "src/Modules/NumberInventory/Obss.NumberInventory.Application/"]
 COPY ["src/Modules/NumberInventory/Obss.NumberInventory.Infrastructure/Obss.NumberInventory.Infrastructure.csproj", "src/Modules/NumberInventory/Obss.NumberInventory.Infrastructure/"]
 COPY ["src/Modules/NumberInventory/Obss.NumberInventory.Api/Obss.NumberInventory.Api.csproj", "src/Modules/NumberInventory/Obss.NumberInventory.Api/"]
+COPY ["src/Modules/ServiceCatalog/Obss.ServiceCatalog.Domain/Obss.ServiceCatalog.Domain.csproj", "src/Modules/ServiceCatalog/Obss.ServiceCatalog.Domain/"]
+COPY ["src/Modules/ServiceCatalog/Obss.ServiceCatalog.Application/Obss.ServiceCatalog.Application.csproj", "src/Modules/ServiceCatalog/Obss.ServiceCatalog.Application/"]
+COPY ["src/Modules/ServiceCatalog/Obss.ServiceCatalog.Infrastructure/Obss.ServiceCatalog.Infrastructure.csproj", "src/Modules/ServiceCatalog/Obss.ServiceCatalog.Infrastructure/"]
+COPY ["src/Modules/ServiceCatalog/Obss.ServiceCatalog.Api/Obss.ServiceCatalog.Api.csproj", "src/Modules/ServiceCatalog/Obss.ServiceCatalog.Api/"]
+COPY ["src/Modules/EventManagement/Obss.EventManagement.Domain/Obss.EventManagement.Domain.csproj", "src/Modules/EventManagement/Obss.EventManagement.Domain/"]
+COPY ["src/Modules/EventManagement/Obss.EventManagement.Application/Obss.EventManagement.Application.csproj", "src/Modules/EventManagement/Obss.EventManagement.Application/"]
+COPY ["src/Modules/EventManagement/Obss.EventManagement.Infrastructure/Obss.EventManagement.Infrastructure.csproj", "src/Modules/EventManagement/Obss.EventManagement.Infrastructure/"]
+COPY ["src/Modules/EventManagement/Obss.EventManagement.Api/Obss.EventManagement.Api.csproj", "src/Modules/EventManagement/Obss.EventManagement.Api/"]
 
 COPY ["src/Host/Obss.Host/Obss.Host.csproj", "src/Host/Obss.Host/"]
 
@@ -137,6 +145,8 @@ COPY ["src/Modules/Reporting/", "src/Modules/Reporting/"]
 COPY ["src/Modules/Audit/", "src/Modules/Audit/"]
 COPY ["src/Modules/ApiGateway/", "src/Modules/ApiGateway/"]
 COPY ["src/Modules/NumberInventory/", "src/Modules/NumberInventory/"]
+COPY ["src/Modules/ServiceCatalog/", "src/Modules/ServiceCatalog/"]
+COPY ["src/Modules/EventManagement/", "src/Modules/EventManagement/"]
 COPY ["src/Host/Obss.Host/", "src/Host/Obss.Host/"]
 
 RUN dotnet publish "src/Host/Obss.Host/Obss.Host.csproj" \
