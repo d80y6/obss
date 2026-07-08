@@ -18,6 +18,7 @@ public class ProvisioningDbContext : EfDbContext
     public DbSet<ProvisioningJob> ProvisioningJobs => Set<ProvisioningJob>();
     public DbSet<ProvisioningTask> ProvisioningTasks => Set<ProvisioningTask>();
     public DbSet<ProvisioningTemplate> ProvisioningTemplates => Set<ProvisioningTemplate>();
+    public DbSet<ServiceOrder> ServiceOrders => Set<ServiceOrder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
