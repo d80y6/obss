@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Obss.Provisioning.Infrastructure.Persistence;
@@ -12,9 +13,11 @@ using Obss.Provisioning.Infrastructure.Persistence;
 namespace Obss.Provisioning.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ProvisioningDbContext))]
-    partial class ProvisioningDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260708184347_AddServiceOrderTables")]
+    partial class AddServiceOrderTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
