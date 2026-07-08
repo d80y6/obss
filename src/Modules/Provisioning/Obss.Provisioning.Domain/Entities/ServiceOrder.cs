@@ -45,7 +45,7 @@ public class ServiceOrder : AggregateRoot<Guid>
     public DateTime OrderDate { get; private set; }
     public DateTime? StatusChangeDate { get; private set; }
     public string? CompletionMessage { get; private set; }
-    public string? Href { get; private set; }
+    public string? Href { get; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
