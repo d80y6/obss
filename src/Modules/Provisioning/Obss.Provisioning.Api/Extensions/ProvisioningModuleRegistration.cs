@@ -16,6 +16,7 @@ public static class ProvisioningModuleRegistration
     {
         services.AddScoped<IProvisioningJobRepository, ProvisioningJobRepository>();
         services.AddScoped<IProvisioningTemplateRepository, ProvisioningTemplateRepository>();
+        services.AddScoped<IServiceOrderRepository, ServiceOrderRepository>();
 
         services.AddHostedService<ProvisioningJobProcessor>();
 

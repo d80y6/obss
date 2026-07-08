@@ -14,7 +14,15 @@ using Obss.Provisioning.Application.DTOs;
 using Obss.Provisioning.Application.Queries.GetProvisioningJobById;
 using Obss.Provisioning.Application.Queries.GetProvisioningJobs;
 using Obss.Provisioning.Application.Queries.GetProvisioningTemplates;
+using Obss.Provisioning.Application.Commands.CreateServiceOrder;
+using Obss.Provisioning.Application.Commands.UpdateServiceOrder;
+using Obss.Provisioning.Application.Commands.CancelServiceOrder;
+using Obss.Provisioning.Application.Queries.GetServiceOrderById;
+using Obss.Provisioning.Application.Queries.GetServiceOrders;
+using Obss.Provisioning.Application.Queries.GetServiceOrderItems;
+using Obss.Provisioning.Domain.Entities;
 using Obss.Provisioning.Infrastructure.Persistence;
+using Obss.SharedKernel.Application.Abstractions;
 
 namespace Obss.Provisioning.Api.Endpoints;
 
@@ -114,6 +122,82 @@ public static class ProvisioningEndpoints
             var template = await repository.GetByIdAsync(id);
             return template is not null
                 ? (IResult)TypedResults.Ok(template.Adapt<ProvisioningTemplateDto>())
+                : (IResult)TypedResults.NotFound();
+        });
+
+        // ServiceOrder endpoints
+        group.MapPost("/service-orders", async (CreateServiceOrderCommand command, IMediator mediator) =>
+        {
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/provisioning/service-orders/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/service-orders/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetServiceOrderByIdQuery(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapGet("/service-orders", async ([AsParameters] GetServiceOrdersQuery query, IMediator mediator) =>
+        {
+            var result = await mediator.Send(query);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPatch("/service-orders/{id:guid}", async (Guid id, UpdateServiceOrderCommand command, IMediator mediator) =>
+        {
+            if (id != command.Id)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/service-orders/{id:guid}", async (Guid id, IServiceOrderRepository repository, IUnitOfWork unitOfWork) =>
+        {
+            var order = await repository.GetByIdAsync(id);
+            if (order is null)
+                return (IResult)TypedResults.NotFound();
+            if (order.State != ServiceOrderState.Acknowledged)
+                return (IResult)TypedResults.BadRequest("Can only delete orders in Acknowledged state.");
+            await repository.DeleteAsync(order);
+            await unitOfWork.SaveChangesAsync();
+            return (IResult)TypedResults.NoContent();
+        });
+
+        group.MapPost("/service-orders/{id:guid}/cancel", async (Guid id, CancelServiceOrderCommand command, IMediator mediator) =>
+        {
+            if (id != command.Id)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/service-orders/{id:guid}/items", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetServiceOrderItemsQuery(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapGet("/service-orders/{id:guid}/items/{itemId:guid}", async (Guid id, Guid itemId, IServiceOrderRepository repository) =>
+        {
+            var order = await repository.GetByIdAsync(id);
+            if (order is null)
+                return (IResult)TypedResults.NotFound();
+            var item = order.Items.FirstOrDefault(i => i.Id == itemId);
+            return item is not null
+                ? (IResult)TypedResults.Ok(item.Adapt<ServiceOrderItemDto>())
                 : (IResult)TypedResults.NotFound();
         });
     }
