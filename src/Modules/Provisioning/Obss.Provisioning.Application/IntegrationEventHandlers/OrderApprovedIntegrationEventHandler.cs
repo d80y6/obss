@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Obss.Orders.Application.IntegrationEvents;
+using Obss.Provisioning.Application.Commands.CreateServiceOrder;
 using Obss.SharedKernel.Application.Abstractions;
 
 namespace Obss.Provisioning.Application.IntegrationEventHandlers;
@@ -24,19 +25,28 @@ public sealed class ProvisioningRequiredIntegrationEventHandler : INotificationH
     public async Task Handle(ProvisioningRequiredIntegrationEvent notification, CancellationToken cancellationToken)
     {
         var tenantId = _currentTenant.TenantId ?? string.Empty;
+        var parsedTenantId = Guid.TryParse(tenantId, out var tid) ? tid : Guid.Empty;
 
         _logger.LogInformation(
-            "Creating provisioning job for order {OrderId}, item {OrderItemId}",
+            "Creating ServiceOrder for order {OrderId}, item {OrderItemId}",
             notification.OrderId,
             notification.OrderItemId);
 
-        var command = new Commands.CreateProvisioningJob.CreateProvisioningJobCommand(
-            notification.OrderId,
-            notification.OrderItemId,
-            notification.CustomerId,
-            Guid.TryParse(tenantId, out var tid) ? tid : Guid.Empty,
-            notification.ServiceType,
-            notification.Action);
+        var command = new CreateServiceOrderCommand(
+            parsedTenantId,
+            notification.OrderId.ToString(),
+            $"Provisioning for order {notification.OrderId}",
+            null,
+            null,
+        [
+            new CreateServiceOrderItemRequest(
+                null,
+                notification.Action,
+                1,
+                $"Service: {notification.ServiceType}",
+                null,
+                null)
+        ]);
 
         await _mediator.Send(command, cancellationToken);
     }
