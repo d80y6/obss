@@ -65,7 +65,8 @@ public sealed record QuoteAuthorizationDto(
     string State,
     DateTime RequestedDate,
     DateTime? GivenDate,
-    RelatedPartyDto? Approver);
+    string? ApproverName,
+    string? ApproverRole);
 
 public sealed record QuoteItemRelationshipDto(
     Guid ItemId,
