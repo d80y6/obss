@@ -28,5 +28,21 @@ public static class SubscriptionMappingConfig
         TypeAdapterConfig<SubscriptionEntitlement, SubscriptionEntitlementDto>.NewConfig()
             .Map(dest => dest.EntitlementType, src => src.EntitlementType.ToString())
             .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<Product, ProductDto>.NewConfig()
+            .Map(dest => dest.Status, src => src.Status.ToString())
+            .Map(dest => dest.Relationships, src => src.Relationships.Adapt<List<ProductRelationshipDto>>())
+            .Map(dest => dest.Characteristics, src => src.Characteristics.Adapt<List<ProductCharacteristicDto>>())
+            .Map(dest => dest.Prices, src => src.Prices.Adapt<List<ProductPriceDto>>())
+            .Map(dest => dest.Terms, src => src.Terms.Adapt<List<ProductTermDto>>())
+            .Map(dest => dest.RealizingServices, src => src.RealizingServices.Adapt<List<RealizingServiceDto>>())
+            .Map(dest => dest.RealizingResources, src => src.RealizingResources.Adapt<List<RealizingResourceDto>>());
+
+        TypeAdapterConfig<ProductRelationship, ProductRelationshipDto>.NewConfig()
+            .Map(dest => dest.Type, src => src.Type.ToString());
+        TypeAdapterConfig<ProductPrice, ProductPriceDto>.NewConfig()
+            .Map(dest => dest.PriceType, src => src.PriceType.ToString());
+        TypeAdapterConfig<ProductTerm, ProductTermDto>.NewConfig()
+            .Map(dest => dest.DurationUnit, src => src.DurationUnit.ToString());
     }
 }
