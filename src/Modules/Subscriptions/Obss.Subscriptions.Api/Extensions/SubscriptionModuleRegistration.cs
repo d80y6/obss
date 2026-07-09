@@ -20,6 +20,7 @@ public static class SubscriptionModuleRegistration
     {
         services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
         services.AddScoped<ISubscriptionEntitlementRepository, SubscriptionEntitlementRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
 
         services.AddScoped<IEntitlementValidator, EntitlementValidator>();
 

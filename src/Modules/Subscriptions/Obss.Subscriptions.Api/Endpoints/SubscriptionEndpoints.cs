@@ -21,6 +21,14 @@ using Obss.Subscriptions.Application.Queries.GetEntitlementUsage;
 using Obss.Subscriptions.Application.Queries.GetSubscriptionById;
 using Obss.Subscriptions.Application.Queries.GetSubscriptionEntitlements;
 using Obss.Subscriptions.Application.Queries.GetSubscriptions;
+using Obss.Subscriptions.Application.Commands.CreateProduct;
+using Obss.Subscriptions.Application.Commands.UpdateProduct;
+using Obss.Subscriptions.Application.Commands.ActivateProduct;
+using Obss.Subscriptions.Application.Commands.SuspendProduct;
+using Obss.Subscriptions.Application.Commands.CancelProduct;
+using Obss.Subscriptions.Application.Queries.GetProductById;
+using Obss.Subscriptions.Application.Queries.GetProducts;
+using Obss.Subscriptions.Application.Queries.GetProductsByCustomer;
 
 namespace Obss.Subscriptions.Api.Endpoints;
 
@@ -188,6 +196,73 @@ public static class SubscriptionEndpoints
             var result = await mediator.Send(command);
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        // Product endpoints
+        group.MapPost("/products", async (CreateProductCommand command, IMediator mediator) =>
+        {
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Created($"/api/v1/subscriptions/products/{result.Value.Id}", result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/products/{id:guid}", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetProductByIdQuery(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.NotFound(result.Error);
+        });
+
+        group.MapGet("/products", async (IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetProductsQuery());
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapGet("/customers/{customerId:guid}/products", async (Guid customerId, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new GetProductsByCustomerQuery(customerId));
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPatch("/products/{id:guid}", async (Guid id, UpdateProductCommand command, IMediator mediator) =>
+        {
+            if (id != command.Id)
+                return (IResult)TypedResults.BadRequest();
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/products/{id:guid}/activate", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new ActivateProductCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/products/{id:guid}/suspend", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new SuspendProductCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPost("/products/{id:guid}/cancel", async (Guid id, IMediator mediator) =>
+        {
+            var result = await mediator.Send(new CancelProductCommand(id));
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
         });
     }
