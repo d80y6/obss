@@ -40,3 +40,15 @@ public sealed class InvalidCustomerStateException : DomainException
     private InvalidCustomerStateException(SerializationInfo info, StreamingContext context)
         : base(info, context) { }
 }
+
+[Serializable]
+public sealed class InvalidQuoteStateException : DomainException
+{
+    public InvalidQuoteStateException() { }
+    public InvalidQuoteStateException(string message)
+        : base(message) { }
+    public InvalidQuoteStateException(string message, Exception innerException)
+        : base(message, innerException) { }
+    private InvalidQuoteStateException(SerializationInfo info, StreamingContext context)
+        : base(info, context) { }
+}
