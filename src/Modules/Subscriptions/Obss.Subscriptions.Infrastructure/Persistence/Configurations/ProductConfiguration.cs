@@ -24,7 +24,6 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.TerminationDate).HasColumnName("termination_date");
         builder.Property(p => p.CreatedAt).HasColumnName("created_at").IsRequired();
         builder.Property(p => p.UpdatedAt).HasColumnName("updated_at").IsRequired();
-        builder.Property(p => p.Href).HasColumnName("href").HasMaxLength(500);
 
         builder.OwnsOne(p => p.BillingAccount, ba =>
         {

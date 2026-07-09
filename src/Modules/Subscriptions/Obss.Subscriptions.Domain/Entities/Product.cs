@@ -1,4 +1,5 @@
 using Obss.SharedKernel.Domain.Common;
+using Obss.Subscriptions.Domain.Events;
 using Obss.Subscriptions.Domain.ValueObjects;
 
 namespace Obss.Subscriptions.Domain.Entities;
@@ -46,7 +47,6 @@ public class Product : AggregateRoot<Guid>
     public DateTime? TerminationDate { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
-    public string? Href { get; }
 
     public BillingAccountRef? BillingAccount { get; private set; }
     public Place? Place { get; private set; }
@@ -67,9 +67,11 @@ public class Product : AggregateRoot<Guid>
         Guid? productSpecificationId,
         Guid? productOfferingId)
     {
-        return new Product(
+        var product = new Product(
             Guid.NewGuid(), tenantId, customerId, name, description,
             productSpecificationId, productOfferingId);
+        product.AddDomainEvent(new ProductCreatedDomainEvent(product.Id, customerId, productOfferingId));
+        return product;
     }
 
     public void SetBillingAccount(BillingAccountRef? billingAccount) { BillingAccount = billingAccount; UpdatedAt = DateTime.UtcNow; }
@@ -82,6 +84,7 @@ public class Product : AggregateRoot<Guid>
         Status = ProductStatus.Active;
         ActivationDate = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new ProductActivatedDomainEvent(Id));
     }
 
     public void Suspend()
@@ -89,6 +92,7 @@ public class Product : AggregateRoot<Guid>
         if (Status != ProductStatus.Active) return;
         Status = ProductStatus.Suspended;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new ProductSuspendedDomainEvent(Id));
     }
 
     public void Cancel()
@@ -96,6 +100,7 @@ public class Product : AggregateRoot<Guid>
         if (Status is ProductStatus.Cancelled or ProductStatus.Terminated) return;
         Status = ProductStatus.Cancelled;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new ProductCancelledDomainEvent(Id));
     }
 
     public void Terminate()
@@ -104,6 +109,7 @@ public class Product : AggregateRoot<Guid>
         Status = ProductStatus.Terminated;
         TerminationDate = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new ProductTerminatedDomainEvent(Id));
     }
 
     public void AddRelationship(ProductRelationship relationship) { _relationships.Add(relationship); UpdatedAt = DateTime.UtcNow; }
