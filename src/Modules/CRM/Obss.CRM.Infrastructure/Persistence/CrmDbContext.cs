@@ -25,6 +25,7 @@ public class CrmDbContext : EfDbContext
     public DbSet<Organization> Organizations => Set<Organization>();
     public DbSet<CreditProfile> CreditProfiles => Set<CreditProfile>();
     public DbSet<Agreement> Agreements => Set<Agreement>();
+    public DbSet<Quote> Quotes => Set<Quote>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
