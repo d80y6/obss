@@ -128,6 +128,15 @@ public sealed class SubscriptionConfiguration : IEntityTypeConfiguration<Subscri
         builder.HasIndex(s => new { s.CustomerId, s.Status })
             .HasDatabaseName("ix_subscriptions_customer_id_status");
 
+        builder.OwnsMany(s => s.RelatedParties, rp =>
+        {
+            rp.ToTable("subscription_related_parties");
+            rp.WithOwner().HasForeignKey("subscription_id");
+            rp.Property(r => r.PartyId).HasColumnName("party_id").HasMaxLength(100).IsRequired();
+            rp.Property(r => r.PartyName).HasColumnName("party_name").HasMaxLength(200).IsRequired();
+            rp.Property(r => r.Role).HasColumnName("role").HasMaxLength(50).IsRequired();
+        });
+
         builder.Navigation(s => s.AddOns)
             .AutoInclude();
 
