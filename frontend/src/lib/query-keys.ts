@@ -381,6 +381,14 @@ export const queryKeys = {
         [...queryKeys.rating.usage.all, "subscription", subscriptionId, filters] as const,
     },
   },
+  quotes: {
+    all: ["quotes"] as const,
+    lists: () => [...queryKeys.quotes.all, "list"] as const,
+    list: (filters: Record<string, string> = {}) =>
+      [...queryKeys.quotes.lists(), filters] as const,
+    details: () => [...queryKeys.quotes.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.quotes.details(), id] as const,
+  },
   numberInventory: {
     all: ["number-inventory"] as const,
     numbers: {
