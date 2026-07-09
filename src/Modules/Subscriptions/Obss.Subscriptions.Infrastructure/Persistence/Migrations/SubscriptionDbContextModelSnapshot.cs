@@ -148,11 +148,6 @@ namespace Obss.Subscriptions.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("description");
 
-                    b.Property<string>("Href")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("href");
-
                     b.Property<string>("Name")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")

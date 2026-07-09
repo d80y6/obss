@@ -12,7 +12,7 @@ using Obss.Subscriptions.Infrastructure.Persistence;
 namespace Obss.Subscriptions.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(SubscriptionDbContext))]
-    [Migration("20260709192953_AddProductInventoryTables")]
+    [Migration("20260709200428_AddProductInventoryTables")]
     partial class AddProductInventoryTables
     {
         /// <inheritdoc />
@@ -150,11 +150,6 @@ namespace Obss.Subscriptions.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("description");
-
-                    b.Property<string>("Href")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)")
-                        .HasColumnName("href");
 
                     b.Property<string>("Name")
                         .HasMaxLength(200)

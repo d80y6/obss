@@ -76,7 +76,6 @@ namespace Obss.Subscriptions.Infrastructure.Persistence.Migrations
                     termination_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     updated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    href = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     billing_account_id = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     billing_account_href = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     place_id = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
