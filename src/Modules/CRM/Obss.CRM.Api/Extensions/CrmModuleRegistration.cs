@@ -18,6 +18,7 @@ public static class CrmModuleRegistration
     {
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<ICustomerSegmentRepository, CustomerSegmentRepository>();
+        services.AddScoped<IQuoteRepository, QuoteRepository>();
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
         services.AddHostedService<CustomerSegmentationJob>();
@@ -36,6 +37,7 @@ public static class CrmModuleRegistration
         PartyEndpoints.Map(group);
         LookupEndpoints.Map(group);
         AgreementEndpoints.Map(group);
+        QuoteEndpoints.Map(group);
 
         return app;
     }
