@@ -91,5 +91,35 @@ public static class CrmMappingConfig
         TypeAdapterConfig<AccountRef, AccountRefDto>.NewConfig();
         TypeAdapterConfig<AgreementRef, AgreementRefDto>.NewConfig();
         TypeAdapterConfig<PaymentMethodRef, PaymentMethodRefDto>.NewConfig();
+
+        TypeAdapterConfig<Quote, QuoteDto>.NewConfig()
+            .Map(dest => dest.State, src => src.State.ToString())
+            .Map(dest => dest.Items, src => src.Items.Adapt<List<QuoteItemDto>>())
+            .Map(dest => dest.RelatedParties, src => src.RelatedParties.Adapt<List<RelatedPartyDto>>())
+            .Map(dest => dest.QuotePrices, src => src.QuotePrices.Adapt<List<QuotePriceDto>>())
+            .Map(dest => dest.Authorizations, src => src.Authorizations.Adapt<List<QuoteAuthorizationDto>>())
+            .Map(dest => dest.BillingAccountRefs, src => src.BillingAccountRefs.Adapt<List<AccountRefDto>>())
+            .Map(dest => dest.AgreementRefs, src => src.AgreementRefs.Adapt<List<AgreementRefDto>>())
+            .Map(dest => dest.Notes, src => src.Notes.Adapt<List<NoteDto>>());
+
+        TypeAdapterConfig<QuoteItem, QuoteItemDto>.NewConfig()
+            .Map(dest => dest.Action, src => src.Action.ToString())
+            .Map(dest => dest.State, src => src.State.ToString())
+            .Map(dest => dest.Prices, src => src.Prices.Adapt<List<QuotePriceDto>>())
+            .Map(dest => dest.ItemRelationships, src => src.ItemRelationships.Adapt<List<QuoteItemRelationshipDto>>())
+            .Map(dest => dest.Notes, src => src.Notes.Adapt<List<NoteDto>>());
+
+        TypeAdapterConfig<QuotePrice, QuotePriceDto>.NewConfig()
+            .Map(dest => dest.PriceType, src => src.PriceType.ToString());
+
+        TypeAdapterConfig<PriceAlteration, PriceAlterationDto>.NewConfig()
+            .Map(dest => dest.PriceType, src => src.PriceType.ToString());
+
+        TypeAdapterConfig<QuoteAuthorization, QuoteAuthorizationDto>.NewConfig()
+            .Map(dest => dest.State, src => src.State.ToString());
+
+        TypeAdapterConfig<QuoteItemRelationship, QuoteItemRelationshipDto>.NewConfig();
+
+        TypeAdapterConfig<Note, NoteDto>.NewConfig();
     }
 }
