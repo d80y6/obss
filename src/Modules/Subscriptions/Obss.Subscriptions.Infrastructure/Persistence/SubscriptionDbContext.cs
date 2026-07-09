@@ -19,6 +19,7 @@ public class SubscriptionDbContext : EfDbContext
     public DbSet<SubscriptionAddOn> SubscriptionAddOns => Set<SubscriptionAddOn>();
     public DbSet<SubscriptionService> SubscriptionServices => Set<SubscriptionService>();
     public DbSet<SubscriptionEntitlement> SubscriptionEntitlements => Set<SubscriptionEntitlement>();
+    public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
