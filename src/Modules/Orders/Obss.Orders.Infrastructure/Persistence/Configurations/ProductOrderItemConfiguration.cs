@@ -8,7 +8,7 @@ public sealed class ProductOrderItemConfiguration : IEntityTypeConfiguration<Pro
 {
     public void Configure(EntityTypeBuilder<ProductOrderItem> builder)
     {
-        builder.ToTable("order_items");
+        builder.ToTable("product_order_items");
 
         builder.HasKey(i => i.Id);
 
@@ -90,6 +90,7 @@ public sealed class ProductOrderItemConfiguration : IEntityTypeConfiguration<Pro
         builder.Property(i => i.State)
             .HasColumnName("state")
             .HasConversion<string>()
-            .HasMaxLength(30);
+            .HasMaxLength(50)
+            .HasDefaultValue("Acknowledged");
     }
 }

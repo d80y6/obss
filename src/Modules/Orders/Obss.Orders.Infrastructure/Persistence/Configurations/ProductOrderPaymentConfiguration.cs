@@ -8,7 +8,7 @@ public sealed class ProductOrderPaymentConfiguration : IEntityTypeConfiguration<
 {
     public void Configure(EntityTypeBuilder<ProductOrderPayment> builder)
     {
-        builder.ToTable("order_payments");
+        builder.ToTable("product_order_payments");
 
         builder.HasKey(p => p.Id);
 

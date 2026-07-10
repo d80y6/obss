@@ -8,7 +8,7 @@ public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<Product
 {
     public void Configure(EntityTypeBuilder<ProductOrder> builder)
     {
-        builder.ToTable("orders");
+        builder.ToTable("product_orders");
 
         builder.HasKey(o => o.Id);
 
@@ -124,7 +124,8 @@ public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<Product
         builder.Property(o => o.OrderPriority)
             .HasColumnName("priority")
             .HasConversion<string>()
-            .HasMaxLength(30);
+            .HasMaxLength(50)
+            .HasDefaultValue("Medium");
 
         builder.Property(o => o.RequestedStartDate)
             .HasColumnName("requested_start_date");
@@ -146,6 +147,22 @@ public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<Product
         builder.Property(o => o.QuoteId)
             .HasColumnName("quote_id");
 
+        builder.Property(o => o.BillingAccountId);
+
+        builder.Property(o => o.BillingAccountHref).HasMaxLength(500);
+
+        builder.Property(o => o.OrderVersion).IsRequired().HasDefaultValue(1);
+
+        builder.Property(o => o.ProductOfferingQualificationId);
+
+        builder.Property(o => o.ProductOfferingQualificationHref).HasMaxLength(500);
+
+        builder.Property(o => o.QuoteHref).HasMaxLength(500);
+
+        builder.Ignore(o => o.Milestones);
+
+        builder.Ignore(o => o.ItemRelationships);
+
         builder.HasMany(o => o.Items)
             .WithOne()
             .HasForeignKey(i => i.OrderId)
@@ -162,20 +179,20 @@ public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<Product
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasIndex(o => o.OrderNumber)
-            .HasDatabaseName("ix_orders_order_number")
+            .HasDatabaseName("ix_product_orders_order_number")
             .IsUnique();
 
         builder.HasIndex(o => o.TenantId)
-            .HasDatabaseName("ix_orders_tenant_id");
+            .HasDatabaseName("ix_product_orders_tenant_id");
 
         builder.HasIndex(o => o.CustomerId)
-            .HasDatabaseName("ix_orders_customer_id");
+            .HasDatabaseName("ix_product_orders_customer_id");
 
         builder.HasIndex(o => o.Status)
-            .HasDatabaseName("ix_orders_status");
+            .HasDatabaseName("ix_product_orders_status");
 
         builder.HasIndex(o => o.OrderDate)
-            .HasDatabaseName("ix_orders_order_date");
+            .HasDatabaseName("ix_product_orders_order_date");
 
         builder.Navigation(o => o.Items)
             .AutoInclude();

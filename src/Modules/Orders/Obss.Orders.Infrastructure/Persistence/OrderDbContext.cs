@@ -19,6 +19,8 @@ public class OrderDbContext : EfDbContext
     public DbSet<ProductOrderItem> OrderItems => Set<ProductOrderItem>();
     public DbSet<ProductOrderPayment> OrderPayments => Set<ProductOrderPayment>();
     public DbSet<OrderFulfillment> OrderFulfillments => Set<OrderFulfillment>();
+    public DbSet<ProductOrderMilestone> Milestones => Set<ProductOrderMilestone>();
+    public DbSet<ProductOrderItemRelationship> ItemRelationships => Set<ProductOrderItemRelationship>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
