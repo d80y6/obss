@@ -22,6 +22,7 @@ public class BillingDbContext : EfDbContext
     public DbSet<TaxExemption> TaxExemptions => Set<TaxExemption>();
     public DbSet<BillingJob> BillingJobs => Set<BillingJob>();
     public DbSet<BillingAccount> BillingAccounts => Set<BillingAccount>();
+    public DbSet<AccountBalance> AccountBalances => Set<AccountBalance>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

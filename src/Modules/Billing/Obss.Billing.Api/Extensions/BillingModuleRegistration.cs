@@ -22,6 +22,7 @@ public static class BillingModuleRegistration
         services.AddScoped<IBillingCycleRepository, BillingCycleRepository>();
         services.AddScoped<IBillingCalculator, BillingCalculator>();
         services.AddScoped<ITaxRuleRepository, TaxRuleRepository>();
+        services.AddScoped<IAccountBalanceRepository, AccountBalanceRepository>();
         services.AddScoped<ITaxCalculator, TaxCalculator>();
 
         services.AddHostedService<BillingGenerationJob>();

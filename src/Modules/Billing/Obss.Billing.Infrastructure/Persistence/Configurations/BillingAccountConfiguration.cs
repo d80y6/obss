@@ -88,6 +88,61 @@ public sealed class BillingAccountConfiguration : IEntityTypeConfiguration<Billi
             .HasColumnName("external_id")
             .HasMaxLength(100);
 
+        builder.Property(ba => ba.PaymentMethodId)
+            .HasColumnName("payment_method_id")
+            .HasMaxLength(100);
+
+        builder.OwnsOne(ba => ba.AccountHolder, ah =>
+        {
+            ah.Property(a => a.Name).HasColumnName("account_holder_name").HasMaxLength(200);
+            ah.Property(a => a.Email).HasColumnName("account_holder_email").HasMaxLength(200);
+            ah.Property(a => a.Phone).HasColumnName("account_holder_phone").HasMaxLength(50);
+            ah.Property(a => a.ContactId).HasColumnName("account_holder_contact_id");
+        });
+
+        builder.OwnsMany(ba => ba.BillPresentationMedia, pm =>
+        {
+            pm.ToTable("billing_account_presentation_media");
+            pm.WithOwner().HasForeignKey("billing_account_id");
+            pm.HasKey("Id");
+
+            pm.Property(p => p.Id)
+                .HasColumnName("id")
+                .ValueGeneratedNever();
+
+            pm.Property(p => p.MediaType)
+                .HasColumnName("media_type")
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
+
+            pm.Property(p => p.EmailAddress)
+                .HasColumnName("email_address")
+                .HasMaxLength(200);
+
+            pm.Property(p => p.PaperFormat)
+                .HasColumnName("paper_format")
+                .HasMaxLength(10);
+
+            pm.Property(p => p.Language)
+                .HasColumnName("language")
+                .HasMaxLength(10)
+                .IsRequired();
+
+            pm.Property(p => p.IsPreferred)
+                .HasColumnName("is_preferred")
+                .IsRequired();
+
+            pm.Property(p => p.ValidFrom)
+                .HasColumnName("valid_from");
+
+            pm.Property(p => p.ValidUntil)
+                .HasColumnName("valid_until");
+        });
+
+        builder.Navigation(ba => ba.BillPresentationMedia)
+            .AutoInclude();
+
         builder.OwnsMany(ba => ba.RelatedParties, rp =>
         {
             rp.ToTable("billing_account_related_parties");

@@ -24,6 +24,9 @@ public sealed class TaxExemptionConfiguration : IEntityTypeConfiguration<TaxExem
             .HasColumnName("customer_id")
             .IsRequired();
 
+        builder.Property(te => te.BillingAccountId)
+            .HasColumnName("billing_account_id");
+
         builder.Property(e => e.TaxRuleId)
             .HasColumnName("tax_rule_id")
             .IsRequired();
