@@ -1,4 +1,5 @@
 using Obss.Orders.Domain.Events;
+using Obss.Orders.Domain.Exceptions;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 using Obss.SharedKernel.Domain.ValueObjects;
@@ -12,6 +13,8 @@ public class ProductOrder : AggregateRoot<Guid>
     private readonly List<ProductOrderItem> _items = [];
     private readonly List<ProductOrderPayment> _payments = [];
     private readonly List<RelatedParty> _relatedParties = [];
+    private readonly List<ProductOrderMilestone> _milestones = [];
+    private readonly List<ProductOrderItemRelationship> _itemRelationships = [];
 
     private ProductOrder() { }
 
@@ -48,6 +51,9 @@ public class ProductOrder : AggregateRoot<Guid>
         GrandTotal = 0;
         BillingAccountId = billingAccountId;
         OrderPriority = orderPriority ?? Priority.Medium;
+
+        _milestones.Add(new ProductOrderMilestone(Id, "OrderCreated", "Order was created", DateTime.UtcNow));
+        _milestones[^1].Achieve();
     }
 
     public string TenantId { get; private set; } = string.Empty;
@@ -99,6 +105,8 @@ public class ProductOrder : AggregateRoot<Guid>
     public IReadOnlyCollection<ProductOrderItem> Items => _items.AsReadOnly();
     public IReadOnlyCollection<ProductOrderPayment> Payments => _payments.AsReadOnly();
     public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
+    public IReadOnlyList<ProductOrderMilestone> Milestones => _milestones.AsReadOnly();
+    public IReadOnlyList<ProductOrderItemRelationship> ItemRelationships => _itemRelationships.AsReadOnly();
 #pragma warning disable S1144, S2933, S3459, CS0649 // Used by EF Core via reflection
     private OrderFulfillment? _fulfillment;
 #pragma warning restore S1144, S2933, S3459, CS0649
@@ -142,6 +150,9 @@ public class ProductOrder : AggregateRoot<Guid>
 
         Status = OrderStatus.Submitted;
 
+        _milestones.Add(new ProductOrderMilestone(Id, "OrderSubmitted", "Order was submitted", DateTime.UtcNow));
+        _milestones[^1].Achieve();
+
         AddDomainEvent(new OrderSubmittedDomainEvent(
             Id,
             OrderNumber,
@@ -168,6 +179,9 @@ public class ProductOrder : AggregateRoot<Guid>
         ApprovedById = userId;
         ApprovedAt = DateTime.UtcNow;
 
+        _milestones.Add(new ProductOrderMilestone(Id, "OrderApproved", "Order was approved", DateTime.UtcNow));
+        _milestones[^1].Achieve();
+
         AddDomainEvent(new OrderApprovedDomainEvent(Id, OrderNumber, userId));
     }
 
@@ -186,6 +200,9 @@ public class ProductOrder : AggregateRoot<Guid>
 
         _fulfillment = OrderFulfillment.Create(Id);
         StartFulfillment();
+
+        _milestones.Add(new ProductOrderMilestone(Id, "FulfillmentStarted", "Fulfillment process started", DateTime.UtcNow));
+        _milestones[^1].Achieve();
     }
 
     public void Reject(string userId, string reason)
@@ -218,6 +235,9 @@ public class ProductOrder : AggregateRoot<Guid>
             throw new InvalidOperationException($"Cannot complete order in {Status} status.");
 
         Status = OrderStatus.Completed;
+
+        _milestones.Add(new ProductOrderMilestone(Id, "OrderCompleted", "Order was completed", DateTime.UtcNow));
+        _milestones[^1].Achieve();
 
         AddDomainEvent(new OrderCompletedDomainEvent(Id));
     }
@@ -353,6 +373,43 @@ public class ProductOrder : AggregateRoot<Guid>
     public void AddRelatedParty(string partyId, string partyName, string role)
     {
         _relatedParties.Add(new RelatedParty(partyId, partyName, role));
+    }
+
+    public void AddItemRelationship(Guid itemId, Guid targetItemId, RelationshipType type)
+    {
+        if (HasCircularDependency(itemId, targetItemId))
+            throw new InvalidProductOrderStateException("Circular dependency detected in item relationships");
+        _itemRelationships.Add(new ProductOrderItemRelationship(itemId, targetItemId, type));
+    }
+
+    public void RemoveItemRelationship(Guid relationshipId)
+    {
+        var rel = _itemRelationships.FirstOrDefault(r => r.Id == relationshipId);
+        if (rel is null) throw new InvalidProductOrderStateException($"Relationship {relationshipId} not found");
+        _itemRelationships.Remove(rel);
+    }
+
+    private bool HasCircularDependency(Guid itemId, Guid targetItemId)
+    {
+        var visited = new HashSet<Guid> { itemId };
+        var queue = new Queue<Guid>([targetItemId]);
+        while (queue.Count > 0)
+        {
+            var current = queue.Dequeue();
+            if (current == itemId) return true;
+            if (!visited.Add(current)) continue;
+            foreach (var rel in _itemRelationships.Where(r => r.ProductOrderItemId == current))
+                queue.Enqueue(rel.TargetItemId);
+        }
+        return false;
+    }
+
+    public IReadOnlyList<ProductOrderItemRelationship> GetItemRelationships(Guid itemId) =>
+        _itemRelationships.Where(r => r.ProductOrderItemId == itemId).ToList().AsReadOnly();
+
+    public void AddMilestone(ProductOrderMilestone milestone)
+    {
+        _milestones.Add(milestone);
     }
 
     private static string GenerateOrderNumber()
