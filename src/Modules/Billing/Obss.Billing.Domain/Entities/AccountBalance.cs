@@ -1,3 +1,4 @@
+using Obss.Billing.Domain.Events;
 using Obss.Billing.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 
@@ -38,6 +39,7 @@ public class AccountBalance : AggregateRoot<Guid>
 
     public void RecordTransaction(decimal amount, TransactionType type, string description, string? referenceId, string? referenceType)
     {
+        var previousBalance = CurrentBalance;
         var signedAmount = type switch
         {
             TransactionType.Payment or TransactionType.Credit or TransactionType.Refund => -Math.Abs(amount),
@@ -48,5 +50,6 @@ public class AccountBalance : AggregateRoot<Guid>
         CurrentBalance += signedAmount;
         LastUpdatedAt = DateTime.UtcNow;
         _transactions.Add(new BalanceTransaction(Id, signedAmount, type, description, referenceId, referenceType));
+        AddDomainEvent(new BalanceChangedEvent(BillingAccountId, previousBalance, CurrentBalance, Currency));
     }
 }
