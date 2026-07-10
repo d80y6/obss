@@ -107,6 +107,17 @@ export const queryKeys = {
       list: (filters: Record<string, string> = {}) =>
         [...queryKeys.billing.taxRules.all, "list", filters] as const,
     },
+    billingAccounts: {
+      all: ["billing", "billing-accounts"] as const,
+      lists: () => [...queryKeys.billing.billingAccounts.all, "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.billing.billingAccounts.lists(), filters] as const,
+      details: () => [...queryKeys.billing.billingAccounts.all, "detail"] as const,
+      detail: (id: string) => [...queryKeys.billing.billingAccounts.details(), id] as const,
+      balance: (id: string) => [...queryKeys.billing.billingAccounts.detail(id), "balance"] as const,
+      relatedParties: (id: string) => [...queryKeys.billing.billingAccounts.detail(id), "related-parties"] as const,
+      presentationMedia: (id: string) => [...queryKeys.billing.billingAccounts.detail(id), "presentation-media"] as const,
+    },
   },
   invoices: {
     all: ["invoices"] as const,
