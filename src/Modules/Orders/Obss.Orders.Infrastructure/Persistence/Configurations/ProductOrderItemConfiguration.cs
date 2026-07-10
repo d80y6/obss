@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Obss.Orders.Domain.Entities;
+using Obss.Orders.Domain.ValueObjects;
 
 namespace Obss.Orders.Infrastructure.Persistence.Configurations;
 
@@ -91,6 +92,6 @@ public sealed class ProductOrderItemConfiguration : IEntityTypeConfiguration<Pro
             .HasColumnName("state")
             .HasConversion<string>()
             .HasMaxLength(50)
-            .HasDefaultValue("Acknowledged");
+            .HasDefaultValue(ProductOrderItemState.Acknowledged);
     }
 }

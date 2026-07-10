@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Obss.Orders.Domain.Entities;
+using Obss.Orders.Domain.ValueObjects;
 
 namespace Obss.Orders.Infrastructure.Persistence.Configurations;
 
@@ -125,7 +126,7 @@ public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<Product
             .HasColumnName("priority")
             .HasConversion<string>()
             .HasMaxLength(50)
-            .HasDefaultValue("Medium");
+            .HasDefaultValue(Priority.Medium);
 
         builder.Property(o => o.RequestedStartDate)
             .HasColumnName("requested_start_date");
@@ -162,6 +163,8 @@ public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<Product
         builder.Ignore(o => o.Milestones);
 
         builder.Ignore(o => o.ItemRelationships);
+
+        builder.Ignore(o => o.RelatedParties);
 
         builder.HasMany(o => o.Items)
             .WithOne()
