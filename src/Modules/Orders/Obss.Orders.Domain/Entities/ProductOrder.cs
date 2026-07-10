@@ -169,7 +169,7 @@ public class ProductOrder : AggregateRoot<Guid>
         _milestones.Add(new ProductOrderMilestone(Id, "OrderSubmitted", "Order was submitted", DateTime.UtcNow));
         _milestones[^1].Achieve();
 
-        AddDomainEvent(new OrderSubmittedDomainEvent(
+        AddDomainEvent(new ProductOrderSubmittedDomainEvent(
             Id,
             OrderNumber,
             CustomerId,
@@ -198,7 +198,7 @@ public class ProductOrder : AggregateRoot<Guid>
         _milestones.Add(new ProductOrderMilestone(Id, "OrderApproved", "Order was approved", DateTime.UtcNow));
         _milestones[^1].Achieve();
 
-        AddDomainEvent(new OrderApprovedDomainEvent(Id, OrderNumber, userId));
+        AddDomainEvent(new ProductOrderApprovedDomainEvent(Id, OrderNumber, userId));
     }
 
     public void StartFulfillment()
@@ -231,7 +231,7 @@ public class ProductOrder : AggregateRoot<Guid>
         ApprovedAt = DateTime.UtcNow;
         CancellationReason = reason;
 
-        AddDomainEvent(new OrderCancelledDomainEvent(Id, reason));
+        AddDomainEvent(new ProductOrderCancelledDomainEvent(Id, reason));
     }
 
     public void Cancel(string reason)
@@ -242,7 +242,7 @@ public class ProductOrder : AggregateRoot<Guid>
         Status = OrderStatus.Cancelled;
         CancellationReason = reason;
 
-        AddDomainEvent(new OrderCancelledDomainEvent(Id, reason));
+        AddDomainEvent(new ProductOrderCancelledDomainEvent(Id, reason));
     }
 
     public void MarkCompleted()
@@ -255,7 +255,7 @@ public class ProductOrder : AggregateRoot<Guid>
         _milestones.Add(new ProductOrderMilestone(Id, "OrderCompleted", "Order was completed", DateTime.UtcNow));
         _milestones[^1].Achieve();
 
-        AddDomainEvent(new OrderCompletedDomainEvent(Id));
+        AddDomainEvent(new ProductOrderCompletedDomainEvent(Id));
     }
 
     public void AddItem(

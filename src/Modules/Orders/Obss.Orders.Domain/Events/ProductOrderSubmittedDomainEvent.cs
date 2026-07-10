@@ -12,9 +12,9 @@ public sealed record OrderItemData(
     decimal UnitPrice,
     decimal TotalPrice);
 
-public sealed class OrderSubmittedDomainEvent : DomainEvent
+public sealed class ProductOrderSubmittedDomainEvent : DomainEvent
 {
-    public OrderSubmittedDomainEvent(
+    public ProductOrderSubmittedDomainEvent(
         Guid orderId,
         string orderNumber,
         Guid customerId,

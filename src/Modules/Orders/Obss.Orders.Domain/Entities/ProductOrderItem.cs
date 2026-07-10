@@ -142,6 +142,7 @@ public class ProductOrderItem : Entity<Guid>
     private void TransitionTo(ProductOrderItemState newState, string? reason = null)
     {
         var oldState = State;
+        if (oldState == newState) return;
         State = newState;
         AddDomainEvent(new ProductOrderItemStateChangedDomainEvent(OrderId, Id, oldState, newState, reason));
     }

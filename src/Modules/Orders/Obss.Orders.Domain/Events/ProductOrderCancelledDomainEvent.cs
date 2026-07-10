@@ -2,9 +2,9 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.Orders.Domain.Events;
 
-public sealed class OrderCancelledDomainEvent : DomainEvent
+public sealed class ProductOrderCancelledDomainEvent : DomainEvent
 {
-    public OrderCancelledDomainEvent(Guid orderId, string reason)
+    public ProductOrderCancelledDomainEvent(Guid orderId, string reason)
     {
         OrderId = orderId;
         Reason = reason;

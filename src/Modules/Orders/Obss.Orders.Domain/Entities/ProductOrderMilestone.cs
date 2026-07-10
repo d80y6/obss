@@ -15,8 +15,8 @@ public class ProductOrderMilestone : Entity<Guid>
     private ProductOrderMilestone() { }
 
     public ProductOrderMilestone(Guid productOrderId, string name, string description, DateTime milestoneDate)
+        : base(Guid.NewGuid())
     {
-        Id = Guid.NewGuid();
         ProductOrderId = productOrderId;
         Name = name;
         Description = description;
