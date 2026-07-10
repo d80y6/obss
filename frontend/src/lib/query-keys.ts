@@ -461,4 +461,12 @@ export const queryKeys = {
       list: (specId: string) => [...queryKeys.serviceCatalog.relationships.all(specId), "list"] as const,
     },
   },
+  serviceQualification: {
+    all: ["service-qualification"] as const,
+    lists: () => [...queryKeys.serviceQualification.all, "list"] as const,
+    list: (filters: Record<string, string> = {}) =>
+      [...queryKeys.serviceQualification.lists(), filters] as const,
+    details: () => [...queryKeys.serviceQualification.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.serviceQualification.details(), id] as const,
+  },
 } as const
