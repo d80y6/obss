@@ -1,8 +1,8 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Obss.ServiceQualification.Api.Endpoints;
-using Obss.SharedKernel.Application.Abstractions;
+using Obss.ServiceQualification.Application.Abstractions;
+using Obss.ServiceQualification.Application.Mappings;
+using Obss.ServiceQualification.Application.Services;
+using Obss.ServiceQualification.Infrastructure.Persistence.Repositories;
 using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.ServiceQualification.Api.Extensions;
@@ -11,14 +11,20 @@ public static class ServiceQualificationModuleRegistration
 {
     public static IServiceCollection AddServiceQualificationModule(this IServiceCollection services)
     {
-        services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+        services.AddScoped<IServiceQualificationRepository, ServiceQualificationRepository>();
+        services.AddScoped<ICoverageAreaRepository, CoverageAreaRepository>();
+        services.AddScoped<IServiceQualificationEngine, CoverageBasedQualificationEngine>();
+        services.AddScoped(typeof(Obss.SharedKernel.Application.Abstractions.IRepository<>), typeof(EfRepository<>));
+
+        ServiceQualificationMappingConfig.Configure();
+
         return services;
     }
 
     public static IEndpointRouteBuilder MapServiceQualificationEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/v{version:apiVersion}/service-qualification")
-            .WithTags("Service Qualification");
+            .WithTags("ServiceQualification");
 
         ServiceQualificationEndpoints.Map(group);
 
