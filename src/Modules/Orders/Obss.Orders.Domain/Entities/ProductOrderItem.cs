@@ -1,3 +1,5 @@
+using Obss.Orders.Domain.Events;
+using Obss.Orders.Domain.Exceptions;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 
@@ -66,6 +68,78 @@ public class ProductOrderItem : Entity<Guid>
     public string? ItemState { get; private set; }
 #pragma warning restore S1144
     public ProductOrderItemState State { get; private set; } = ProductOrderItemState.Acknowledged;
+
+    public void Acknowledge() => TransitionTo(ProductOrderItemState.Acknowledged);
+
+    public void StartProgress()
+    {
+        if (State != ProductOrderItemState.Acknowledged && State != ProductOrderItemState.Pending)
+            throw new InvalidProductOrderItemStateException($"Cannot start progress from {State}");
+        TransitionTo(ProductOrderItemState.InProgress);
+    }
+
+    public void Hold()
+    {
+        if (State != ProductOrderItemState.InProgress)
+            throw new InvalidProductOrderItemStateException($"Cannot hold from {State}");
+        TransitionTo(ProductOrderItemState.Held);
+    }
+
+    public void Resume()
+    {
+        if (State != ProductOrderItemState.Held)
+            throw new InvalidProductOrderItemStateException($"Cannot resume from {State}");
+        TransitionTo(ProductOrderItemState.InProgress);
+    }
+
+    public void Assess()
+    {
+        if (State != ProductOrderItemState.InProgress)
+            throw new InvalidProductOrderItemStateException($"Cannot assess from {State}");
+        TransitionTo(ProductOrderItemState.Assessing);
+    }
+
+    public void Pending(string reason)
+    {
+        if (State != ProductOrderItemState.InProgress)
+            throw new InvalidProductOrderItemStateException($"Cannot set pending from {State}");
+        TransitionTo(ProductOrderItemState.Pending);
+    }
+
+    public void Reject(string reason)
+    {
+        if (State != ProductOrderItemState.Assessing)
+            throw new InvalidProductOrderItemStateException($"Cannot reject from {State}");
+        TransitionTo(ProductOrderItemState.Rejected);
+    }
+
+    public void Complete()
+    {
+        if (State != ProductOrderItemState.InProgress && State != ProductOrderItemState.Assessing)
+            throw new InvalidProductOrderItemStateException($"Cannot complete from {State}");
+        TransitionTo(ProductOrderItemState.Completed);
+    }
+
+    public void Fail(string error)
+    {
+        if (State != ProductOrderItemState.InProgress)
+            throw new InvalidProductOrderItemStateException($"Cannot fail from {State}");
+        TransitionTo(ProductOrderItemState.Failed);
+    }
+
+    public void Cancel()
+    {
+        if (State is ProductOrderItemState.Completed or ProductOrderItemState.Failed or ProductOrderItemState.Rejected or ProductOrderItemState.Cancelled)
+            throw new InvalidProductOrderItemStateException($"Cannot cancel from {State}");
+        TransitionTo(ProductOrderItemState.Cancelled);
+    }
+
+    private void TransitionTo(ProductOrderItemState newState)
+    {
+        var oldState = State;
+        State = newState;
+        AddDomainEvent(new ProductOrderItemStateChangedDomainEvent(OrderId, Id, oldState, newState, null));
+    }
 
     public void Deactivate()
     {
