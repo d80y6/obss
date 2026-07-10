@@ -7,15 +7,15 @@ namespace Obss.Orders.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class Order : AggregateRoot<Guid>
+public class ProductOrder : AggregateRoot<Guid>
 {
-    private readonly List<OrderItem> _items = [];
-    private readonly List<OrderPayment> _payments = [];
+    private readonly List<ProductOrderItem> _items = [];
+    private readonly List<ProductOrderPayment> _payments = [];
     private readonly List<RelatedParty> _relatedParties = [];
 
-    private Order() { }
+    private ProductOrder() { }
 
-    private Order(
+    private ProductOrder(
         Guid id,
         string tenantId,
         Guid customerId,
@@ -25,7 +25,9 @@ public class Order : AggregateRoot<Guid>
         Address? billingAddress,
         Address? shippingAddress,
         string createdById,
-        string currency)
+        string currency,
+        Guid? billingAccountId,
+        Priority? orderPriority)
         : base(id)
     {
         TenantId = tenantId;
@@ -44,6 +46,8 @@ public class Order : AggregateRoot<Guid>
         TaxTotal = 0;
         DiscountTotal = 0;
         GrandTotal = 0;
+        BillingAccountId = billingAccountId;
+        OrderPriority = orderPriority ?? Priority.Medium;
     }
 
     public string TenantId { get; private set; } = string.Empty;
@@ -67,7 +71,7 @@ public class Order : AggregateRoot<Guid>
     public string? CancellationReason { get; private set; }
     public string? Description { get; private set; }
     public string? Channel { get; private set; }
-    public string? Priority { get; private set; }
+    public Priority OrderPriority { get; private set; } = Priority.Medium;
     public DateTime? RequestedStartDate { get; private set; }
     public DateTime? RequestedCompletionDate { get; private set; }
     public DateTime? ExpectedCompletionDate { get; private set; }
@@ -81,16 +85,26 @@ public class Order : AggregateRoot<Guid>
     public string? AtSchemaLocation { get; private set; }
 #pragma warning restore S1144
     public string? CompletionDate { get; private set; }
+    public Guid? BillingAccountId { get; private set; }
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public string? BillingAccountHref { get; private set; }
+#pragma warning restore S1144
+    public int OrderVersion { get; private set; } = 1;
+#pragma warning disable S1144 // Used by EF Core via reflection
+    public Guid? ProductOfferingQualificationId { get; private set; }
+    public string? ProductOfferingQualificationHref { get; private set; }
+    public string? QuoteHref { get; private set; }
+#pragma warning restore S1144
 
-    public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
-    public IReadOnlyCollection<OrderPayment> Payments => _payments.AsReadOnly();
+    public IReadOnlyCollection<ProductOrderItem> Items => _items.AsReadOnly();
+    public IReadOnlyCollection<ProductOrderPayment> Payments => _payments.AsReadOnly();
     public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 #pragma warning disable S1144, S2933, S3459, CS0649 // Used by EF Core via reflection
     private OrderFulfillment? _fulfillment;
 #pragma warning restore S1144, S2933, S3459, CS0649
     public OrderFulfillment? Fulfillment => _fulfillment;
 
-    public static Order Create(
+    public static ProductOrder Create(
         string tenantId,
         Guid customerId,
         string customerName,
@@ -99,9 +113,11 @@ public class Order : AggregateRoot<Guid>
         string? notes = null,
         Address? billingAddress = null,
         Address? shippingAddress = null,
-        string currency = "USD")
+        string currency = "USD",
+        Priority? priority = null,
+        Guid? billingAccountId = null)
     {
-        return new Order(
+        return new ProductOrder(
             Guid.NewGuid(),
             tenantId,
             customerId,
@@ -111,7 +127,9 @@ public class Order : AggregateRoot<Guid>
             billingAddress,
             shippingAddress,
             createdById,
-            currency);
+            currency,
+            billingAccountId,
+            priority);
     }
 
     public void Submit()
@@ -224,7 +242,7 @@ public class Order : AggregateRoot<Guid>
 
         var totalPrice = (unitPrice * quantity) + recurringPrice - discountAmount + taxAmount;
 
-        var item = new OrderItem(
+        var item = new ProductOrderItem(
             Guid.NewGuid(),
             Id,
             productId,
@@ -271,7 +289,7 @@ public class Order : AggregateRoot<Guid>
 
     public void AddPayment(decimal amount, string paymentMethod, string paymentReference)
     {
-        var payment = new OrderPayment(
+        var payment = new ProductOrderPayment(
             Guid.NewGuid(),
             Id,
             amount,
@@ -294,7 +312,7 @@ public class Order : AggregateRoot<Guid>
     public void UpdateDetails(
         string? description = null,
         string? channel = null,
-        string? priority = null,
+        Priority? priority = null,
         string? notes = null,
         DateTime? requestedStartDate = null,
         DateTime? requestedCompletionDate = null,
@@ -310,7 +328,7 @@ public class Order : AggregateRoot<Guid>
 
         if (description is not null) Description = description;
         if (channel is not null) Channel = channel;
-        if (priority is not null) Priority = priority;
+        if (priority.HasValue) OrderPriority = priority.Value;
         if (notes is not null) Notes = notes;
         if (requestedStartDate.HasValue) RequestedStartDate = requestedStartDate;
         if (requestedCompletionDate.HasValue) RequestedCompletionDate = requestedCompletionDate;

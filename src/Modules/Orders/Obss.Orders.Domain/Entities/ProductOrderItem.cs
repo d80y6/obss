@@ -3,9 +3,9 @@ using Obss.SharedKernel.Domain.Common;
 
 namespace Obss.Orders.Domain.Entities;
 
-public class OrderItem : Entity<Guid>
+public class ProductOrderItem : Entity<Guid>
 {
-    internal OrderItem(
+    internal ProductOrderItem(
         Guid id,
         Guid orderId,
         Guid productId,
@@ -43,7 +43,7 @@ public class OrderItem : Entity<Guid>
         ServiceType = serviceType;
     }
 
-    private OrderItem() { }
+    private ProductOrderItem() { }
 
     public Guid OrderId { get; private set; }
     public Guid ProductId { get; private set; }
@@ -65,6 +65,7 @@ public class OrderItem : Entity<Guid>
     public string? Action { get; private set; }
     public string? ItemState { get; private set; }
 #pragma warning restore S1144
+    public ProductOrderItemState State { get; private set; } = ProductOrderItemState.Acknowledged;
 
     public void Deactivate()
     {
