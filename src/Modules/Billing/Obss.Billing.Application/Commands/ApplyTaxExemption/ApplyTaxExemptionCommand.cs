@@ -6,6 +6,7 @@ namespace Obss.Billing.Application.Commands.ApplyTaxExemption;
 
 public sealed record ApplyTaxExemptionCommand(
     Guid CustomerId,
+    Guid? BillingAccountId,
     Guid TaxRuleId,
     string ExemptionCertificate,
     decimal ExemptionRate,

@@ -11,6 +11,7 @@ public class TaxExemption : Entity<Guid>, ITenantEntity
         Guid id,
         string tenantId,
         Guid customerId,
+        Guid? billingAccountId,
         Guid taxRuleId,
         string exemptionCertificate,
         decimal exemptionRate,
@@ -21,6 +22,7 @@ public class TaxExemption : Entity<Guid>, ITenantEntity
     {
         TenantId = tenantId;
         CustomerId = customerId;
+        BillingAccountId = billingAccountId;
         TaxRuleId = taxRuleId;
         ExemptionCertificate = exemptionCertificate;
         ExemptionRate = exemptionRate;
@@ -32,6 +34,7 @@ public class TaxExemption : Entity<Guid>, ITenantEntity
 
     public string TenantId { get; private set; } = string.Empty;
     public Guid CustomerId { get; private set; }
+    public Guid? BillingAccountId { get; private set; }
     public Guid TaxRuleId { get; private set; }
     public string ExemptionCertificate { get; private set; } = string.Empty;
     public decimal ExemptionRate { get; private set; }
@@ -46,6 +49,7 @@ public class TaxExemption : Entity<Guid>, ITenantEntity
     public static TaxExemption Create(
         string tenantId,
         Guid customerId,
+        Guid? billingAccountId,
         Guid taxRuleId,
         string exemptionCertificate,
         decimal exemptionRate,
@@ -57,6 +61,7 @@ public class TaxExemption : Entity<Guid>, ITenantEntity
             Guid.NewGuid(),
             tenantId,
             customerId,
+            billingAccountId,
             taxRuleId,
             exemptionCertificate,
             exemptionRate,

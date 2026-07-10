@@ -41,6 +41,7 @@ public sealed class ApplyTaxExemptionCommandHandler : IRequestHandler<ApplyTaxEx
         var exemption = TaxExemption.Create(
             tenantId,
             request.CustomerId,
+            billingAccountId: null,
             request.TaxRuleId,
             request.ExemptionCertificate,
             request.ExemptionRate,

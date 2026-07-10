@@ -1,3 +1,4 @@
+using Obss.Billing.Domain.Events;
 using Obss.Billing.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 
@@ -6,6 +7,7 @@ namespace Obss.Billing.Domain.Entities;
 public class BillingAccount : AggregateRoot<Guid>
 {
     private readonly List<RelatedParty> _relatedParties = [];
+    private readonly List<BillPresentationMedia> _billPresentationMedia = [];
 
     private BillingAccount() { }
 
@@ -21,6 +23,7 @@ public class BillingAccount : AggregateRoot<Guid>
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new BillingAccountCreatedEvent(Id, customerId, accountType.ToString()));
     }
 
     public Guid CustomerId { get; private set; }
@@ -45,6 +48,10 @@ public class BillingAccount : AggregateRoot<Guid>
     public string? ExternalId { get; private set; }
 #pragma warning restore S1144
 
+    public AccountHolder? AccountHolder { get; private set; }
+    public string? PaymentMethodId { get; private set; }
+    public IReadOnlyCollection<BillPresentationMedia> BillPresentationMedia => _billPresentationMedia.AsReadOnly();
+
     public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 
     public void UpdateDetails(string name, decimal creditLimit, string currency, string? description)
@@ -54,6 +61,7 @@ public class BillingAccount : AggregateRoot<Guid>
         Currency = currency;
         Description = description;
         UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new BillingAccountUpdatedEvent(Id, name, Status));
     }
 
     public void SetStatus(string status)
@@ -78,4 +86,35 @@ public class BillingAccount : AggregateRoot<Guid>
     public void SetHref(string href) => Href = href;
 
     public void AddRelatedParty(string partyId, string partyName, string role) => _relatedParties.Add(new RelatedParty(partyId, partyName, role));
+
+    public void SetAccountHolder(AccountHolder accountHolder)
+    {
+        AccountHolder = accountHolder;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void SetPaymentMethodId(string? paymentMethodId)
+    {
+        PaymentMethodId = paymentMethodId;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void AddBillPresentationMedia(BillPresentationMedia media) => _billPresentationMedia.Add(media);
+
+    public void RemoveBillPresentationMedia(Guid mediaId)
+    {
+        var media = _billPresentationMedia.FirstOrDefault(m => m.Id == mediaId);
+        if (media is not null)
+            _billPresentationMedia.Remove(media);
+    }
+
+    public void MarkDeleted()
+    {
+        IsActive = false;
+        Status = "Deleted";
+        UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new BillingAccountDeletedEvent(Id));
+    }
+
+    public void RemoveRelatedParty(RelatedParty party) => _relatedParties.Remove(party);
 }
