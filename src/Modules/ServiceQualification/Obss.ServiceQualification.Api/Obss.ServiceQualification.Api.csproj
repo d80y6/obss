@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Obss.ServiceQualification.Application\Obss.ServiceQualification.Application.csproj" />
+    <ProjectReference Include="..\Obss.ServiceQualification.Infrastructure\Obss.ServiceQualification.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

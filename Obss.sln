@@ -253,6 +253,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.EventManagement.Infras
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.EventManagement.Api", "src\Modules\EventManagement\Obss.EventManagement.Api\Obss.EventManagement.Api.csproj", "{CF57BD52-E070-479F-928D-3E95BE880F27}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServiceQualification", "ServiceQualification", "{F993F516-5F07-89E4-0B12-C44DFA2A0798}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.ServiceQualification.Domain", "src\Modules\ServiceQualification\Obss.ServiceQualification.Domain\Obss.ServiceQualification.Domain.csproj", "{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.ServiceQualification.Application", "src\Modules\ServiceQualification\Obss.ServiceQualification.Application\Obss.ServiceQualification.Application.csproj", "{02515317-6FE0-4A3B-9EF3-762B3B45E63A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.ServiceQualification.Infrastructure", "src\Modules\ServiceQualification\Obss.ServiceQualification.Infrastructure\Obss.ServiceQualification.Infrastructure.csproj", "{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.ServiceQualification.Api", "src\Modules\ServiceQualification\Obss.ServiceQualification.Api\Obss.ServiceQualification.Api.csproj", "{7C4867E2-4351-4DFE-864F-C5840C29C50C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1355,6 +1365,54 @@ Global
 		{CF57BD52-E070-479F-928D-3E95BE880F27}.Release|x64.Build.0 = Release|Any CPU
 		{CF57BD52-E070-479F-928D-3E95BE880F27}.Release|x86.ActiveCfg = Release|Any CPU
 		{CF57BD52-E070-479F-928D-3E95BE880F27}.Release|x86.Build.0 = Release|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Debug|x64.Build.0 = Debug|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Release|x64.ActiveCfg = Release|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Release|x64.Build.0 = Release|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D}.Release|x86.Build.0 = Release|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Debug|x64.Build.0 = Debug|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Debug|x86.Build.0 = Debug|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Release|x64.ActiveCfg = Release|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Release|x64.Build.0 = Release|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Release|x86.ActiveCfg = Release|Any CPU
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A}.Release|x86.Build.0 = Release|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Debug|x64.Build.0 = Debug|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Debug|x86.Build.0 = Debug|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Release|x64.ActiveCfg = Release|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Release|x64.Build.0 = Release|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Release|x86.ActiveCfg = Release|Any CPU
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33}.Release|x86.Build.0 = Release|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Debug|x64.Build.0 = Debug|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Debug|x86.Build.0 = Debug|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x64.ActiveCfg = Release|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x64.Build.0 = Release|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x86.ActiveCfg = Release|Any CPU
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1480,5 +1538,10 @@ Global
 		{FEDF6595-5CC0-4823-9658-B15D892E61D3} = {46C8A5AA-6346-4B02-5069-1FD7508E0C7C}
 		{FB334FC6-9CBB-4982-B203-D9A26DD590BA} = {46C8A5AA-6346-4B02-5069-1FD7508E0C7C}
 		{CF57BD52-E070-479F-928D-3E95BE880F27} = {46C8A5AA-6346-4B02-5069-1FD7508E0C7C}
+		{F993F516-5F07-89E4-0B12-C44DFA2A0798} = {EC447DCF-ABFA-6E24-52A5-D7FD48A5C558}
+		{0A2C604D-EFBA-49E2-BCDB-2495ED7DA56D} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
+		{02515317-6FE0-4A3B-9EF3-762B3B45E63A} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
+		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
+		{7C4867E2-4351-4DFE-864F-C5840C29C50C} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
 	EndGlobalSection
 EndGlobal

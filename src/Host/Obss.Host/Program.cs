@@ -29,6 +29,7 @@ using Obss.Reporting.Api.Extensions;
 using Obss.ServiceCatalog.Api.Extensions;
 using Obss.EventManagement.Api.Extensions;
 using Obss.ServiceInventory.Api.Extensions;
+using Obss.ServiceQualification.Api.Extensions;
 using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Application.Behaviors;
 using Obss.SharedKernel.Infrastructure;
@@ -187,6 +188,7 @@ AddModuleDbContext<Obss.Audit.Infrastructure.Persistence.AuditDbContext>("audit"
 AddModuleDbContext<Obss.ApiGateway.Infrastructure.Persistence.GatewayDbContext>("gateway");
 AddModuleDbContext<Obss.ServiceCatalog.Infrastructure.Persistence.ServiceCatalogDbContext>("service_catalog");
 AddModuleDbContext<Obss.EventManagement.Infrastructure.Persistence.EventDbContext>("event_management");
+AddModuleDbContext<Obss.ServiceQualification.Infrastructure.Persistence.ServiceQualificationDbContext>("service_qualification");
 
 builder.Services.TryAddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
@@ -216,6 +218,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Obss.NumberInventory.Application.Commands.AddNumber.AddNumberCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.ServiceCatalog.Application.Commands.ServiceCategory.CreateServiceCategory.CreateServiceCategoryCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.EventManagement.Application.Commands.CreateSubscriptionCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Obss.ServiceQualification.Application.Commands.CheckServiceQualification.CheckServiceQualificationCommand).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuditBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -244,6 +247,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(Obss.ApiGateway.Application.Co
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.NumberInventory.Application.Commands.AddNumber.AddNumberCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceCatalog.Application.Commands.ServiceCategory.CreateServiceCategory.CreateServiceCategoryCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.EventManagement.Application.Commands.CreateSubscriptionCommandValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceQualification.Application.Commands.CheckServiceQualification.CheckServiceQualificationCommandValidator).Assembly);
 
 builder.Services.AddOutboxProcessing(TimeSpan.FromSeconds(10));
 builder.Services.AddRabbitMqConsumer();
@@ -269,6 +273,7 @@ builder.Services.AddApiGatewayModule();
 builder.Services.AddNumberInventoryModule();
 builder.Services.AddServiceCatalogModule();
 builder.Services.AddEventModule();
+builder.Services.AddServiceQualificationModule();
 
 var pgConnString = connectionString;
 builder.Services.AddHealthChecks()
@@ -315,6 +320,7 @@ var infraAsms = new[] {
     typeof(Obss.NumberInventory.Infrastructure.Persistence.NumberDbContext).Assembly,
     typeof(Obss.ServiceCatalog.Infrastructure.Persistence.ServiceCatalogDbContext).Assembly,
     typeof(Obss.EventManagement.Infrastructure.Persistence.EventDbContext).Assembly,
+    typeof(Obss.ServiceQualification.Infrastructure.Persistence.ServiceQualificationDbContext).Assembly,
 };
 var skipInterfaces = new HashSet<string> { "IDisposable", "IAsyncDisposable", "IEquatable`1" };
 foreach (var asm in infraAsms)
@@ -371,6 +377,7 @@ app.MapApiGatewayEndpoints();
 app.MapNumberInventoryEndpoints();
 app.MapServiceCatalogEndpoints();
 app.MapEventEndpoints();
+app.MapServiceQualificationEndpoints();
 
 app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
 {

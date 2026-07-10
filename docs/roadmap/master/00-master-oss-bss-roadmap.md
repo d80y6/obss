@@ -1006,7 +1006,7 @@ Each module has its own database schema. The `UnitOfWork` iterates all contexts 
 | WP-008 | Add integration test scaffolding | W0 | HIGH | P1 | MEDIUM | M | 5 days | 1.0 |
 | WP-009 | Fix Provisioning→Workflow coupling | W1 | HIGH | P0 | HIGH | S | 2 days | 0.4 |
 | WP-010 | Fix cross-DB UnitOfWork | W1 | HIGH | P0 | HIGH | M | 1 week | 1.0 |
-| WP-011 | Add saga for order→provisioning→subscription | W1 | HIGH | P0 | HIGH | L | 3 weeks | 3.0 |
+| WP-011 | Add saga for order→provisioning→subscription | W1 | HIGH | P0 (deferred) | HIGH | L | 3 weeks | 3.0 |
 | WP-012 | Fix aggregate root violations | W1 | MEDIUM | P1 | MEDIUM | M | 1 week | 1.0 |
 | WP-013 | Fix PartyRole handler bug | W1 | HIGH | P1 | HIGH | S | 1 day | 0.2 |
 | WP-014 | Fix CRM dual aggregate root | W1 | MEDIUM | P1 | MEDIUM | M | 3 days | 0.6 |
@@ -1036,6 +1036,7 @@ Each module has its own database schema. The `UnitOfWork` iterates all contexts 
 | WP-038 | Operations hardening | W4 | MEDIUM | P2 | MEDIUM | M | 1 week | 1.0 |
 | WP-039 | Documentation completion | W4 | MEDIUM | P3 | LOW | M | 1 week | 1.0 |
 | WP-040 | Production readiness certification | W4 | HIGH | P0 | HIGH | M | 1 week | 1.0 |
+| WP-041 | Saga for order→provisioning→subscription (revisit) | W1 | HIGH | P1 (revisit) | HIGH | L | 3 weeks | 3.0 |
 
 ---
 
@@ -1152,18 +1153,26 @@ P3 (LOW - nice to have)
 ### 14.2 Actual Execution Schedule
 
 ```
+### 14.3 Actual Execution History
+
+```
 Week 1:  WP-001, WP-002, WP-003, WP-004, WP-005, WP-006, WP-007
 Week 2:  WP-008, WP-009, WP-010, WP-012, WP-013
-Week 3:  WP-011, WP-014, WP-015, WP-016, WP-017
+Week 3:  WP-011 (NOT EXECUTED), WP-014, WP-015, WP-016, WP-017
 Week 4:  WP-018 (start)
 Week 5:  WP-018 (continue)
-Week 6:  WP-018 (continue), WP-019 (start)
-Week 7:  WP-019 (continue)
+Week 6:  WP-018 (continue), WP-019 (design + spec)
+```
+
+### 14.4 Revised Forward Schedule
+
+```
+Week 7:  WP-018 (completed), WP-019 (implementation — subagent-driven)
 Week 8:  WP-019 (continue)
-Week 9:  WP-019 (continue), WP-020 (start)
+Week 9:  WP-019 (finish), WP-020 (start)
 Week 10: WP-020 (continue), WP-021 (start)
 Week 11: WP-020 (continue), WP-021 (continue)
-Week 12: WP-022 (start), WP-023 (start)
+Week 12: WP-011 (saga — revisit), WP-022 (start), WP-023 (start)
 Week 13: WP-022 (continue), WP-023 (continue)
 Week 14: WP-022 (continue), WP-024 (start)
 Week 15: WP-024 (continue), WP-025, WP-026
@@ -1178,6 +1187,7 @@ Week 23: WP-035, WP-036
 Week 24: WP-037, WP-038
 Week 25: WP-039, WP-040
 Week 26: WP-040 (continue), Final certification
+```
 ```
 
 ---
