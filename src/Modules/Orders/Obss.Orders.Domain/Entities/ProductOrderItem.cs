@@ -69,7 +69,12 @@ public class ProductOrderItem : Entity<Guid>
 #pragma warning restore S1144
     public ProductOrderItemState State { get; private set; } = ProductOrderItemState.Acknowledged;
 
-    public void Acknowledge() => TransitionTo(ProductOrderItemState.Acknowledged);
+    public void Acknowledge()
+    {
+        if (State is not ProductOrderItemState.Acknowledged)
+            throw new InvalidProductOrderItemStateException($"Cannot acknowledge from {State}");
+        TransitionTo(ProductOrderItemState.Acknowledged);
+    }
 
     public void StartProgress()
     {
@@ -103,14 +108,14 @@ public class ProductOrderItem : Entity<Guid>
     {
         if (State != ProductOrderItemState.InProgress)
             throw new InvalidProductOrderItemStateException($"Cannot set pending from {State}");
-        TransitionTo(ProductOrderItemState.Pending);
+        TransitionTo(ProductOrderItemState.Pending, reason);
     }
 
     public void Reject(string reason)
     {
         if (State != ProductOrderItemState.Assessing)
             throw new InvalidProductOrderItemStateException($"Cannot reject from {State}");
-        TransitionTo(ProductOrderItemState.Rejected);
+        TransitionTo(ProductOrderItemState.Rejected, reason);
     }
 
     public void Complete()
@@ -124,7 +129,7 @@ public class ProductOrderItem : Entity<Guid>
     {
         if (State != ProductOrderItemState.InProgress)
             throw new InvalidProductOrderItemStateException($"Cannot fail from {State}");
-        TransitionTo(ProductOrderItemState.Failed);
+        TransitionTo(ProductOrderItemState.Failed, error);
     }
 
     public void Cancel()
@@ -134,11 +139,11 @@ public class ProductOrderItem : Entity<Guid>
         TransitionTo(ProductOrderItemState.Cancelled);
     }
 
-    private void TransitionTo(ProductOrderItemState newState)
+    private void TransitionTo(ProductOrderItemState newState, string? reason = null)
     {
         var oldState = State;
         State = newState;
-        AddDomainEvent(new ProductOrderItemStateChangedDomainEvent(OrderId, Id, oldState, newState, null));
+        AddDomainEvent(new ProductOrderItemStateChangedDomainEvent(OrderId, Id, oldState, newState, reason));
     }
 
     public void Deactivate()

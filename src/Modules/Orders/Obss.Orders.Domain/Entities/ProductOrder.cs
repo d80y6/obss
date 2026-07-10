@@ -30,7 +30,11 @@ public class ProductOrder : AggregateRoot<Guid>
         string createdById,
         string currency,
         Guid? billingAccountId,
-        Priority? orderPriority)
+        Priority? orderPriority,
+        string? billingAccountHref = null,
+        Guid? productOfferingQualificationId = null,
+        string? productOfferingQualificationHref = null,
+        string? quoteHref = null)
         : base(id)
     {
         TenantId = tenantId;
@@ -51,6 +55,10 @@ public class ProductOrder : AggregateRoot<Guid>
         GrandTotal = 0;
         BillingAccountId = billingAccountId;
         OrderPriority = orderPriority ?? Priority.Medium;
+        BillingAccountHref = billingAccountHref;
+        ProductOfferingQualificationId = productOfferingQualificationId;
+        ProductOfferingQualificationHref = productOfferingQualificationHref;
+        QuoteHref = quoteHref;
 
         _milestones.Add(new ProductOrderMilestone(Id, "OrderCreated", "Order was created", DateTime.UtcNow));
         _milestones[^1].Achieve();
@@ -123,7 +131,11 @@ public class ProductOrder : AggregateRoot<Guid>
         Address? shippingAddress = null,
         string currency = "USD",
         Priority? priority = null,
-        Guid? billingAccountId = null)
+        Guid? billingAccountId = null,
+        string? billingAccountHref = null,
+        Guid? productOfferingQualificationId = null,
+        string? productOfferingQualificationHref = null,
+        string? quoteHref = null)
     {
         return new ProductOrder(
             Guid.NewGuid(),
@@ -137,7 +149,11 @@ public class ProductOrder : AggregateRoot<Guid>
             createdById,
             currency,
             billingAccountId,
-            priority);
+            priority,
+            billingAccountHref,
+            productOfferingQualificationId,
+            productOfferingQualificationHref,
+            quoteHref);
     }
 
     public void Submit()
