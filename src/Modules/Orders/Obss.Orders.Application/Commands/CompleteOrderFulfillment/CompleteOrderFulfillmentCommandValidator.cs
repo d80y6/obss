@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace Obss.Orders.Application.Commands.CompleteOrderFulfillment;
 
-internal sealed class CompleteOrderFulfillmentCommandValidator : AbstractValidator<CompleteOrderFulfillmentCommand>
+public sealed class CompleteOrderFulfillmentCommandValidator : AbstractValidator<CompleteOrderFulfillmentCommand>
 {
     public CompleteOrderFulfillmentCommandValidator()
     {

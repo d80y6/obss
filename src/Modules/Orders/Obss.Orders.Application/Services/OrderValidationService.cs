@@ -28,7 +28,7 @@ public class OrderValidationService
         _offerRepository = offerRepository;
     }
 
-    public virtual async Task<OrderValidationResult> ValidateAsync(Order order, CancellationToken cancellationToken)
+    public virtual async Task<OrderValidationResult> ValidateAsync(ProductOrder order, CancellationToken cancellationToken)
     {
         var errors = new List<ValidationError>();
         var warnings = new List<ValidationWarning>();
@@ -60,7 +60,7 @@ public class OrderValidationService
     }
 
     private async Task ValidateProductsAndOffersAsync(
-        Order order,
+        ProductOrder order,
         List<ValidationError> errors,
         CancellationToken cancellationToken)
     {
@@ -106,7 +106,7 @@ public class OrderValidationService
         }
     }
 
-    private static Task ValidateCreditLimitAsync(Order order, Customer? customer, List<ValidationError> errors)
+    private static Task ValidateCreditLimitAsync(ProductOrder order, Customer? customer, List<ValidationError> errors)
     {
         if (customer is null || order.GrandTotal <= 0)
             return Task.CompletedTask;
@@ -120,7 +120,7 @@ public class OrderValidationService
         return Task.CompletedTask;
     }
 
-    private static void ValidateBillingInformation(Order order, List<ValidationError> errors, List<ValidationWarning> warnings)
+    private static void ValidateBillingInformation(ProductOrder order, List<ValidationError> errors, List<ValidationWarning> warnings)
     {
         if (order.BillingAddress is null)
         {

@@ -7,14 +7,14 @@ using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Orders.Infrastructure.Persistence.Repositories;
 
-public sealed class OrderRepository : EfRepository<Order>, IOrderRepository
+public sealed class ProductOrderRepository : EfRepository<ProductOrder>, IProductOrderRepository
 {
-    public OrderRepository(OrderDbContext context)
+    public ProductOrderRepository(OrderDbContext context)
         : base(context)
     {
     }
 
-    public async Task<Order?> GetByIdWithItemsAsync(Guid orderId, CancellationToken cancellationToken = default)
+    public async Task<ProductOrder?> GetByIdWithItemsAsync(Guid orderId, CancellationToken cancellationToken = default)
     {
         return await DbSet
             .Include(o => o.Items)
@@ -23,7 +23,7 @@ public sealed class OrderRepository : EfRepository<Order>, IOrderRepository
             .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Order>> GetFilteredAsync(
+    public async Task<IReadOnlyList<ProductOrder>> GetFilteredAsync(
         Guid? customerId = null,
         OrderStatus? status = null,
         DateTime? fromDate = null,
@@ -80,7 +80,7 @@ public sealed class OrderRepository : EfRepository<Order>, IOrderRepository
         return await query.ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Order>> GetByCustomerAsync(
+    public async Task<IReadOnlyList<ProductOrder>> GetByCustomerAsync(
         Guid customerId,
         int offset = 0,
         int limit = 20,

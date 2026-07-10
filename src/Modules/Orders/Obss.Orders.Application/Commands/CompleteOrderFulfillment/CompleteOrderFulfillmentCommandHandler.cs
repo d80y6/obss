@@ -8,12 +8,12 @@ namespace Obss.Orders.Application.Commands.CompleteOrderFulfillment;
 public sealed class CompleteOrderFulfillmentCommandHandler : IRequestHandler<CompleteOrderFulfillmentCommand, Result>
 {
     private readonly IOrderFulfillmentRepository _fulfillmentRepository;
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CompleteOrderFulfillmentCommandHandler(
         IOrderFulfillmentRepository fulfillmentRepository,
-        IOrderRepository orderRepository,
+        IProductOrderRepository orderRepository,
         IUnitOfWork unitOfWork)
     {
         _fulfillmentRepository = fulfillmentRepository;

@@ -15,14 +15,14 @@ public static class OrderModuleRegistration
 {
     public static IServiceCollection AddOrderModule(this IServiceCollection services)
     {
-        services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IProductOrderRepository, ProductOrderRepository>();
         services.AddScoped<IOrderFulfillmentRepository, OrderFulfillmentRepository>();
 
         services.AddScoped<OrderValidationService>();
 
         services.AddHostedService<OrderFulfillmentJob>();
 
-        OrderMappingConfig.Configure();
+        ProductOrderMappingConfig.Configure();
 
         return services;
     }

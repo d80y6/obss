@@ -13,14 +13,14 @@ public sealed class ProvisioningJobCompletedEventHandler : INotificationHandler<
 {
     private readonly IProvisioningJobRepository _jobRepository;
     private readonly IServiceRepository _serviceRepository;
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ProvisioningJobCompletedEventHandler> _logger;
 
     public ProvisioningJobCompletedEventHandler(
         IProvisioningJobRepository jobRepository,
         IServiceRepository serviceRepository,
-        IOrderRepository orderRepository,
+        IProductOrderRepository orderRepository,
         IUnitOfWork unitOfWork,
         ILogger<ProvisioningJobCompletedEventHandler> logger)
     {

@@ -4,9 +4,9 @@ using Obss.Orders.Domain.Entities;
 
 namespace Obss.Orders.Infrastructure.Persistence.Configurations;
 
-public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
+public sealed class ProductOrderConfiguration : IEntityTypeConfiguration<ProductOrder>
 {
-    public void Configure(EntityTypeBuilder<Order> builder)
+    public void Configure(EntityTypeBuilder<ProductOrder> builder)
     {
         builder.ToTable("orders");
 
@@ -121,8 +121,9 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasColumnName("channel")
             .HasMaxLength(50);
 
-        builder.Property(o => o.Priority)
+        builder.Property(o => o.OrderPriority)
             .HasColumnName("priority")
+            .HasConversion<string>()
             .HasMaxLength(30);
 
         builder.Property(o => o.RequestedStartDate)

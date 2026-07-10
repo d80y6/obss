@@ -13,7 +13,7 @@ public sealed class QuoteAcceptedIntegrationEventHandler : INotificationHandler<
 {
     private readonly IQuoteRepository _quoteRepository;
     private readonly ICustomerRepository _customerRepository;
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentTenant _currentTenant;
     private readonly ILogger<QuoteAcceptedIntegrationEventHandler> _logger;
@@ -21,7 +21,7 @@ public sealed class QuoteAcceptedIntegrationEventHandler : INotificationHandler<
     public QuoteAcceptedIntegrationEventHandler(
         IQuoteRepository quoteRepository,
         ICustomerRepository customerRepository,
-        IOrderRepository orderRepository,
+        IProductOrderRepository orderRepository,
         IUnitOfWork unitOfWork,
         ICurrentTenant currentTenant,
         ILogger<QuoteAcceptedIntegrationEventHandler> logger)
@@ -52,7 +52,7 @@ public sealed class QuoteAcceptedIntegrationEventHandler : INotificationHandler<
         var customerName = customer?.DisplayName ?? "Unknown";
 
         var tenantId = _currentTenant.TenantId ?? string.Empty;
-        var order = Order.Create(tenantId, quote.CustomerId, customerName, OrderType.New, "system");
+        var order = ProductOrder.Create(tenantId, quote.CustomerId, customerName, OrderType.New, "system");
 
         foreach (var quoteItem in quote.Items)
         {

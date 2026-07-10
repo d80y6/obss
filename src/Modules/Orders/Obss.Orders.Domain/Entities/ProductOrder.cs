@@ -428,6 +428,13 @@ public class ProductOrder : AggregateRoot<Guid>
         _milestones.Add(milestone);
     }
 
+    public void RemoveMilestone(Guid milestoneId)
+    {
+        var milestone = _milestones.FirstOrDefault(m => m.Id == milestoneId);
+        if (milestone is null) throw new InvalidProductOrderStateException($"Milestone {milestoneId} not found");
+        _milestones.Remove(milestone);
+    }
+
     private static string GenerateOrderNumber()
     {
         var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");

@@ -4,9 +4,9 @@ using Obss.Orders.Domain.Entities;
 
 namespace Obss.Orders.Infrastructure.Persistence.Configurations;
 
-public sealed class OrderPaymentConfiguration : IEntityTypeConfiguration<OrderPayment>
+public sealed class ProductOrderPaymentConfiguration : IEntityTypeConfiguration<ProductOrderPayment>
 {
-    public void Configure(EntityTypeBuilder<OrderPayment> builder)
+    public void Configure(EntityTypeBuilder<ProductOrderPayment> builder)
     {
         builder.ToTable("order_payments");
 

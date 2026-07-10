@@ -4,9 +4,9 @@ using Obss.Orders.Domain.Entities;
 
 namespace Obss.Orders.Infrastructure.Persistence.Configurations;
 
-public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
+public sealed class ProductOrderItemConfiguration : IEntityTypeConfiguration<ProductOrderItem>
 {
-    public void Configure(EntityTypeBuilder<OrderItem> builder)
+    public void Configure(EntityTypeBuilder<ProductOrderItem> builder)
     {
         builder.ToTable("order_items");
 
@@ -86,5 +86,10 @@ public sealed class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(i => i.ServiceType)
             .HasColumnName("service_type")
             .HasMaxLength(50);
+
+        builder.Property(i => i.State)
+            .HasColumnName("state")
+            .HasConversion<string>()
+            .HasMaxLength(30);
     }
 }

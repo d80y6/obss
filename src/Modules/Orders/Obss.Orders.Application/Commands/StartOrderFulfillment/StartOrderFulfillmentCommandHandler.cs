@@ -11,13 +11,13 @@ namespace Obss.Orders.Application.Commands.StartOrderFulfillment;
 
 public sealed class StartOrderFulfillmentCommandHandler : IRequestHandler<StartOrderFulfillmentCommand, Result<OrderFulfillmentDto>>
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IOrderFulfillmentRepository _fulfillmentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<StartOrderFulfillmentCommandHandler> _logger;
 
     public StartOrderFulfillmentCommandHandler(
-        IOrderRepository orderRepository,
+        IProductOrderRepository orderRepository,
         IOrderFulfillmentRepository fulfillmentRepository,
         IUnitOfWork unitOfWork,
         ILogger<StartOrderFulfillmentCommandHandler> logger)
@@ -32,7 +32,7 @@ public sealed class StartOrderFulfillmentCommandHandler : IRequestHandler<StartO
     {
         var order = await _orderRepository.GetByIdWithItemsAsync(request.OrderId, cancellationToken);
         if (order is null)
-            return Result.Failure<OrderFulfillmentDto>(Error.NotFound("Order", request.OrderId));
+            return Result.Failure<OrderFulfillmentDto>(Error.NotFound("ProductOrder", request.OrderId));
 
         var existingFulfillment = await _fulfillmentRepository.GetByOrderIdAsync(request.OrderId, cancellationToken);
         if (existingFulfillment is not null)

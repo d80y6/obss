@@ -200,7 +200,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Obss.IAM.Application.Commands.CreateUser.CreateUserCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.CRM.Application.Commands.CreateCustomer.CreateCustomerCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.ProductCatalog.Application.Commands.CreateProduct.CreateProductCommand).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(Obss.Orders.Application.Commands.CreateOrder.CreateOrderCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Obss.Orders.Application.Commands.CreateProductOrder.CreateProductOrderCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.Subscriptions.Application.Commands.CreateSubscription.CreateSubscriptionCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.Rating.Application.Commands.CreateRatingRule.CreateRatingRuleCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.Billing.Application.Commands.GenerateBill.GenerateBillCommand).Assembly);
@@ -229,7 +229,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(Obss.Audit.Application.Command
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.IAM.Application.Commands.CreateUser.CreateUserCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.CRM.Application.Commands.CreateCustomer.CreateCustomerCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.ProductCatalog.Application.Commands.CreateProduct.CreateProductCommandValidator).Assembly);
-builder.Services.AddValidatorsFromAssembly(typeof(Obss.Orders.Application.Commands.CreateOrder.CreateOrderCommandValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Obss.Orders.Application.Commands.CreateProductOrder.CreateProductOrderCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.Subscriptions.Application.Commands.CreateSubscription.CreateSubscriptionCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.Rating.Application.Commands.CreateRatingRule.CreateRatingRuleCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.Billing.Application.Commands.GenerateBill.GenerateBillCommandValidator).Assembly);

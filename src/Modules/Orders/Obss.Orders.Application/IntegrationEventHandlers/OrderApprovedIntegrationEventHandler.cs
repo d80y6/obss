@@ -6,16 +6,16 @@ using Obss.SharedKernel.Application.Abstractions;
 
 namespace Obss.Orders.Application.IntegrationEventHandlers;
 
-public sealed class OrderApprovedIntegrationEventHandler : INotificationHandler<OrderApprovedIntegrationEvent>
+public sealed class OrderApprovedIntegrationEventHandler : INotificationHandler<ProductOrderApprovedIntegrationEvent>
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IOutboxService _outboxService;
     private readonly ICurrentTenant _currentTenant;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<OrderApprovedIntegrationEventHandler> _logger;
 
     public OrderApprovedIntegrationEventHandler(
-        IOrderRepository orderRepository,
+        IProductOrderRepository orderRepository,
         IOutboxService outboxService,
         ICurrentTenant currentTenant,
         IUnitOfWork unitOfWork,
@@ -28,7 +28,7 @@ public sealed class OrderApprovedIntegrationEventHandler : INotificationHandler<
         _logger = logger;
     }
 
-    public async Task Handle(OrderApprovedIntegrationEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(ProductOrderApprovedIntegrationEvent notification, CancellationToken cancellationToken)
     {
         _logger.LogInformation(
             "Processing fulfillment for approved order {OrderId}",
