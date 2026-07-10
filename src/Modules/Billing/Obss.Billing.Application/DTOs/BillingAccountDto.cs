@@ -19,4 +19,7 @@ public sealed record BillingAccountDto(
     string? AtBaseType,
     string? AtSchemaLocation,
     string? ExternalId,
-    List<RelatedPartyDto>? RelatedParties);
+    List<RelatedPartyDto>? RelatedParties,
+    AccountHolderDto? AccountHolder,
+    List<BillPresentationMediaDto>? BillPresentationMedia,
+    string? PaymentMethodId);

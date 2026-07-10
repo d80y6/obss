@@ -35,6 +35,23 @@ public static class BillingMappingConfig
         TypeAdapterConfig<BillingAccount, BillingAccountDto>.NewConfig()
             .Map(dest => dest.AccountType, src => src.AccountType.ToString())
             .Map(dest => dest.RelatedParties, src => src.RelatedParties.Adapt<List<RelatedPartyDto>>())
+            .Map(dest => dest.AccountHolder, src => src.AccountHolder.Adapt<AccountHolderDto>())
+            .Map(dest => dest.BillPresentationMedia, src => src.BillPresentationMedia.Adapt<List<BillPresentationMediaDto>>())
+            .Map(dest => dest.PaymentMethodId, src => src.PaymentMethodId)
             .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<AccountBalance, AccountBalanceDto>.NewConfig()
+            .Map(dest => dest.Transactions, src => src.Transactions.Adapt<List<BalanceTransactionDto>>())
+            .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<BalanceTransaction, BalanceTransactionDto>.NewConfig()
+            .Map(dest => dest.TransactionType, src => src.TransactionType.ToString())
+            .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<BillPresentationMedia, BillPresentationMediaDto>.NewConfig()
+            .Map(dest => dest.MediaType, src => src.MediaType.ToString())
+            .Map(dest => dest.Id, src => src.Id);
+
+        TypeAdapterConfig<AccountHolder, AccountHolderDto>.NewConfig();
     }
 }
