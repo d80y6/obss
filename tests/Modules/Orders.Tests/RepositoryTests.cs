@@ -14,9 +14,9 @@ public class RepositoryTests : OrdersIntegrationTests
     public async Task CanAddAndRetrieveOrder()
     {
         using var context = CreateDbContext();
-        var repository = new OrderRepository(context);
+        var repository = new ProductOrderRepository(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "John Doe",
             OrderType.New, "test-user");
 
@@ -37,9 +37,9 @@ public class RepositoryTests : OrdersIntegrationTests
     public async Task CanAddAndRetrieveOrderWithItems()
     {
         using var context = CreateDbContext();
-        var repository = new OrderRepository(context);
+        var repository = new ProductOrderRepository(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "John Doe",
             OrderType.New, "test-user");
         order.AddItem(
@@ -65,8 +65,8 @@ public class RepositoryTests : OrdersIntegrationTests
 
         using (var context1 = CreateDbContext())
         {
-            var repository1 = new OrderRepository(context1);
-            var order1 = Order.Create(
+            var repository1 = new ProductOrderRepository(context1);
+            var order1 = ProductOrder.Create(
                 "test-tenant", customerId, "Alice",
                 OrderType.New, "user-1");
             await repository1.AddAsync(order1);
@@ -75,8 +75,8 @@ public class RepositoryTests : OrdersIntegrationTests
 
         using (var context2 = CreateDbContext())
         {
-            var repository2 = new OrderRepository(context2);
-            var order2 = Order.Create(
+            var repository2 = new ProductOrderRepository(context2);
+            var order2 = ProductOrder.Create(
                 "test-tenant", customerId, "Bob",
                 OrderType.Renewal, "user-1");
             await repository2.AddAsync(order2);
@@ -85,7 +85,7 @@ public class RepositoryTests : OrdersIntegrationTests
 
         using (var context3 = CreateDbContext())
         {
-            var repository3 = new OrderRepository(context3);
+            var repository3 = new ProductOrderRepository(context3);
             var orders = await repository3.GetByCustomerAsync(customerId, 1, 10);
 
             orders.Should().HaveCount(2);
@@ -99,8 +99,8 @@ public class RepositoryTests : OrdersIntegrationTests
     {
         using (var context1 = CreateDbContext())
         {
-            var repo1 = new OrderRepository(context1);
-            var draft = Order.Create("test-tenant", Guid.NewGuid(), "Draft Order", OrderType.New, "user-1");
+            var repo1 = new ProductOrderRepository(context1);
+            var draft = ProductOrder.Create("test-tenant", Guid.NewGuid(), "Draft Order", OrderType.New, "user-1");
             draft.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);
             await repo1.AddAsync(draft);
             await context1.SaveChangesAsync();
@@ -108,7 +108,7 @@ public class RepositoryTests : OrdersIntegrationTests
             draft.Submit();
             await context1.SaveChangesAsync();
 
-            var pending = Order.Create("test-tenant", Guid.NewGuid(), "Pending Order", OrderType.Change, "user-1");
+            var pending = ProductOrder.Create("test-tenant", Guid.NewGuid(), "Pending Order", OrderType.Change, "user-1");
             pending.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);
             await repo1.AddAsync(pending);
             await context1.SaveChangesAsync();
@@ -116,7 +116,7 @@ public class RepositoryTests : OrdersIntegrationTests
 
         using (var context2 = CreateDbContext())
         {
-            var repo2 = new OrderRepository(context2);
+            var repo2 = new ProductOrderRepository(context2);
             var submittedOrders = await repo2.GetFilteredAsync(
                 null, OrderStatus.Submitted, null, null, null, null, 1, 10);
 
@@ -129,10 +129,10 @@ public class RepositoryTests : OrdersIntegrationTests
     public async Task CanAddAndRetrieveFulfillment()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var fulfillmentRepository = new OrderFulfillmentRepository(context);
 
-        var order = Order.Create("test-tenant", Guid.NewGuid(), "John", OrderType.New, "user-1");
+        var order = ProductOrder.Create("test-tenant", Guid.NewGuid(), "John", OrderType.New, "user-1");
         order.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);
         await orderRepository.AddAsync(order);
         await context.SaveChangesAsync();
@@ -152,12 +152,12 @@ public class RepositoryTests : OrdersIntegrationTests
     public async Task CanQueryFulfillmentsByStatus()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var repository = new OrderFulfillmentRepository(context);
 
-        var order1 = Order.Create("test-tenant", Guid.NewGuid(), "John", OrderType.New, "user-1");
+        var order1 = ProductOrder.Create("test-tenant", Guid.NewGuid(), "John", OrderType.New, "user-1");
         order1.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);
-        var order2 = Order.Create("test-tenant", Guid.NewGuid(), "Jane", OrderType.New, "user-1");
+        var order2 = ProductOrder.Create("test-tenant", Guid.NewGuid(), "Jane", OrderType.New, "user-1");
         order2.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);
         await orderRepository.AddAsync(order1);
         await orderRepository.AddAsync(order2);
@@ -179,8 +179,8 @@ public class RepositoryTests : OrdersIntegrationTests
     {
         using (var context1 = CreateDbContext())
         {
-            var repo1 = new OrderRepository(context1);
-            var order1 = Order.Create("test-tenant", Guid.NewGuid(), "Alice Johnson", OrderType.New, "user-1");
+            var repo1 = new ProductOrderRepository(context1);
+            var order1 = ProductOrder.Create("test-tenant", Guid.NewGuid(), "Alice Johnson", OrderType.New, "user-1");
             order1.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);
             await repo1.AddAsync(order1);
             await context1.SaveChangesAsync();
@@ -188,7 +188,7 @@ public class RepositoryTests : OrdersIntegrationTests
 
         using (var context2 = CreateDbContext())
         {
-            var repo2 = new OrderRepository(context2);
+            var repo2 = new ProductOrderRepository(context2);
             var result = await repo2.GetFilteredAsync(
                 null, null, null, null, null, "Alice", 1, 10);
 
@@ -200,9 +200,9 @@ public class RepositoryTests : OrdersIntegrationTests
     public async Task CanUpdateOrder()
     {
         using var context = CreateDbContext();
-        var repository = new OrderRepository(context);
+        var repository = new ProductOrderRepository(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "John Doe",
             OrderType.New, "test-user");
         order.AddItem(Guid.NewGuid(), Guid.NewGuid(), "Item", "Offer", 1, 10m, 0, 0, 0, BillingPeriod.Monthly);

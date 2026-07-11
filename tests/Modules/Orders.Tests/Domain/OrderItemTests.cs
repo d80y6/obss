@@ -5,11 +5,11 @@ using Obss.Orders.Domain.ValueObjects;
 
 namespace Obss.Orders.Tests.Domain;
 
-public class OrderItemTests
+public class ProductOrderItemTests
 {
-    private static Order CreateDraftOrder()
+    private static ProductOrder CreateDraftOrder()
     {
-        return Order.Create(
+        return ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
     }

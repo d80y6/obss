@@ -13,14 +13,14 @@ namespace Obss.Orders.Tests.Application;
 public class CompleteOrderFulfillmentCommandHandlerTests
 {
     private readonly IOrderFulfillmentRepository _fulfillmentRepository;
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly CompleteOrderFulfillmentCommandHandler _handler;
 
     public CompleteOrderFulfillmentCommandHandlerTests()
     {
         _fulfillmentRepository = Substitute.For<IOrderFulfillmentRepository>();
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
         _handler = new CompleteOrderFulfillmentCommandHandler(
             _fulfillmentRepository, _orderRepository, _unitOfWork);
@@ -80,9 +80,9 @@ public class CompleteOrderFulfillmentCommandHandlerTests
         result.Error.Code.Should().Be("Error.NotFound");
     }
 
-    private static Order CreateFulfillingOrder()
+    private static ProductOrder CreateFulfillingOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(

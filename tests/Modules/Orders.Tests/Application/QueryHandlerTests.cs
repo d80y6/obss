@@ -4,9 +4,9 @@ using NSubstitute;
 using Obss.Orders.Application.Abstractions;
 using Obss.Orders.Application.Contracts;
 using Obss.Orders.Application.DTOs;
-using Obss.Orders.Application.Queries.GetOrderById;
-using Obss.Orders.Application.Queries.GetOrders;
-using Obss.Orders.Application.Queries.GetOrdersByCustomer;
+using Obss.Orders.Application.Queries.GetProductOrderById;
+using Obss.Orders.Application.Queries.GetProductOrders;
+using Obss.Orders.Application.Queries.GetProductOrdersByCustomer;
 using Obss.Orders.Application.Queries.GetOrderFulfillmentStatus;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
@@ -18,16 +18,16 @@ public class QueryHandlerTests
     [Fact]
     public async Task GetOrderById_ShouldReturnOrder_WhenOrderExists()
     {
-        var repository = Substitute.For<IOrderRepository>();
-        var order = Order.Create(
+        var repository = Substitute.For<IProductOrderRepository>();
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         repository.GetByIdWithItemsAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
-        var handler = new GetOrderByIdQueryHandler(repository);
+        var handler = new GetProductOrderByIdQueryHandler(repository);
 
         var result = await handler.Handle(
-            new GetOrderByIdQuery(order.Id), CancellationToken.None);
+            new GetProductOrderByIdQuery(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Id.Should().Be(order.Id);
@@ -37,14 +37,14 @@ public class QueryHandlerTests
     [Fact]
     public async Task GetOrderById_WhenOrderNotFound_ShouldReturnNotFound()
     {
-        var repository = Substitute.For<IOrderRepository>();
+        var repository = Substitute.For<IProductOrderRepository>();
         var orderId = Guid.NewGuid();
         repository.GetByIdWithItemsAsync(orderId, Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
-        var handler = new GetOrderByIdQueryHandler(repository);
+            .Returns((ProductOrder?)null);
+        var handler = new GetProductOrderByIdQueryHandler(repository);
 
         var result = await handler.Handle(
-            new GetOrderByIdQuery(orderId), CancellationToken.None);
+            new GetProductOrderByIdQuery(orderId), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.NotFound");
@@ -53,11 +53,11 @@ public class QueryHandlerTests
     [Fact]
     public async Task GetOrders_ShouldReturnFilteredList()
     {
-        var repository = Substitute.For<IOrderRepository>();
-        var orders = new List<Order>
+        var repository = Substitute.For<IProductOrderRepository>();
+        var orders = new List<ProductOrder>
         {
-            Order.Create("tenant-1", Guid.NewGuid(), "Alice", OrderType.New, "user-1"),
-            Order.Create("tenant-1", Guid.NewGuid(), "Bob", OrderType.Renewal, "user-1")
+            ProductOrder.Create("tenant-1", Guid.NewGuid(), "Alice", OrderType.New, "user-1"),
+            ProductOrder.Create("tenant-1", Guid.NewGuid(), "Bob", OrderType.Renewal, "user-1")
         };
         repository.GetFilteredAsync(
                 Arg.Any<Guid?>(), Arg.Any<OrderStatus?>(),
@@ -71,10 +71,10 @@ public class QueryHandlerTests
                 Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
                 Arg.Any<CancellationToken>())
             .Returns(orders.Count);
-        var handler = new GetOrdersQueryHandler(repository);
+        var handler = new GetProductOrdersQueryHandler(repository);
 
         var result = await handler.Handle(
-            new GetOrdersQuery(null, null, null, null, null, null, 1, 20),
+            new GetProductOrdersQuery(null, null, null, null, null, null, 1, 20),
             CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
@@ -84,11 +84,11 @@ public class QueryHandlerTests
     [Fact]
     public async Task GetOrdersByCustomer_ShouldReturnCustomerOrders()
     {
-        var repository = Substitute.For<IOrderRepository>();
+        var repository = Substitute.For<IProductOrderRepository>();
         var customerId = Guid.NewGuid();
-        var orders = new List<Order>
+        var orders = new List<ProductOrder>
         {
-            Order.Create("tenant-1", customerId, "Alice", OrderType.New, "user-1")
+            ProductOrder.Create("tenant-1", customerId, "Alice", OrderType.New, "user-1")
         };
         repository.GetByCustomerAsync(customerId, Arg.Any<int>(), Arg.Any<int>(),
                 Arg.Any<CancellationToken>())
@@ -97,10 +97,10 @@ public class QueryHandlerTests
                 Arg.Any<DateTime?>(), Arg.Any<DateTime?>(),
                 Arg.Any<CancellationToken>())
             .Returns(orders.Count);
-        var handler = new GetOrdersByCustomerQueryHandler(repository);
+        var handler = new GetProductOrdersByCustomerQueryHandler(repository);
 
         var result = await handler.Handle(
-            new GetOrdersByCustomerQuery(customerId, 1, 20),
+            new GetProductOrdersByCustomerQuery(customerId, 1, 20),
             CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();

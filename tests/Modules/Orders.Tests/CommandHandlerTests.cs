@@ -2,12 +2,12 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Obss.Orders.Application.Abstractions;
-using Obss.Orders.Application.Commands.AddOrderItem;
-using Obss.Orders.Application.Commands.ApproveOrder;
-using Obss.Orders.Application.Commands.CancelOrder;
+using Obss.Orders.Application.Commands.AddProductOrderItem;
+using Obss.Orders.Application.Commands.ApproveProductOrder;
+using Obss.Orders.Application.Commands.CancelProductOrder;
 using Obss.Orders.Application.Commands.CompleteOrderFulfillment;
 using Obss.Orders.Application.Commands.StartOrderFulfillment;
-using Obss.Orders.Application.Commands.SubmitOrder;
+using Obss.Orders.Application.Commands.SubmitProductOrder;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.Orders.Infrastructure.Persistence;
@@ -23,10 +23,10 @@ public class CommandHandlerTests : OrdersIntegrationTests
     public async Task SubmitOrderCommand_ShouldSubmitOrderInDatabase()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var unitOfWork = CreateUnitOfWork(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "John Doe",
             OrderType.New, "test-user");
         order.AddItem(
@@ -37,10 +37,10 @@ public class CommandHandlerTests : OrdersIntegrationTests
         await orderRepository.AddAsync(order);
         await context.SaveChangesAsync();
 
-        var handler = new SubmitOrderCommandHandler(orderRepository, unitOfWork);
+        var handler = new SubmitProductOrderCommandHandler(orderRepository, unitOfWork);
 
         var result = await handler.Handle(
-            new SubmitOrderCommand(order.Id), CancellationToken.None);
+            new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
 
@@ -53,19 +53,19 @@ public class CommandHandlerTests : OrdersIntegrationTests
     public async Task SubmitOrderCommand_WithNoItems_ShouldReturnFailure()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var unitOfWork = CreateUnitOfWork(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "John Doe",
             OrderType.New, "test-user");
         await orderRepository.AddAsync(order);
         await context.SaveChangesAsync();
 
-        var handler = new SubmitOrderCommandHandler(orderRepository, unitOfWork);
+        var handler = new SubmitProductOrderCommandHandler(orderRepository, unitOfWork);
 
         var result = await handler.Handle(
-            new SubmitOrderCommand(order.Id), CancellationToken.None);
+            new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.Validation");
@@ -75,10 +75,10 @@ public class CommandHandlerTests : OrdersIntegrationTests
     public async Task SubmitAndApproveOrderCommand_ShouldApproveOrder()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var unitOfWork = CreateUnitOfWork(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "Jane Doe",
             OrderType.New, "test-user");
         order.AddItem(
@@ -89,16 +89,16 @@ public class CommandHandlerTests : OrdersIntegrationTests
         await orderRepository.AddAsync(order);
         await context.SaveChangesAsync();
 
-        var submitHandler = new SubmitOrderCommandHandler(orderRepository, unitOfWork);
-        await submitHandler.Handle(new SubmitOrderCommand(order.Id), CancellationToken.None);
+        var submitHandler = new SubmitProductOrderCommandHandler(orderRepository, unitOfWork);
+        await submitHandler.Handle(new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
         var currentUser = Substitute.For<ICurrentUser>();
         currentUser.UserId.Returns("approver-1");
-        var approveHandler = new ApproveOrderCommandHandler(
+        var approveHandler = new ApproveProductOrderCommandHandler(
             orderRepository, currentUser, unitOfWork);
 
         var result = await approveHandler.Handle(
-            new ApproveOrderCommand(order.Id), CancellationToken.None);
+            new ApproveProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
 
@@ -111,23 +111,23 @@ public class CommandHandlerTests : OrdersIntegrationTests
     public async Task SubmitApproveAndCancelOrderCommand_ShouldCancelOrder()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var unitOfWork = CreateUnitOfWork(context);
         var currentUser = Substitute.For<ICurrentUser>();
         currentUser.UserId.Returns("approver-1");
 
         var order = CreateSavedOrder(context);
 
-        var submitHandler = new SubmitOrderCommandHandler(orderRepository, unitOfWork);
-        await submitHandler.Handle(new SubmitOrderCommand(order.Id), CancellationToken.None);
+        var submitHandler = new SubmitProductOrderCommandHandler(orderRepository, unitOfWork);
+        await submitHandler.Handle(new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
-        var approveHandler = new ApproveOrderCommandHandler(
+        var approveHandler = new ApproveProductOrderCommandHandler(
             orderRepository, currentUser, unitOfWork);
-        await approveHandler.Handle(new ApproveOrderCommand(order.Id), CancellationToken.None);
+        await approveHandler.Handle(new ApproveProductOrderCommand(order.Id), CancellationToken.None);
 
-        var cancelHandler = new CancelOrderCommandHandler(orderRepository, unitOfWork);
+        var cancelHandler = new CancelProductOrderCommandHandler(orderRepository, unitOfWork);
         var result = await cancelHandler.Handle(
-            new CancelOrderCommand(order.Id, "Customer changed mind"), CancellationToken.None);
+            new CancelProductOrderCommand(order.Id, "Customer changed mind"), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
 
@@ -140,7 +140,7 @@ public class CommandHandlerTests : OrdersIntegrationTests
     public async Task FullOrderLifecycle_ShouldTransitionThroughAllStatuses()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var fulfillmentRepository = new OrderFulfillmentRepository(context);
         var unitOfWork = CreateUnitOfWork(context);
         var currentUser = Substitute.For<ICurrentUser>();
@@ -149,12 +149,12 @@ public class CommandHandlerTests : OrdersIntegrationTests
 
         var order = CreateSavedOrder(context);
 
-        var submitHandler = new SubmitOrderCommandHandler(orderRepository, unitOfWork);
-        await submitHandler.Handle(new SubmitOrderCommand(order.Id), CancellationToken.None);
+        var submitHandler = new SubmitProductOrderCommandHandler(orderRepository, unitOfWork);
+        await submitHandler.Handle(new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
-        var approveHandler = new ApproveOrderCommandHandler(
+        var approveHandler = new ApproveProductOrderCommandHandler(
             orderRepository, currentUser, unitOfWork);
-        await approveHandler.Handle(new ApproveOrderCommand(order.Id), CancellationToken.None);
+        await approveHandler.Handle(new ApproveProductOrderCommand(order.Id), CancellationToken.None);
 
         var fulfillmentHandler = new StartOrderFulfillmentCommandHandler(
             orderRepository, fulfillmentRepository, unitOfWork, logger);
@@ -177,17 +177,17 @@ public class CommandHandlerTests : OrdersIntegrationTests
     public async Task AddOrderItemCommand_ShouldAddItemToDraftOrder()
     {
         using var context = CreateDbContext();
-        var orderRepository = new OrderRepository(context);
+        var orderRepository = new ProductOrderRepository(context);
         var unitOfWork = CreateUnitOfWork(context);
 
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "John Doe",
             OrderType.New, "test-user");
         await orderRepository.AddAsync(order);
         await context.SaveChangesAsync();
 
-        var handler = new AddOrderItemCommandHandler(orderRepository, unitOfWork);
-        var command = new AddOrderItemCommand(
+        var handler = new AddProductOrderItemCommandHandler(orderRepository, unitOfWork);
+        var command = new AddProductOrderItemCommand(
             order.Id, Guid.NewGuid(), Guid.NewGuid(),
             "New Product", "New Offer",
             3, 29.99m, 9.99m, 5m, 4m,
@@ -203,9 +203,9 @@ public class CommandHandlerTests : OrdersIntegrationTests
         saved.Items.Single().Quantity.Should().Be(3);
     }
 
-    private static Order CreateSavedOrder(OrderDbContext context)
+    private static ProductOrder CreateSavedOrder(OrderDbContext context)
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "test-tenant", Guid.NewGuid(), "Jane Doe",
             OrderType.New, "test-user");
         order.AddItem(

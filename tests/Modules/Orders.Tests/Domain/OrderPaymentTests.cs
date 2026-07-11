@@ -5,11 +5,11 @@ using Obss.Orders.Domain.ValueObjects;
 
 namespace Obss.Orders.Tests.Domain;
 
-public class OrderPaymentTests
+public class ProductOrderPaymentTests
 {
-    private static Order CreateOrderWithPayment(decimal amount = 100m, string method = "CreditCard", string reference = "PAY-001")
+    private static ProductOrder CreateOrderWithPayment(decimal amount = 100m, string method = "CreditCard", string reference = "PAY-001")
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddPayment(amount, method, reference);

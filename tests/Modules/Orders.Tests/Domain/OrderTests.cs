@@ -6,11 +6,11 @@ using Obss.Orders.Domain.ValueObjects;
 
 namespace Obss.Orders.Tests.Domain;
 
-public class OrderTests
+public class ProductOrderTests
 {
-    private static Order CreateDraftOrder()
+    private static ProductOrder CreateDraftOrder()
     {
-        return Order.Create(
+        return ProductOrder.Create(
             "tenant-1",
             Guid.NewGuid(),
             "John Doe",
@@ -22,7 +22,7 @@ public class OrderTests
             "USD");
     }
 
-    private static Order CreateOrderWithItems()
+    private static ProductOrder CreateOrderWithItems()
     {
         var order = CreateDraftOrder();
         order.AddItem(
@@ -49,7 +49,7 @@ public class OrderTests
     public void Create_ShouldSetPropertiesCorrectly()
     {
         var customerId = Guid.NewGuid();
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", customerId, "Jane Doe",
             OrderType.Renewal, "user-2",
             "Renewal order",
@@ -316,21 +316,21 @@ public class OrderTests
     }
 
     [Fact]
-    public void Submit_ShouldRaiseOrderSubmittedDomainEvent()
+    public void Submit_ShouldRaiseProductOrderSubmittedDomainEvent()
     {
         var order = CreateOrderWithItems();
 
         order.Submit();
 
-        order.DomainEvents.Should().ContainSingle(e => e is OrderSubmittedDomainEvent);
-        var domainEvent = order.DomainEvents.OfType<OrderSubmittedDomainEvent>().Single();
+        order.DomainEvents.Should().ContainSingle(e => e is ProductOrderSubmittedDomainEvent);
+        var domainEvent = order.DomainEvents.OfType<ProductOrderSubmittedDomainEvent>().Single();
         domainEvent.OrderId.Should().Be(order.Id);
         domainEvent.OrderNumber.Should().Be(order.OrderNumber);
         domainEvent.OrderItems.Should().HaveCount(1);
     }
 
     [Fact]
-    public void Approve_ShouldRaiseOrderApprovedDomainEvent()
+    public void Approve_ShouldRaiseProductOrderApprovedDomainEvent()
     {
         var order = CreateOrderWithItems();
         order.Submit();
@@ -338,14 +338,14 @@ public class OrderTests
 
         order.Approve("approver-1");
 
-        order.DomainEvents.Should().ContainSingle(e => e is OrderApprovedDomainEvent);
-        var domainEvent = order.DomainEvents.OfType<OrderApprovedDomainEvent>().Single();
+        order.DomainEvents.Should().ContainSingle(e => e is ProductOrderApprovedDomainEvent);
+        var domainEvent = order.DomainEvents.OfType<ProductOrderApprovedDomainEvent>().Single();
         domainEvent.OrderId.Should().Be(order.Id);
         domainEvent.ApprovedBy.Should().Be("approver-1");
     }
 
     [Fact]
-    public void Cancel_ShouldRaiseOrderCancelledDomainEvent()
+    public void Cancel_ShouldRaiseProductOrderCancelledDomainEvent()
     {
         var order = CreateOrderWithItems();
         order.Submit();
@@ -353,14 +353,14 @@ public class OrderTests
 
         order.Cancel("Customer request");
 
-        order.DomainEvents.Should().ContainSingle(e => e is OrderCancelledDomainEvent);
-        var domainEvent = order.DomainEvents.OfType<OrderCancelledDomainEvent>().Single();
+        order.DomainEvents.Should().ContainSingle(e => e is ProductOrderCancelledDomainEvent);
+        var domainEvent = order.DomainEvents.OfType<ProductOrderCancelledDomainEvent>().Single();
         domainEvent.OrderId.Should().Be(order.Id);
         domainEvent.Reason.Should().Be("Customer request");
     }
 
     [Fact]
-    public void MarkCompleted_ShouldRaiseOrderCompletedDomainEvent()
+    public void MarkCompleted_ShouldRaiseProductOrderCompletedDomainEvent()
     {
         var order = CreateOrderWithItems();
         order.Submit();
@@ -370,7 +370,7 @@ public class OrderTests
 
         order.MarkCompleted();
 
-        order.DomainEvents.Should().ContainSingle(e => e is OrderCompletedDomainEvent);
+        order.DomainEvents.Should().ContainSingle(e => e is ProductOrderCompletedDomainEvent);
     }
 
     [Fact]

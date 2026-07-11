@@ -2,7 +2,7 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Obss.Orders.Application.Abstractions;
-using Obss.Orders.Application.Commands.ApproveOrder;
+using Obss.Orders.Application.Commands.ApproveProductOrder;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Abstractions;
@@ -10,19 +10,19 @@ using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Orders.Tests.Application;
 
-public class ApproveOrderCommandHandlerTests
+public class ApproveProductOrderCommandHandlerTests
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ApproveOrderCommandHandler _handler;
+    private readonly ApproveProductOrderCommandHandler _handler;
 
-    public ApproveOrderCommandHandlerTests()
+    public ApproveProductOrderCommandHandlerTests()
     {
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _currentUser = Substitute.For<ICurrentUser>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new ApproveOrderCommandHandler(_orderRepository, _currentUser, _unitOfWork);
+        _handler = new ApproveProductOrderCommandHandler(_orderRepository, _currentUser, _unitOfWork);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class ApproveOrderCommandHandlerTests
             .Returns(order);
         _currentUser.UserId.Returns("approver-1");
 
-        var result = await _handler.Handle(new ApproveOrderCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new ApproveProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Approved);
@@ -47,9 +47,9 @@ public class ApproveOrderCommandHandlerTests
     {
         var orderId = Guid.NewGuid();
         _orderRepository.GetByIdAsync(orderId, Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
+            .Returns((ProductOrder?)null);
 
-        var result = await _handler.Handle(new ApproveOrderCommand(orderId), CancellationToken.None);
+        var result = await _handler.Handle(new ApproveProductOrderCommand(orderId), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.NotFound");
@@ -58,21 +58,21 @@ public class ApproveOrderCommandHandlerTests
     [Fact]
     public async Task Handle_WhenOrderNotSubmitted_ShouldReturnValidationError()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var result = await _handler.Handle(new ApproveOrderCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new ApproveProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.Validation");
     }
 
-    private static Order CreateSubmittedOrder()
+    private static ProductOrder CreateSubmittedOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(

@@ -2,7 +2,7 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Obss.Orders.Application.Abstractions;
-using Obss.Orders.Application.Commands.AddOrderItem;
+using Obss.Orders.Application.Commands.AddProductOrderItem;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Abstractions;
@@ -10,17 +10,17 @@ using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Orders.Tests.Application;
 
-public class AddOrderItemCommandHandlerTests
+public class AddProductOrderItemCommandHandlerTests
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly AddOrderItemCommandHandler _handler;
+    private readonly AddProductOrderItemCommandHandler _handler;
 
-    public AddOrderItemCommandHandlerTests()
+    public AddProductOrderItemCommandHandlerTests()
     {
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new AddOrderItemCommandHandler(_orderRepository, _unitOfWork);
+        _handler = new AddProductOrderItemCommandHandler(_orderRepository, _unitOfWork);
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public class AddOrderItemCommandHandlerTests
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var command = new AddOrderItemCommand(
+        var command = new AddProductOrderItemCommand(
             order.Id, Guid.NewGuid(), Guid.NewGuid(),
             "New Product", "New Offer",
             2, 79.99m, 39.99m, 10m, 15m,
@@ -49,9 +49,9 @@ public class AddOrderItemCommandHandlerTests
     {
         var orderId = Guid.NewGuid();
         _orderRepository.GetByIdAsync(orderId, Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
+            .Returns((ProductOrder?)null);
 
-        var command = new AddOrderItemCommand(
+        var command = new AddProductOrderItemCommand(
             orderId, Guid.NewGuid(), Guid.NewGuid(),
             "Product", "Offer", 1, 10m, 0, 0, 0,
             "Monthly", null, null);
@@ -69,7 +69,7 @@ public class AddOrderItemCommandHandlerTests
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var command = new AddOrderItemCommand(
+        var command = new AddProductOrderItemCommand(
             order.Id, Guid.NewGuid(), Guid.NewGuid(),
             "Product", "Offer", 1, 10m, 0, 0, 0,
             "Monthly", null, null);
@@ -87,7 +87,7 @@ public class AddOrderItemCommandHandlerTests
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var command = new AddOrderItemCommand(
+        var command = new AddProductOrderItemCommand(
             order.Id, Guid.NewGuid(), Guid.NewGuid(),
             "Product", "Offer", 1, 10m, 0, 0, 0,
             "InvalidPeriod", null, null);
@@ -99,9 +99,9 @@ public class AddOrderItemCommandHandlerTests
         result.Error.Description.Should().Contain("Invalid billing period");
     }
 
-    private static Order CreateDraftOrder()
+    private static ProductOrder CreateDraftOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(
@@ -112,7 +112,7 @@ public class AddOrderItemCommandHandlerTests
         return order;
     }
 
-    private static Order CreateSubmittedOrder()
+    private static ProductOrder CreateSubmittedOrder()
     {
         var order = CreateDraftOrder();
         order.Submit();

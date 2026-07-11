@@ -2,7 +2,7 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Obss.Orders.Application.Abstractions;
-using Obss.Orders.Application.Commands.CancelOrder;
+using Obss.Orders.Application.Commands.CancelProductOrder;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Abstractions;
@@ -10,17 +10,17 @@ using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Orders.Tests.Application;
 
-public class CancelOrderCommandHandlerTests
+public class CancelProductOrderCommandHandlerTests
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly CancelOrderCommandHandler _handler;
+    private readonly CancelProductOrderCommandHandler _handler;
 
-    public CancelOrderCommandHandlerTests()
+    public CancelProductOrderCommandHandlerTests()
     {
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new CancelOrderCommandHandler(_orderRepository, _unitOfWork);
+        _handler = new CancelProductOrderCommandHandler(_orderRepository, _unitOfWork);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class CancelOrderCommandHandlerTests
             .Returns(order);
 
         var result = await _handler.Handle(
-            new CancelOrderCommand(order.Id, "Customer request"), CancellationToken.None);
+            new CancelProductOrderCommand(order.Id, "Customer request"), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Cancelled);
@@ -45,10 +45,10 @@ public class CancelOrderCommandHandlerTests
     {
         var orderId = Guid.NewGuid();
         _orderRepository.GetByIdAsync(orderId, Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
+            .Returns((ProductOrder?)null);
 
         var result = await _handler.Handle(
-            new CancelOrderCommand(orderId, "Reason"), CancellationToken.None);
+            new CancelProductOrderCommand(orderId, "Reason"), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.NotFound");
@@ -62,15 +62,15 @@ public class CancelOrderCommandHandlerTests
             .Returns(order);
 
         var result = await _handler.Handle(
-            new CancelOrderCommand(order.Id, "Too late"), CancellationToken.None);
+            new CancelProductOrderCommand(order.Id, "Too late"), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.Validation");
     }
 
-    private static Order CreateDraftOrder()
+    private static ProductOrder CreateDraftOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(
@@ -81,9 +81,9 @@ public class CancelOrderCommandHandlerTests
         return order;
     }
 
-    private static Order CreateCompletedOrder()
+    private static ProductOrder CreateCompletedOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(

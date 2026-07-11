@@ -2,7 +2,7 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Obss.Orders.Application.Abstractions;
-using Obss.Orders.Application.Commands.SubmitOrder;
+using Obss.Orders.Application.Commands.SubmitProductOrder;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Abstractions;
@@ -10,17 +10,17 @@ using Obss.SharedKernel.Application.Contracts;
 
 namespace Obss.Orders.Tests.Application;
 
-public class SubmitOrderCommandHandlerTests
+public class SubmitProductOrderCommandHandlerTests
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly SubmitOrderCommandHandler _handler;
+    private readonly SubmitProductOrderCommandHandler _handler;
 
-    public SubmitOrderCommandHandlerTests()
+    public SubmitProductOrderCommandHandlerTests()
     {
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
-        _handler = new SubmitOrderCommandHandler(_orderRepository, _unitOfWork);
+        _handler = new SubmitProductOrderCommandHandler(_orderRepository, _unitOfWork);
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public class SubmitOrderCommandHandlerTests
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var result = await _handler.Handle(new SubmitOrderCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         order.Status.Should().Be(OrderStatus.Submitted);
@@ -43,9 +43,9 @@ public class SubmitOrderCommandHandlerTests
     {
         var orderId = Guid.NewGuid();
         _orderRepository.GetByIdAsync(orderId, Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
+            .Returns((ProductOrder?)null);
 
-        var result = await _handler.Handle(new SubmitOrderCommand(orderId), CancellationToken.None);
+        var result = await _handler.Handle(new SubmitProductOrderCommand(orderId), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.NotFound");
@@ -54,13 +54,13 @@ public class SubmitOrderCommandHandlerTests
     [Fact]
     public async Task Handle_WhenOrderHasNoItems_ShouldReturnValidationError()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var result = await _handler.Handle(new SubmitOrderCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.Validation");
@@ -74,15 +74,15 @@ public class SubmitOrderCommandHandlerTests
         _orderRepository.GetByIdAsync(order.Id, Arg.Any<CancellationToken>())
             .Returns(order);
 
-        var result = await _handler.Handle(new SubmitOrderCommand(order.Id), CancellationToken.None);
+        var result = await _handler.Handle(new SubmitProductOrderCommand(order.Id), CancellationToken.None);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Code.Should().Be("Error.Validation");
     }
 
-    private static Order CreateOrderWithItems()
+    private static ProductOrder CreateOrderWithItems()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(

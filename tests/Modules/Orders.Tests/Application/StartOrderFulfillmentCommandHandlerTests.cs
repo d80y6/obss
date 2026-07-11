@@ -13,7 +13,7 @@ namespace Obss.Orders.Tests.Application;
 
 public class StartOrderFulfillmentCommandHandlerTests
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly IOrderFulfillmentRepository _fulfillmentRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<StartOrderFulfillmentCommandHandler> _logger;
@@ -21,7 +21,7 @@ public class StartOrderFulfillmentCommandHandlerTests
 
     public StartOrderFulfillmentCommandHandlerTests()
     {
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _fulfillmentRepository = Substitute.For<IOrderFulfillmentRepository>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
         _logger = Substitute.For<ILogger<StartOrderFulfillmentCommandHandler>>();
@@ -54,7 +54,7 @@ public class StartOrderFulfillmentCommandHandlerTests
     {
         var orderId = Guid.NewGuid();
         _orderRepository.GetByIdWithItemsAsync(orderId, Arg.Any<CancellationToken>())
-            .Returns((Order?)null);
+            .Returns((ProductOrder?)null);
 
         var result = await _handler.Handle(
             new StartOrderFulfillmentCommand(orderId), CancellationToken.None);
@@ -96,9 +96,9 @@ public class StartOrderFulfillmentCommandHandlerTests
         result.Error.Code.Should().Be("Error.Validation");
     }
 
-    private static Order CreateApprovedOrder()
+    private static ProductOrder CreateApprovedOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(
@@ -111,9 +111,9 @@ public class StartOrderFulfillmentCommandHandlerTests
         return order;
     }
 
-    private static Order CreateDraftOrder()
+    private static ProductOrder CreateDraftOrder()
     {
-        var order = Order.Create(
+        var order = ProductOrder.Create(
             "tenant-1", Guid.NewGuid(), "John Doe",
             OrderType.New, "user-1");
         order.AddItem(

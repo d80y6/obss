@@ -5,7 +5,7 @@ using Obss.CRM.Application.Abstractions;
 using Obss.CRM.Domain.Entities;
 using Obss.CRM.Domain.ValueObjects;
 using Obss.Orders.Application.Abstractions;
-using Obss.Orders.Application.Commands.CreateOrder;
+using Obss.Orders.Application.Commands.CreateProductOrder;
 using Obss.Orders.Domain.Entities;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.ProductCatalog.Application.Abstractions;
@@ -16,20 +16,20 @@ using Obss.SharedKernel.Domain.ValueObjects;
 
 namespace Obss.Orders.Tests.Application;
 
-public class CreateOrderCommandHandlerTests
+public class CreateProductOrderCommandHandlerTests
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IProductOrderRepository _orderRepository;
     private readonly ICustomerRepository _customerRepository;
     private readonly IProductRepository _productRepository;
     private readonly IOfferRepository _offerRepository;
     private readonly ICurrentTenant _currentTenant;
     private readonly ICurrentUser _currentUser;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly CreateOrderCommandHandler _handler;
+    private readonly CreateProductOrderCommandHandler _handler;
 
-    public CreateOrderCommandHandlerTests()
+    public CreateProductOrderCommandHandlerTests()
     {
-        _orderRepository = Substitute.For<IOrderRepository>();
+        _orderRepository = Substitute.For<IProductOrderRepository>();
         _customerRepository = Substitute.For<ICustomerRepository>();
         _productRepository = Substitute.For<IProductRepository>();
         _offerRepository = Substitute.For<IOfferRepository>();
@@ -37,7 +37,7 @@ public class CreateOrderCommandHandlerTests
         _currentUser = Substitute.For<ICurrentUser>();
         _unitOfWork = Substitute.For<IUnitOfWork>();
 
-        _handler = new CreateOrderCommandHandler(
+        _handler = new CreateProductOrderCommandHandler(
             _orderRepository,
             _customerRepository,
             _productRepository,
@@ -47,9 +47,9 @@ public class CreateOrderCommandHandlerTests
             _unitOfWork);
     }
 
-    private static CreateOrderCommand CreateValidCommand()
+    private static CreateProductOrderCommand CreateValidCommand()
     {
-        return new CreateOrderCommand(
+        return new CreateProductOrderCommand(
             Guid.NewGuid(),
             "John Doe",
             "New",
@@ -57,7 +57,11 @@ public class CreateOrderCommandHandlerTests
             "123 Main St", "New York", "NY", "10001", "US",
             null, null, null, null, null,
             "USD",
-            new List<CreateOrderItemRequest>
+            null,
+            null,
+            null,
+            null,
+            new List<CreateProductOrderItemRequest>
             {
                 new(Guid.NewGuid(), Guid.NewGuid(), "Internet", "Basic Plan",
                     1, 49.99m, 29.99m, 5m, 8m, "Monthly")
@@ -90,8 +94,8 @@ public class CreateOrderCommandHandlerTests
         _offerRepository.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>())
             .Returns(offer);
 
-        _orderRepository.AddAsync(Arg.Any<Order>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<Order>(null!));
+        _orderRepository.AddAsync(Arg.Any<ProductOrder>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<ProductOrder>(null!));
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -100,7 +104,7 @@ public class CreateOrderCommandHandlerTests
         result.Value.CustomerName.Should().Be("John Doe");
         result.Value.Status.Should().Be("Draft");
 
-        await _orderRepository.Received(1).AddAsync(Arg.Any<Order>(), Arg.Any<CancellationToken>());
+        await _orderRepository.Received(1).AddAsync(Arg.Any<ProductOrder>(), Arg.Any<CancellationToken>());
         await _unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 
@@ -133,12 +137,16 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_WhenOrderTypeIsInvalid_ShouldReturnValidationError()
     {
-        var command = new CreateOrderCommand(
+        var command = new CreateProductOrderCommand(
             Guid.NewGuid(), "John Doe", "InvalidType", null,
             null, null, null, null, null,
             null, null, null, null, null,
             "USD",
-            new List<CreateOrderItemRequest>
+            null,
+            null,
+            null,
+            null,
+            new List<CreateProductOrderItemRequest>
             {
                 new(Guid.NewGuid(), Guid.NewGuid(), "Internet", "Basic",
                     1, 49.99m, 0, 0, 0, "Monthly")
@@ -198,12 +206,16 @@ public class CreateOrderCommandHandlerTests
     [Fact]
     public async Task Handle_WhenBillingPeriodIsInvalid_ShouldReturnValidationError()
     {
-        var command = new CreateOrderCommand(
+        var command = new CreateProductOrderCommand(
             Guid.NewGuid(), "John Doe", "New", null,
             null, null, null, null, null,
             null, null, null, null, null,
             "USD",
-            new List<CreateOrderItemRequest>
+            null,
+            null,
+            null,
+            null,
+            new List<CreateProductOrderItemRequest>
             {
                 new(Guid.NewGuid(), Guid.NewGuid(), "Internet", "Basic",
                     1, 49.99m, 0, 0, 0, "InvalidPeriod")
