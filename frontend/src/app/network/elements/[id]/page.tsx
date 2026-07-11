@@ -12,14 +12,13 @@ import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
-import type { NetworkElementDto } from "@/api/generated"
 import type { NetworkConnectionDto } from "@/api/generated"
 
 export default function NetworkElementDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: element, isLoading, error: elementError } = useNetworkElement(id)
+  const { data: element, isLoading } = useNetworkElement(id)
 
   const { data: connections, error: connectionsError } = useQuery({
     queryKey: queryKeys.networks.elements.connections(id),

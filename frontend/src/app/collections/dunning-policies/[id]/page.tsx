@@ -6,7 +6,6 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDunningPolicy, useDeleteDunningPolicy } from "@/api/hooks/use-collections"
-import type { DunningPolicyDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import { useCallback } from "react"
 

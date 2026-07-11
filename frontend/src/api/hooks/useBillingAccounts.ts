@@ -82,7 +82,7 @@ export function useBillingAccounts(filters: Record<string, string> = {}) {
     queryFn: async () => {
       const params = new URLSearchParams(filters)
       const res = await api.get(`/api/v1/billing/billing-accounts?${params.toString()}`)
-      return res.json()
+      return res.data
     },
   })
 }
@@ -92,7 +92,7 @@ export function useBillingAccount(id: string) {
     queryKey: queryKeys.billing.billingAccounts.detail(id),
     queryFn: async () => {
       const res = await api.get(`/api/v1/billing/billing-accounts/${id}`)
-      return res.json()
+      return res.data
     },
     enabled: !!id,
   })
@@ -103,7 +103,7 @@ export function useBillingAccountBalance(id: string) {
     queryKey: queryKeys.billing.billingAccounts.balance(id),
     queryFn: async () => {
       const res = await api.get(`/api/v1/billing/billing-accounts/${id}/balance`)
-      return res.json()
+      return res.data
     },
     enabled: !!id,
   })
@@ -120,7 +120,7 @@ export function useCreateBillingAccount() {
       currency: string
     }) => {
       const res = await api.post("/api/v1/billing/billing-accounts", data)
-      return res.json()
+      return res.data
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.billing.billingAccounts.all })
@@ -139,7 +139,7 @@ export function useUpdateBillingAccount() {
       description: string | null
     }) => {
       const res = await api.put(`/api/v1/billing/billing-accounts/${id}`, data)
-      return res.json()
+      return res.data
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.billing.billingAccounts.detail(variables.id) })
@@ -173,7 +173,7 @@ export function useAddBillingAccountRelatedParty() {
         `/api/v1/billing/billing-accounts/${billingAccountId}/related-parties`,
         data,
       )
-      return res.json()
+      return res.data
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
@@ -212,7 +212,7 @@ export function useCreateBillPresentationMedia() {
         `/api/v1/billing/billing-accounts/${billingAccountId}/presentation-media`,
         data,
       )
-      return res.json()
+      return res.data
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({

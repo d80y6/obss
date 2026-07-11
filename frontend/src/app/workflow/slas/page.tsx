@@ -9,10 +9,8 @@ import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import type { WorkflowSlaDto } from "@/api/generated"
 import { ListTodo } from "lucide-react"
-import { useRouter } from "next/navigation"
 
 export default function WorkflowSlasPage() {
-  const router = useRouter()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const { data, isLoading, error } = useQuery({

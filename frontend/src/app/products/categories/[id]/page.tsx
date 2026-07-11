@@ -15,7 +15,7 @@ export default function CategoryDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: category, isLoading, error: categoryError } = useQuery({
+  const { data: category, isLoading } = useQuery({
     queryKey: ["product-categories", id],
     queryFn: async () => {
       const res = await api.get(`/api/v1/catalog/categories/${id}`)
@@ -24,7 +24,7 @@ export default function CategoryDetailPage() {
     enabled: !!id,
   })
 
-  const { data: categories, error: categoriesError } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ["product-categories"],
     queryFn: async () => {
       const res = await api.get("/api/v1/catalog/categories")
@@ -34,7 +34,7 @@ export default function CategoryDetailPage() {
 
   const parentCategory = categories?.find((c) => c.id === category?.parentCategoryId)
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Category", id)
+  const { data: auditEntries } = useAuditLog("Category", id)
 
   const tabs = [
     {

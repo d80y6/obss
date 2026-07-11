@@ -7,8 +7,8 @@ import { StatusBadge } from "@/components/shared/StatusBadge"
 import { FilterBar } from "@/components/shared/FilterBar"
 import { SearchBar } from "@/components/shared/SearchBar"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { useOrders } from "@/api/hooks/useOrders"
-import type { OrderDto } from "@/api/generated"
+import { useProductOrders } from "@/api/hooks/useProductOrders"
+import type { ProductOrderDto } from "@/api/hooks/useProductOrders"
 import { ShoppingCart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -24,7 +24,7 @@ const statusOptions = [
   { label: "Suspended", value: "SUSPENDED" },
 ]
 
-export default function OrdersPage() {
+export default function ProductOrdersPage() {
   const router = useRouter()
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
@@ -43,16 +43,16 @@ export default function OrdersPage() {
     pageSize: String(pageSize),
   }
 
-  const { data, isLoading, error } = useOrders(filters)
+  const { data, isLoading, error } = useProductOrders(filters)
   const queryClient = useQueryClient()
 
   const bulkMutation = useMutation({
     mutationFn: async ({ ids, action }: { ids: string[]; action: string }) => {
-      const promises = ids.map((id) => api.post(`/api/v1/orders/orders/${id}/${action}`))
+      const promises = ids.map((id) => api.post(`/api/v1/productOrder/orders/${id}/${action}`))
       await Promise.all(promises)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.lists() })
       toast({ title: "Success", description: `${variables.ids.length} items updated.` })
     },
     onError: () => {
@@ -60,7 +60,7 @@ export default function OrdersPage() {
     },
   })
 
-  const columns: Column<OrderDto>[] = [
+  const columns: Column<ProductOrderDto>[] = [
     { id: "orderNumber", header: "Order #", accessorKey: "orderNumber", sortable: true },
     { id: "customerName", header: "Customer", accessorKey: "customerName" },
     { id: "grandTotal", header: "Total", cell: (row) => `${row.currency ?? ""} ${(row.grandTotal ?? 0).toLocaleString()}` },

@@ -26,7 +26,7 @@ export default function RoleDetailPage() {
 
   const { data: role, isLoading } = useRole(id)
 
-  const { data: users, error: usersError } = useQuery({
+  const { data: users } = useQuery({
     queryKey: queryKeys.users.list(),
     queryFn: async () => {
       const res = await api.get("/api/v1/iam/users")
@@ -34,7 +34,7 @@ export default function RoleDetailPage() {
     },
   })
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Role", id)
+  const { data: auditEntries } = useAuditLog("Role", id)
 
   const usersWithRole = (users ?? []).filter((u) => u.role === role?.name)
 

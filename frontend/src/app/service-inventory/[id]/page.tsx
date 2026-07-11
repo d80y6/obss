@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { useState } from "react"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
@@ -20,14 +20,13 @@ import Link from "next/link"
 
 export default function ServiceInventoryDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const id = params.id as string
 
   const { data: service, isLoading } = useService(id)
   const { data: topology } = useServiceTopology(id)
-  const { data: resources, refetch: refetchResources } = useServiceResources(id)
+  const { data: resources } = useServiceResources(id)
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Service", id)
+  const { data: auditEntries } = useAuditLog("Service", id)
 
   const [showAllocate, setShowAllocate] = useState(false)
   const [newResourceType, setNewResourceType] = useState("")

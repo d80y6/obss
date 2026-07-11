@@ -16,7 +16,7 @@ export default function TenantDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: tenant, isLoading, error: tenantError } = useQuery({
+  const { data: tenant, isLoading } = useQuery({
     queryKey: queryKeys.tenants.detail(id),
     queryFn: async () => {
       const res = await api.get(`/api/v1/iam/tenants/${id}`)
@@ -25,7 +25,7 @@ export default function TenantDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Tenant", id)
+  const { data: auditEntries } = useAuditLog("Tenant", id)
 
   const tabs = [
     {

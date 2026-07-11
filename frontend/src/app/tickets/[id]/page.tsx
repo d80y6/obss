@@ -8,7 +8,6 @@ import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useTicket } from "@/api/hooks/useTicket"
 import { useUsers } from "@/api/hooks/useUsers"
@@ -163,11 +162,6 @@ export default function TicketDetailPage() {
     },
     onError: () => toast({ title: "Error", description: "Failed to add comment.", variant: "destructive" }),
   })
-
-  const userOptions = (userList).map((u) => ({
-    label: `${u.firstName} ${u.lastName}`,
-    value: u.id,
-  }))
 
   const slaTimeRemaining = ticketSla ? (
     <div className="space-y-1">

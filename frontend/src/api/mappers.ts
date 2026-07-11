@@ -1,4 +1,4 @@
-import type { CreateCustomerCommand, CustomerDto, CreateOrderCommand, OrderDto } from '@/api/generated'
+import type { CreateCustomerCommand, CustomerDto, CreateOrderCommand } from '@/api/generated'
 
 // ── Customer Mappers ──
 

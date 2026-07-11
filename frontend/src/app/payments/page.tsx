@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { usePayments } from "@/api/hooks/usePayments"
 import type { PaymentDto } from "@/api/generated/dto"
-import { CreditCard, ArrowLeftRight, RotateCcw, Plus } from "lucide-react"
+import { CreditCard, ArrowLeftRight, RotateCcw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 

@@ -6,7 +6,6 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { useVlan } from "@/api/hooks/useVlan"
-import type { VlanDto } from "@/api/generated/dto"
 
 export default function VlanDetailPage() {
   const params = useParams()

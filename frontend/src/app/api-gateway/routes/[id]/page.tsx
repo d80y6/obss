@@ -6,10 +6,7 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useQuery } from "@tanstack/react-query"
-import api from "@/services/api"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
-import type { ApiRouteDto } from "@/api/generated"
 import { useApiRoute } from "@/api/hooks/use-api-gateway"
 
 export default function ApiRouteDetailPage() {
@@ -17,7 +14,7 @@ export default function ApiRouteDetailPage() {
   const id = params.id as string
   const { data: route, isLoading } = useApiRoute(id)
 
-  const { data: auditEntries, error: auditError } = useAuditLog("ApiRoute", id)
+  const { data: auditEntries } = useAuditLog("ApiRoute", id)
 
   const tabs = [
     {

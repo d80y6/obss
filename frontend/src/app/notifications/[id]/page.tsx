@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
 import { useNotification, useMarkNotificationRead } from "@/api/hooks/use-notifications"
-import { toast } from "@/components/ui/toast"
 
 export default function NotificationDetailPage() {
   const params = useParams()

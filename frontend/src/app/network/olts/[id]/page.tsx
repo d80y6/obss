@@ -6,7 +6,6 @@ import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { useOlt } from "@/api/hooks/useOlt"
-import type { OltDto } from "@/api/generated/dto"
 
 export default function OltDetailPage() {
   const params = useParams()

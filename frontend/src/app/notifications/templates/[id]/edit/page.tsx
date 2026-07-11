@@ -42,7 +42,7 @@ export default function EditNotificationTemplatePage() {
   const id = params.id as string
   const queryClient = useQueryClient()
 
-  const { data: template, isLoading } = useQuery({
+  const { data: template } = useQuery({
     queryKey: ["notification-templates", id],
     queryFn: async () => {
       const res = await api.get(`/api/v1/notifications/templates/${id}`)

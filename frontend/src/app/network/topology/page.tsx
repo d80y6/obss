@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useQueryClient } from "@tanstack/react-query"
 import { useNetworkTopology } from "@/api/hooks/useNetworkTopology"
 import { useNetworkElements } from "@/api/hooks/useNetworkElements"
 import { useTopologyMaps } from "@/api/hooks/useTopologyMaps"
@@ -39,7 +38,6 @@ export default function TopologyPage() {
     resolver: zodResolver(linkSchema),
   })
 
-  const queryClient = useQueryClient()
   const saveMap = useSaveTopologyMap()
 
   const linkTypeOptions = [

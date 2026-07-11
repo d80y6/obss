@@ -40,7 +40,7 @@ export default function OfferDetailPage() {
   const { data: offer, isLoading } = useOffer(id)
   const deleteOffer = useDeleteOffer()
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Offer", id)
+  const { data: auditEntries } = useAuditLog("Offer", id)
 
   const createTerm = useCreateTerm()
   const deleteTerm = useDeleteTerm()

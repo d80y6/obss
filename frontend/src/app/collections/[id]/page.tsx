@@ -18,7 +18,7 @@ import { useRecordArrangementPayment, useDunningPolicies } from "@/api/hooks/use
 import type { CollectionCaseDto, CollectionActionDto, PaymentArrangementDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import Link from "next/link"
-import { CheckCircle, Send, Plus, Phone, CreditCard, Landmark } from "lucide-react"
+import { CheckCircle, Send, Phone, CreditCard, Landmark } from "lucide-react"
 
 export default function CollectionCaseDetailPage() {
   const params = useParams()

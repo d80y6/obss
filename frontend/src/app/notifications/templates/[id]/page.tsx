@@ -9,13 +9,12 @@ import { useQuery } from "@tanstack/react-query"
 import api from "@/services/api"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
 import type { NotificationTemplateDto } from "@/api/generated"
-import { FileText } from "lucide-react"
 
 export default function NotificationTemplateDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: template, isLoading, error: templateError } = useQuery({
+  const { data: template, isLoading } = useQuery({
     queryKey: ["notification-templates", id],
     queryFn: async () => {
       const res = await api.get(`/api/v1/notifications/templates/${id}`)
@@ -24,7 +23,7 @@ export default function NotificationTemplateDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useAuditLog("NotificationTemplate", id)
+  const { data: auditEntries } = useAuditLog("NotificationTemplate", id)
 
   const tabs = [
     {

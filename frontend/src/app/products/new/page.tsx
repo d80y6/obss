@@ -45,15 +45,11 @@ export default function NewProductPage() {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<ProductForm>({
     resolver: zodResolver(productSchema),
     defaultValues: { isShippable: false, taxable: true },
   })
-
-  const isShippable = watch("isShippable")
-  const taxable = watch("taxable")
 
   const onSubmit = (data: ProductForm) => {
     createProduct.mutate({

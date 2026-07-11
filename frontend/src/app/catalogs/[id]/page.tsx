@@ -28,7 +28,7 @@ export default function CatalogDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Catalog", id)
+  const { data: auditEntries } = useAuditLog("Catalog", id)
 
   const deleteMutation = useMutation({
     mutationFn: async () => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { StatusBadge } from "@/components/shared/StatusBadge"

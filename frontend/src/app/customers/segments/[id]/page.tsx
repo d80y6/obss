@@ -18,9 +18,9 @@ export default function SegmentDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: segment, isLoading, error: segmentError } = useSegment(id)
+  const { data: segment, isLoading } = useSegment(id)
 
-  const { data: assignments, error: assignmentsError } = useQuery({
+  const { data: assignments } = useQuery({
     queryKey: ["segments", id, "assignments"],
     queryFn: async () => {
       const res = await api.get(`/api/v1/crm/segments/${id}/assignments`)

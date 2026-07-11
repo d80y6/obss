@@ -4,7 +4,7 @@ import { useState } from "react"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { StatusBadge } from "@/components/shared/StatusBadge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,11 +13,9 @@ import { useDiscoveryJobs, useStartDiscoveryJob, useCompleteDiscoveryJob } from 
 import type { DiscoveryJobDto } from "@/api/generated"
 import { Search, Play, CheckCircle2 } from "lucide-react"
 import { toast } from "@/components/ui/toast"
-import { useQueryClient } from "@tanstack/react-query"
 import Link from "next/link"
 
 export default function DiscoveryPage() {
-  const queryClient = useQueryClient()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [startOpen, setStartOpen] = useState(false)
   const [completeOpen, setCompleteOpen] = useState(false)

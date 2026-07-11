@@ -24,7 +24,7 @@ export default function UserDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: user, isLoading, error: userError } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: queryKeys.users.detail(id),
     queryFn: async () => {
       const res = await api.get(`/api/v1/iam/users/${id}`)
@@ -33,7 +33,7 @@ export default function UserDetailPage() {
     enabled: !!id,
   })
 
-  const { data: roles, error: rolesError } = useQuery({
+  const { data: roles } = useQuery({
     queryKey: queryKeys.roles.list(),
     queryFn: async () => {
       const res = await api.get("/api/v1/iam/roles")
@@ -41,7 +41,7 @@ export default function UserDetailPage() {
     },
   })
 
-  const { data: auditEntries, error: auditError } = useAuditLog("User", id)
+  const { data: auditEntries } = useAuditLog("User", id)
 
   const tabs = [
     {

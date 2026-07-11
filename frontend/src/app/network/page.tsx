@@ -1,9 +1,8 @@
 "use client"
 
 import { PageHeader } from "@/components/shared/PageHeader"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Cable, Radio, ListTodo, Waves, Network } from "lucide-react"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import { Cable, Radio, Waves, Network } from "lucide-react"
 import Link from "next/link"
 
 export default function NetworkPage() {

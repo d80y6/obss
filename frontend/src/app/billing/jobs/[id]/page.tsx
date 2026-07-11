@@ -13,9 +13,9 @@ export default function BillingJobDetailPage() {
   const params = useParams()
   const id = params.id as string
 
-  const { data: job, isLoading, error: jobError } = useBillingJob(id)
+  const { data: job, isLoading } = useBillingJob(id)
 
-  const { data: auditEntries, error: auditError } = useAuditLog("BillingJob", id)
+  const { data: auditEntries } = useAuditLog("BillingJob", id)
 
   const percentComplete = job ? (job.totalProcessed + job.totalErrors > 0
     ? Math.round((job.totalProcessed / (job.totalProcessed + job.totalErrors)) * 100)

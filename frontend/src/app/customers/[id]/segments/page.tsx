@@ -5,7 +5,6 @@ import { useState } from "react"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { DataTable, Column } from "@/components/shared/DataTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
@@ -21,7 +20,7 @@ export default function CustomerSegmentsPage() {
 
   const { data: segments, isLoading } = useCustomerSegments(id)
 
-  const assignMutation = useMutation({
+  const removeMutation = useMutation({
     mutationFn: async (segmentId: string) => {
       await api.post(`/api/v1/crm/segments/${segmentId}/assign/${id}`)
     },

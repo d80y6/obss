@@ -13,7 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import api from "@/services/api"
 import { queryKeys } from "@/lib/query-keys"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
-import type { WorkflowInstanceDto, WorkflowTaskDto } from "@/api/generated"
+import type { WorkflowInstanceDto } from "@/api/generated"
 import { toast } from "@/components/ui/toast"
 import { Play, CheckCircle, XCircle } from "lucide-react"
 

@@ -17,7 +17,7 @@ export default function PartnerDetailPage() {
   const id = params.id as string
   const { data: partner, isLoading } = usePartner(id)
 
-  const { data: apiKeys, error: apiKeysError } = useQuery({
+  const { data: apiKeys } = useQuery({
     queryKey: ["gateway", "api-keys", "by-partner", id],
     queryFn: async () => {
       const res = await api.get(`/api/v1/gateway/api-keys?partnerId=${id}`)
@@ -26,7 +26,7 @@ export default function PartnerDetailPage() {
     enabled: !!id,
   })
 
-  const { data: auditEntries, error: auditError } = useAuditLog("Partner", id)
+  const { data: auditEntries } = useAuditLog("Partner", id)
 
   const tabs = [
     {

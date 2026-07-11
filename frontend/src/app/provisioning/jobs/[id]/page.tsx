@@ -1,17 +1,15 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import api from "@/services/api"
+import { useQueryClient } from "@tanstack/react-query"
 import { queryKeys } from "@/lib/query-keys"
 import { useAuditLog } from "@/api/hooks/useAuditLog"
-import type { ProvisioningJobDto } from "@/api/generated"
 import { useStartProvisioningJob, useRetryProvisioningJob, useProvisioningJob } from "@/api/hooks/use-provisioning-jobs"
 import { toast } from "@/components/ui/toast"
 import { Play, RotateCcw, FileText } from "lucide-react"
@@ -19,7 +17,6 @@ import Link from "next/link"
 
 export default function ProvisioningJobDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const queryClient = useQueryClient()
   const id = params.id as string
 

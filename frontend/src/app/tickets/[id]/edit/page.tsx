@@ -47,7 +47,7 @@ export default function EditTicketPage() {
   const id = params.id as string
   const queryClient = useQueryClient()
 
-  const { data: ticket, isLoading } = useTicket(id)
+  const { data: ticket } = useTicket(id)
   const { data: users } = useUsers({})
 
   const updateMutation = useMutation({

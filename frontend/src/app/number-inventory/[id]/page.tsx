@@ -1,6 +1,6 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
@@ -16,7 +16,6 @@ import { useState } from "react"
 
 export default function NumberDetailPage() {
   const params = useParams()
-  const router = useRouter()
   const id = params.id as string
 
   const { data: tel, isLoading } = useTelephoneNumber(id)
@@ -107,7 +106,7 @@ export default function NumberDetailPage() {
               </Button>
             )}
             {tel && !["Available", "Assigned"].includes(tel.status) && (
-              <p className="text-sm text-muted-foreground">No actions available for numbers with status "{tel.status}".</p>
+              <p className="text-sm text-muted-foreground">No actions available for numbers with status &quot;{tel.status}&quot;.</p>
             )}
           </CardContent>
         </Card>

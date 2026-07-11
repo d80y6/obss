@@ -5,7 +5,6 @@ import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuditEntry } from "@/api/hooks/use-audit-entries"
-import type { AuditEntryDto } from "@/api/generated/dto"
 
 export default function AuditEntryDetailPage() {
   const params = useParams()
