@@ -2,12 +2,14 @@
 
 import Link from "next/link"
 import { useBillingAccounts, useDeleteBillingAccount } from "@/api/hooks/useBillingAccounts"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { EmptyState } from "@/components/shared/EmptyState"
 
 export default function BillingAccountsPage() {
   const { data: accounts, isLoading } = useBillingAccounts()
   const deleteAccount = useDeleteBillingAccount()
 
-  if (isLoading) return <div className="p-6 text-gray-500">Loading billing accounts...</div>
+  if (isLoading) return <div className="p-6"><LoadingState rows={5} /></div>
 
   return (
     <div className="p-6">
@@ -69,8 +71,8 @@ export default function BillingAccountsPage() {
             ))}
             {(!accounts || accounts.length === 0) && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                  No billing accounts found. Create one to get started.
+                <td colSpan={6} className="px-4 py-8 text-center">
+                  <EmptyState title="No billing accounts" description="Create one to get started." />
                 </td>
               </tr>
             )}

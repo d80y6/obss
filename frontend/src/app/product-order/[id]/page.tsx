@@ -6,6 +6,8 @@ import { EntityHeader } from "@/components/shared/EntityHeader"
 import { EntityMetadata } from "@/components/shared/EntityMetadata"
 import { EntityTabs } from "@/components/shared/EntityTabs"
 import { StatusBadge } from "@/components/shared/StatusBadge"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -151,6 +153,8 @@ export default function OrderDetailPage() {
   const canApprove = order?.status === "Submitted" || order?.status === "PendingApproval"
   const canCancel = order?.status !== "Cancelled" && order?.status !== "Completed"
 
+  if (isLoading && !order) return <div className="flex-1 p-6"><LoadingState rows={8} /></div>
+
   const tabs = [
     {
       id: "overview",
@@ -289,6 +293,7 @@ export default function OrderDetailPage() {
   ]
 
   return (
+    <ErrorBoundary>
     <div className="flex-1 space-y-6 p-6">
       <EntityHeader
         title={`Order ${order?.orderNumber ?? ""}`}
@@ -412,5 +417,6 @@ export default function OrderDetailPage() {
         </div>
       )}
     </div>
+    </ErrorBoundary>
   )
 }

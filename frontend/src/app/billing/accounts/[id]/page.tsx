@@ -9,6 +9,9 @@ import {
   useRemoveBillingAccountRelatedParty,
 } from "@/api/hooks/useBillingAccounts"
 import { useState } from "react"
+import { LoadingState } from "@/components/shared/LoadingState"
+import { ErrorFallback } from "@/components/shared/ErrorFallback"
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary"
 
 export default function BillingAccountDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,8 +21,8 @@ export default function BillingAccountDetailPage() {
   const removeParty = useRemoveBillingAccountRelatedParty()
   const [newParty, setNewParty] = useState({ partyId: "", partyName: "", role: "" })
 
-  if (isLoading) return <div className="p-6 text-gray-500">Loading...</div>
-  if (!account) return <div className="p-6 text-red-500">Account not found</div>
+  if (isLoading) return <div className="p-6"><LoadingState rows={5} /></div>
+  if (!account) return <ErrorFallback message="Account not found" />
 
   const handleAddParty = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,6 +31,7 @@ export default function BillingAccountDetailPage() {
   }
 
   return (
+    <ErrorBoundary>
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -139,5 +143,6 @@ export default function BillingAccountDetailPage() {
         </form>
       </div>
     </div>
+    </ErrorBoundary>
   )
 }
