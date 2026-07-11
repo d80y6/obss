@@ -66,7 +66,7 @@ builder.Services.AddOpenApi(options =>
         if (schema.Required?.Count > 0 && schema.Properties is not null)
         {
             var nullableRequired = schema.Properties
-                .Where(p => p.Value.Nullable)
+                .Where(p => p.Value?.Nullable == true)
                 .Select(p => p.Key)
                 .ToHashSet();
 

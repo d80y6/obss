@@ -118,6 +118,10 @@ COPY ["src/Modules/EventManagement/Obss.EventManagement.Domain/Obss.EventManagem
 COPY ["src/Modules/EventManagement/Obss.EventManagement.Application/Obss.EventManagement.Application.csproj", "src/Modules/EventManagement/Obss.EventManagement.Application/"]
 COPY ["src/Modules/EventManagement/Obss.EventManagement.Infrastructure/Obss.EventManagement.Infrastructure.csproj", "src/Modules/EventManagement/Obss.EventManagement.Infrastructure/"]
 COPY ["src/Modules/EventManagement/Obss.EventManagement.Api/Obss.EventManagement.Api.csproj", "src/Modules/EventManagement/Obss.EventManagement.Api/"]
+COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Domain/Obss.ServiceQualification.Domain.csproj", "src/Modules/ServiceQualification/Obss.ServiceQualification.Domain/"]
+COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Application/Obss.ServiceQualification.Application.csproj", "src/Modules/ServiceQualification/Obss.ServiceQualification.Application/"]
+COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Infrastructure/Obss.ServiceQualification.Infrastructure.csproj", "src/Modules/ServiceQualification/Obss.ServiceQualification.Infrastructure/"]
+COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Api/Obss.ServiceQualification.Api.csproj", "src/Modules/ServiceQualification/Obss.ServiceQualification.Api/"]
 
 COPY ["src/Host/Obss.Host/Obss.Host.csproj", "src/Host/Obss.Host/"]
 
@@ -147,6 +151,7 @@ COPY ["src/Modules/ApiGateway/", "src/Modules/ApiGateway/"]
 COPY ["src/Modules/NumberInventory/", "src/Modules/NumberInventory/"]
 COPY ["src/Modules/ServiceCatalog/", "src/Modules/ServiceCatalog/"]
 COPY ["src/Modules/EventManagement/", "src/Modules/EventManagement/"]
+COPY ["src/Modules/ServiceQualification/", "src/Modules/ServiceQualification/"]
 COPY ["src/Host/Obss.Host/", "src/Host/Obss.Host/"]
 
 RUN dotnet publish "src/Host/Obss.Host/Obss.Host.csproj" \
