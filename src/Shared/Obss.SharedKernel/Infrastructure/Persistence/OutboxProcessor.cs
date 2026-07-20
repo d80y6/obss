@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Obss.SharedKernel.Infrastructure.Diagnostics;
 using Obss.SharedKernel.Infrastructure.EventBus;
 using Obss.SharedKernel.Infrastructure.Serialization;
 using RabbitMQ.Client;
@@ -15,18 +16,23 @@ public sealed class OutboxProcessor : BackgroundService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IOptions<RabbitMqConfiguration> _rabbitMqConfiguration;
     private readonly ILogger<OutboxProcessor> _logger;
+    private readonly OutboxMetrics _metrics;
     private readonly TimeSpan _pollingInterval;
+    private readonly TimeSpan _lockDuration;
 
     public OutboxProcessor(
         IServiceScopeFactory scopeFactory,
         IOptions<RabbitMqConfiguration> rabbitMqConfiguration,
         ILogger<OutboxProcessor> logger,
+        OutboxMetrics metrics,
         TimeSpan? pollingInterval = null)
     {
         _scopeFactory = scopeFactory;
         _rabbitMqConfiguration = rabbitMqConfiguration;
         _logger = logger;
+        _metrics = metrics;
         _pollingInterval = pollingInterval ?? TimeSpan.FromSeconds(10);
+        _lockDuration = TimeSpan.FromMinutes(2);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,40 +60,53 @@ public sealed class OutboxProcessor : BackgroundService
     {
         using var scope = _scopeFactory.CreateScope();
         var contexts = scope.ServiceProvider.GetServices<EfDbContext>();
-        var processedIds = new HashSet<Guid>();
+        var instanceId = Guid.NewGuid();
 
         var connection = await CreateConnectionAsync(cancellationToken);
         await using var channel = await connection.CreateChannelAsync(
             cancellationToken: cancellationToken);
 
+        var dlxExchangeName = "obss_integration_events.dlx";
+
+        await channel.ExchangeDeclareAsync(
+            exchange: dlxExchangeName,
+            type: ExchangeType.Direct,
+            durable: true,
+            autoDelete: false,
+            cancellationToken: cancellationToken);
+
         foreach (var context in contexts)
         {
+            var now = DateTime.UtcNow;
+
             var messages = await context.OutboxMessages
                 .Where(m => m.ProcessedAt == null)
+                .Where(m => !m.IsDeadLettered)
+                .Where(m => m.NextAttemptAt == null || m.NextAttemptAt <= now)
+                .Where(m => m.LockExpiresAt == null || m.LockExpiresAt <= now)
                 .OrderBy(m => m.CreatedAt)
                 .Take(50)
                 .ToListAsync(cancellationToken);
 
             if (messages.Count == 0)
-            {
                 continue;
-            }
 
             foreach (var message in messages)
             {
-                if (processedIds.Contains(message.Id))
-                {
-                    message.MarkAsProcessed();
+                if (!message.TryAcquireLock(instanceId, _lockDuration))
                     continue;
-                }
+
+                var startedAt = DateTime.UtcNow;
 
                 try
                 {
                     await PublishMessageAsync(channel, message, cancellationToken);
-                    processedIds.Add(message.Id);
 
                     message.MarkAsProcessed();
                     context.OutboxMessages.Update(message);
+
+                    _metrics.MessageProcessed();
+                    _metrics.RecordProcessingDuration((DateTime.UtcNow - startedAt).TotalMilliseconds);
 
                     _logger.LogInformation(
                         "Published event {MessageId} of type {EventType}",
@@ -95,10 +114,33 @@ public sealed class OutboxProcessor : BackgroundService
                 }
                 catch (Exception ex)
                 {
+                    _metrics.MessageFailed();
+
                     _logger.LogError(
                         ex,
                         "Failed to process outbox message {MessageId} of type {EventType}",
                         message.Id, message.EventType);
+
+                    if (message.CanRetry())
+                    {
+                        _metrics.RecordProcessingDuration((DateTime.UtcNow - startedAt).TotalMilliseconds);
+                        message.RecordFailure(ex.Message);
+                        message.ReleaseLock();
+                    }
+                    else
+                    {
+                        _metrics.MessageDeadLettered();
+                        _metrics.RecordProcessingDuration((DateTime.UtcNow - startedAt).TotalMilliseconds);
+
+                        message.MarkAsDeadLettered(
+                            $"Max retries ({message.RetryCount}) exceeded or non-retryable: {ex.Message}");
+
+                        _logger.LogWarning(
+                            "Outbox message {MessageId} of type {EventType} moved to dead-letter after {RetryCount} retries",
+                            message.Id, message.EventType, message.RetryCount);
+                    }
+
+                    context.OutboxMessages.Update(message);
                 }
             }
 
@@ -134,10 +176,18 @@ public sealed class OutboxProcessor : BackgroundService
             properties.CorrelationId = message.CorrelationId;
         }
 
+        if (message.RetryCount > 0)
+        {
+            properties.Headers = new Dictionary<string, object?>
+            {
+                { "x-retry-count", Encoding.UTF8.GetBytes(message.RetryCount.ToString()) }
+            };
+        }
+
         await channel.BasicPublishAsync(
             exchange: exchangeName,
             routingKey: message.EventType,
-            mandatory: false,
+            mandatory: true,
             basicProperties: properties,
             body: Encoding.UTF8.GetBytes(message.EventData),
             cancellationToken: cancellationToken);

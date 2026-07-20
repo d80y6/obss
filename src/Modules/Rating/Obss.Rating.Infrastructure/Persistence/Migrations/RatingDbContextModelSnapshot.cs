@@ -57,6 +57,11 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
                         .HasColumnType("numeric(18,4)")
                         .HasColumnName("discount_value");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -186,6 +191,11 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("description");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
@@ -246,6 +256,21 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AtBaseType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_base_type");
+
+                    b.Property<string>("AtSchemaLocation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("at_schema_location");
+
+                    b.Property<string>("AtType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_type");
+
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasMaxLength(3)
@@ -270,6 +295,16 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("error_message");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("Href")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("href");
 
                     b.Property<decimal>("RatedAmount")
                         .HasPrecision(18, 4)
@@ -515,6 +550,52 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
                         });
 
                     b.Navigation("Tiers");
+                });
+
+            modelBuilder.Entity("Obss.Rating.Domain.Entities.UsageRecord", b =>
+                {
+                    b.OwnsMany("Obss.Rating.Domain.Entities.RelatedParty", "RelatedParties", b1 =>
+                        {
+                            b1.Property<Guid>("usage_record_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("usage_record_id");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("PartyId")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("party_id");
+
+                            b1.Property<string>("PartyName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("party_name");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("role");
+
+                            b1.HasKey("usage_record_id", "Id")
+                                .HasName("pk_usage_record_related_parties");
+
+                            b1.ToTable("usage_record_related_parties", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("usage_record_id")
+                                .HasConstraintName("fk_usage_record_related_parties_usage_records_usage_record_id");
+                        });
+
+                    b.Navigation("RelatedParties");
                 });
 
             modelBuilder.Entity("Obss.Rating.Domain.Entities.Promotion", b =>

@@ -852,6 +852,10 @@ namespace Obss.ProductCatalog.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("product_number");
 
+                    b.Property<Guid?>("ServiceSpecificationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("service_specification_id");
+
                     b.Property<string>("TenantId")
                         .IsRequired()
                         .HasMaxLength(100)

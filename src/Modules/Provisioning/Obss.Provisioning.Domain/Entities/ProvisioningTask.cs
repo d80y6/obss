@@ -83,6 +83,11 @@ public class ProvisioningTask : Entity<Guid>
         RetryCount++;
     }
 
+    public void SetResult(string resultData)
+    {
+        Result = JsonSerializer.Deserialize<JsonDocument>(resultData);
+    }
+
     public void Skip()
     {
         if (Status != ProvisioningTaskStatus.Pending)

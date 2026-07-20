@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.IAM.Application.Commands.CreateTenant;
 using Obss.IAM.Application.Queries.GetTenants;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.IAM.Api.Endpoints;
 
@@ -17,7 +18,7 @@ public static class TenantEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.TenantRead));
 
         group.MapPost("/tenants", async (CreateTenantCommand command, IMediator mediator) =>
         {
@@ -25,6 +26,6 @@ public static class TenantEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/iam/tenants/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.Platform));
     }
 }

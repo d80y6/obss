@@ -13,6 +13,7 @@ public class EventSubscription : AggregateRoot<Guid>
         Guid id,
         string name,
         string callbackUrl,
+        string? signingSecret,
         string? query,
         string status,
         string? description)
@@ -20,6 +21,7 @@ public class EventSubscription : AggregateRoot<Guid>
     {
         Name = name;
         CallbackUrl = callbackUrl;
+        SigningSecret = signingSecret;
         Query = query;
         Status = status;
         Description = description;
@@ -28,6 +30,7 @@ public class EventSubscription : AggregateRoot<Guid>
 
     public string Name { get; private set; } = string.Empty;
     public string CallbackUrl { get; private set; } = string.Empty;
+    public string? SigningSecret { get; private set; }
     public string? Query { get; private set; }
     public string Status { get; private set; } = "active";
     public string? Description { get; private set; }
@@ -39,6 +42,7 @@ public class EventSubscription : AggregateRoot<Guid>
     public static EventSubscription Create(
         string name,
         string callbackUrl,
+        string? signingSecret,
         string? query,
         string? description)
     {
@@ -46,6 +50,7 @@ public class EventSubscription : AggregateRoot<Guid>
             Guid.NewGuid(),
             name,
             callbackUrl,
+            signingSecret,
             query,
             "active",
             description);
@@ -66,6 +71,12 @@ public class EventSubscription : AggregateRoot<Guid>
     public void Deactivate()
     {
         Status = "inactive";
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void RotateSigningSecret(string newSecret)
+    {
+        SigningSecret = newSecret;
         UpdatedAt = DateTime.UtcNow;
     }
 }

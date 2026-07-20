@@ -101,6 +101,30 @@ namespace Obss.ServiceInventory.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("activation_date");
 
+                    b.Property<string>("AtBaseType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_base_type");
+
+                    b.Property<string>("AtSchemaLocation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("at_schema_location");
+
+                    b.Property<string>("AtType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_type");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("category");
+
+                    b.Property<DateTime?>("CompletionDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("completion_date");
+
                     b.Property<string>("Configuration")
                         .HasColumnType("jsonb")
                         .HasColumnName("configuration");
@@ -117,10 +141,50 @@ namespace Obss.ServiceInventory.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("decommissioned_at");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("Href")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("href");
+
                     b.Property<string>("Location")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("location");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Place")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("place");
+
+                    b.Property<string>("RelatedPartyId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("related_party_id");
+
+                    b.Property<string>("RelatedPartyName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("related_party_name");
+
+                    b.Property<string>("RelatedPartyRole")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("related_party_role");
 
                     b.Property<string>("ServiceIdentifier")
                         .IsRequired()
@@ -128,11 +192,19 @@ namespace Obss.ServiceInventory.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("service_identifier");
 
+                    b.Property<Guid?>("ServiceSpecificationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("service_specification_id");
+
                     b.Property<string>("ServiceType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("service_type");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_date");
 
                     b.Property<string>("Status")
                         .IsRequired()

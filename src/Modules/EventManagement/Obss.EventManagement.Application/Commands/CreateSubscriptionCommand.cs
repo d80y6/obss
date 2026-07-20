@@ -12,6 +12,7 @@ namespace Obss.EventManagement.Application.Commands;
 public sealed record CreateSubscriptionCommand(
     string Name,
     string CallbackUrl,
+    string? SigningSecret,
     string? Query,
     string? Description,
     IReadOnlyList<EventFilterDto>? Filters) : IRequest<Result<EventSubscriptionDto>>;
@@ -39,6 +40,7 @@ public sealed class CreateSubscriptionCommandHandler : IRequestHandler<CreateSub
         var subscription = EventSubscription.Create(
             request.Name,
             request.CallbackUrl,
+            request.SigningSecret,
             request.Query,
             request.Description);
 

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Obss.EventManagement.Api.Endpoints;
 using Obss.EventManagement.Application.Abstractions;
 using Obss.EventManagement.Infrastructure.Persistence.Repositories;
+using Obss.EventManagement.Infrastructure.Diagnostics;
 using Obss.EventManagement.Infrastructure.Services;
 using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Infrastructure.Persistence;
@@ -18,6 +19,7 @@ public static class EventModuleRegistration
         services.AddScoped<IWebhookEventRepository, WebhookEventRepository>();
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
+        services.AddSingleton<WebhookMetrics>();
         services.AddHttpClient<WebhookDispatcher>();
         services.AddHostedService<WebhookDispatcher>();
 

@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Obss.ApiGateway.Api.Extensions;
@@ -31,12 +32,16 @@ using Obss.EventManagement.Api.Extensions;
 using Obss.ServiceInventory.Api.Extensions;
 using Obss.ServiceQualification.Api.Extensions;
 using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.SharedKernel.Application.Behaviors;
 using Obss.SharedKernel.Infrastructure;
+using Obss.SharedKernel.Infrastructure.Authorization;
 using Obss.SharedKernel.Infrastructure.Persistence;
 using Obss.Subscriptions.Api.Extensions;
 using Obss.Ticketing.Api.Extensions;
 using Obss.Workflow.Api.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
@@ -124,11 +129,114 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
+
+    void AddPermissionPolicy(string permission)
+    {
+        options.AddPolicy(Permissions.PolicyName(permission), policy =>
+            policy.RequireAuthenticatedUser()
+                  .AddRequirements(new PermissionRequirement(permission)));
+    }
+
+    AddPermissionPolicy(Permissions.Iam.Platform);
+    AddPermissionPolicy(Permissions.Iam.TenantRead);
+    AddPermissionPolicy(Permissions.Iam.TenantWrite);
+    AddPermissionPolicy(Permissions.Iam.UserRead);
+    AddPermissionPolicy(Permissions.Iam.UserWrite);
+    AddPermissionPolicy(Permissions.Iam.UserDeactivate);
+    AddPermissionPolicy(Permissions.Iam.RoleRead);
+    AddPermissionPolicy(Permissions.Iam.RoleWrite);
+    AddPermissionPolicy(Permissions.Iam.PermissionManage);
+
+    AddPermissionPolicy(Permissions.Billing.BillRead);
+    AddPermissionPolicy(Permissions.Billing.BillWrite);
+    AddPermissionPolicy(Permissions.Billing.BillFinalize);
+    AddPermissionPolicy(Permissions.Billing.BillAdjust);
+    AddPermissionPolicy(Permissions.Billing.AccountRead);
+    AddPermissionPolicy(Permissions.Billing.AccountWrite);
+    AddPermissionPolicy(Permissions.Billing.TaxManage);
+    AddPermissionPolicy(Permissions.Billing.CycleManage);
+
+    AddPermissionPolicy(Permissions.Payments.PaymentRead);
+    AddPermissionPolicy(Permissions.Payments.PaymentWrite);
+    AddPermissionPolicy(Permissions.Payments.PaymentRefund);
+    AddPermissionPolicy(Permissions.Payments.PaymentGatewayManage);
+    AddPermissionPolicy(Permissions.Payments.PaymentReconciliation);
+
+    AddPermissionPolicy(Permissions.Invoices.InvoiceRead);
+    AddPermissionPolicy(Permissions.Invoices.InvoiceWrite);
+    AddPermissionPolicy(Permissions.Invoices.InvoiceFinalize);
+    AddPermissionPolicy(Permissions.Invoices.InvoiceSend);
+    AddPermissionPolicy(Permissions.Invoices.InvoiceCreditNote);
+    AddPermissionPolicy(Permissions.Invoices.InvoiceDisputeManage);
+
+    AddPermissionPolicy(Permissions.Provisioning.JobRead);
+    AddPermissionPolicy(Permissions.Provisioning.JobWrite);
+    AddPermissionPolicy(Permissions.Provisioning.JobExecute);
+    AddPermissionPolicy(Permissions.Provisioning.TemplateManage);
+    AddPermissionPolicy(Permissions.Provisioning.ServiceOrderRead);
+    AddPermissionPolicy(Permissions.Provisioning.ServiceOrderWrite);
+
+    AddPermissionPolicy(Permissions.Orders.OrderRead);
+    AddPermissionPolicy(Permissions.Orders.OrderWrite);
+    AddPermissionPolicy(Permissions.Orders.OrderApprove);
+    AddPermissionPolicy(Permissions.Orders.OrderCancel);
+    AddPermissionPolicy(Permissions.Orders.OrderFulfill);
+
+    AddPermissionPolicy(Permissions.Customers.CustomerRead);
+    AddPermissionPolicy(Permissions.Customers.CustomerWrite);
+    AddPermissionPolicy(Permissions.Customers.CustomerKycVerify);
+    AddPermissionPolicy(Permissions.Customers.CustomerSegmentManage);
+
+    AddPermissionPolicy(Permissions.Crm.QuoteRead);
+    AddPermissionPolicy(Permissions.Crm.QuoteWrite);
+    AddPermissionPolicy(Permissions.Crm.QuoteApprove);
+    AddPermissionPolicy(Permissions.Crm.AgreementRead);
+    AddPermissionPolicy(Permissions.Crm.AgreementWrite);
+
+    AddPermissionPolicy(Permissions.Subscriptions.SubscriptionRead);
+    AddPermissionPolicy(Permissions.Subscriptions.SubscriptionWrite);
+    AddPermissionPolicy(Permissions.Subscriptions.SubscriptionActivate);
+    AddPermissionPolicy(Permissions.Subscriptions.SubscriptionSuspend);
+    AddPermissionPolicy(Permissions.Subscriptions.SubscriptionCancel);
+    AddPermissionPolicy(Permissions.Subscriptions.ProductRead);
+    AddPermissionPolicy(Permissions.Subscriptions.ProductWrite);
+
+    AddPermissionPolicy(Permissions.Catalog.ProductRead);
+    AddPermissionPolicy(Permissions.Catalog.ProductWrite);
+    AddPermissionPolicy(Permissions.Catalog.CategoryRead);
+    AddPermissionPolicy(Permissions.Catalog.CategoryWrite);
+    AddPermissionPolicy(Permissions.Catalog.OfferRead);
+    AddPermissionPolicy(Permissions.Catalog.OfferWrite);
+    AddPermissionPolicy(Permissions.Catalog.SpecificationRead);
+    AddPermissionPolicy(Permissions.Catalog.SpecificationWrite);
+
+    AddPermissionPolicy(Permissions.Audit.AuditRead);
+    AddPermissionPolicy(Permissions.Audit.AuditWrite);
+    AddPermissionPolicy(Permissions.Audit.AuditPurge);
+    AddPermissionPolicy(Permissions.Audit.AuditAlertManage);
+    AddPermissionPolicy(Permissions.Audit.AuditPolicyManage);
+
+    AddPermissionPolicy(Permissions.Collections.CaseRead);
+    AddPermissionPolicy(Permissions.Collections.CaseWrite);
+    AddPermissionPolicy(Permissions.Collections.DunningManage);
+    AddPermissionPolicy(Permissions.Collections.ArrangementManage);
+
+    AddPermissionPolicy(Permissions.Network.ElementRead);
+    AddPermissionPolicy(Permissions.Network.ElementWrite);
+    AddPermissionPolicy(Permissions.Network.CapacityRead);
+    AddPermissionPolicy(Permissions.Network.TopologyRead);
+
+    AddPermissionPolicy(Permissions.Notifications.NotificationRead);
+    AddPermissionPolicy(Permissions.Notifications.NotificationSend);
+    AddPermissionPolicy(Permissions.Notifications.TemplateManage);
+    AddPermissionPolicy(Permissions.Notifications.PreferenceManage);
 });
 
 builder.Services.AddApiVersioning(options =>
@@ -249,6 +357,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceCatalog.Applicatio
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.EventManagement.Application.Commands.CreateSubscriptionCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceQualification.Application.Commands.CheckServiceQualification.CheckServiceQualificationCommandValidator).Assembly);
 
+builder.Services.AddSingleton<IModelCacheKeyFactory, Obss.SharedKernel.Infrastructure.Persistence.TenantModelCacheKeyFactory>();
 builder.Services.AddOutboxProcessing(TimeSpan.FromSeconds(10));
 builder.Services.AddRabbitMqConsumer();
 builder.Services.AddAuditModule();
@@ -266,7 +375,7 @@ builder.Services.AddNetworkModule();
 builder.Services.AddServiceInventoryModule();
 builder.Services.AddWorkflowModule();
 builder.Services.AddProvisioningModule();
-builder.Services.AddNotificationsModule();
+builder.Services.AddNotificationsModule(builder.Configuration);
 builder.Services.AddTicketingModule();
 builder.Services.AddReportingModule();
 builder.Services.AddApiGatewayModule();
@@ -276,8 +385,10 @@ builder.Services.AddEventModule();
 builder.Services.AddServiceQualificationModule();
 
 var pgConnString = connectionString;
-builder.Services.AddHealthChecks()
-    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379")
+var healthChecksBuilder = builder.Services.AddHealthChecks();
+healthChecksBuilder
+    .AddRedis(builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379",
+        name: "redis", tags: ["ready", "health"])
     .AddRabbitMQ(async (_) =>
     {
         var config = builder.Configuration.GetSection("RabbitMq");
@@ -292,10 +403,36 @@ builder.Services.AddHealthChecks()
             NetworkRecoveryInterval = TimeSpan.FromSeconds(10)
         };
         return await factory.CreateConnectionAsync();
-    }, "rabbitmq");
+    }, "rabbitmq", tags: ["ready", "health"]);
 
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<Obss.IAM.Infrastructure.Persistence.IamDbContext>("postgresql");
+void AddDbHealthCheck<TDbContext>(string name) where TDbContext : DbContext
+    => healthChecksBuilder.AddDbContextCheck<TDbContext>(
+        name: $"db_{name}",
+        tags: ["database", "ready", "health"]);
+
+AddDbHealthCheck<Obss.IAM.Infrastructure.Persistence.IamDbContext>("iam");
+AddDbHealthCheck<Obss.CRM.Infrastructure.Persistence.CrmDbContext>("crm");
+AddDbHealthCheck<Obss.ProductCatalog.Infrastructure.Persistence.CatalogDbContext>("catalog");
+AddDbHealthCheck<Obss.Orders.Infrastructure.Persistence.OrderDbContext>("orders");
+AddDbHealthCheck<Obss.Subscriptions.Infrastructure.Persistence.SubscriptionDbContext>("subscriptions");
+AddDbHealthCheck<Obss.Rating.Infrastructure.Persistence.RatingDbContext>("rating");
+AddDbHealthCheck<Obss.Billing.Infrastructure.Persistence.BillingDbContext>("billing");
+AddDbHealthCheck<Obss.Invoices.Infrastructure.Persistence.InvoiceDbContext>("invoices");
+AddDbHealthCheck<Obss.Payments.Infrastructure.Persistence.PaymentDbContext>("payments");
+AddDbHealthCheck<Obss.Collections.Infrastructure.Persistence.CollectionDbContext>("collections");
+AddDbHealthCheck<Obss.ServiceInventory.Infrastructure.Persistence.ServiceDbContext>("service_inventory");
+AddDbHealthCheck<Obss.NetworkInventory.Infrastructure.Persistence.NetworkDbContext>("network_inventory");
+AddDbHealthCheck<Obss.NumberInventory.Infrastructure.Persistence.NumberDbContext>("number_inventory");
+AddDbHealthCheck<Obss.Provisioning.Infrastructure.Persistence.ProvisioningDbContext>("provisioning");
+AddDbHealthCheck<Obss.Workflow.Infrastructure.Persistence.WorkflowDbContext>("workflow");
+AddDbHealthCheck<Obss.Ticketing.Infrastructure.Persistence.TicketDbContext>("ticketing");
+AddDbHealthCheck<Obss.Notifications.Infrastructure.Persistence.NotificationDbContext>("notifications");
+AddDbHealthCheck<Obss.Reporting.Infrastructure.Persistence.ReportDbContext>("reporting");
+AddDbHealthCheck<Obss.Audit.Infrastructure.Persistence.AuditDbContext>("audit");
+AddDbHealthCheck<Obss.ApiGateway.Infrastructure.Persistence.GatewayDbContext>("apigateway");
+AddDbHealthCheck<Obss.ServiceCatalog.Infrastructure.Persistence.ServiceCatalogDbContext>("service_catalog");
+AddDbHealthCheck<Obss.EventManagement.Infrastructure.Persistence.EventDbContext>("events");
+AddDbHealthCheck<Obss.ServiceQualification.Infrastructure.Persistence.ServiceQualificationDbContext>("service_qualification");
 
 var infraAsms = new[] {
     typeof(Obss.IAM.Infrastructure.Persistence.IamDbContext).Assembly,
@@ -348,10 +485,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 app.UseSerilogRequestLogging();
+app.UseMiddleware<CorrelationMiddleware>();
 app.UseMiddleware<Obss.Host.Middleware.ExceptionHandlingMiddleware>();
 app.UseAuthentication();
 app.UseMiddleware<ApiKeyAuthMiddleware>();
 app.UseAuthorization();
+app.UseMiddleware<TenantValidationMiddleware>();
 app.UseMiddleware<RateLimitingMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 
@@ -380,16 +519,33 @@ app.MapServiceCatalogEndpoints();
 app.MapEventEndpoints();
 app.MapServiceQualificationEndpoints();
 
-app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+var healthOptions = new HealthCheckOptions
 {
     ResultStatusCodes =
     {
-        [Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy] = StatusCodes.Status200OK,
-        [Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
-        [Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable,
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable,
+    }
+};
+
+app.MapHealthChecks("/health", healthOptions).AllowAnonymous();
+app.MapHealthChecks("/healthz", new HealthCheckOptions
+{
+    Predicate = _ => false,
+    ResultStatusCodes = { [HealthStatus.Healthy] = StatusCodes.Status200OK }
+}).AllowAnonymous();
+app.MapHealthChecks("/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResultStatusCodes =
+    {
+        [HealthStatus.Healthy] = StatusCodes.Status200OK,
+        [HealthStatus.Degraded] = StatusCodes.Status503ServiceUnavailable,
+        [HealthStatus.Unhealthy] = StatusCodes.Status503ServiceUnavailable,
     }
 }).AllowAnonymous();
-app.MapGet("/health/detailed", async (Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService healthCheckService) =>
+app.MapGet("/health/detailed", async (HealthCheckService healthCheckService) =>
 {
     var report = await healthCheckService.CheckHealthAsync();
     return Results.Ok(new

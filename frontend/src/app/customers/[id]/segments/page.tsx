@@ -22,19 +22,6 @@ export default function CustomerSegmentsPage() {
 
   const removeMutation = useMutation({
     mutationFn: async (segmentId: string) => {
-      await api.post(`/api/v1/crm/segments/${segmentId}/assign/${id}`)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.customers.segments(id) })
-      toast({ title: "Segment assigned", description: "Customer has been assigned to the segment." })
-    },
-    onError: () => {
-      toast({ title: "Error", description: "Failed to assign segment.", variant: "destructive" })
-    },
-  })
-
-  const removeMutation = useMutation({
-    mutationFn: async (segmentId: string) => {
       await api.delete(`/api/v1/crm/segments/${segmentId}/customers/${id}`)
     },
     onSuccess: () => {

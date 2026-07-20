@@ -111,6 +111,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: >
+        -rabbit vm_memory_high_watermark absolute 350MB
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-obss_admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-obss_rmq_s3cur3}
       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}

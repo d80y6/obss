@@ -52,7 +52,7 @@ export default function ProductOrdersPage() {
       await Promise.all(promises)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() })
       toast({ title: "Success", description: `${variables.ids.length} items updated.` })
     },
     onError: () => {

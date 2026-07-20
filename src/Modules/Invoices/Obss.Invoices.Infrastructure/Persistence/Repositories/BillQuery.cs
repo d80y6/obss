@@ -18,7 +18,7 @@ public sealed class BillQuery : IBillQuery
     public async Task<Result<BillDto>> GetBillByIdAsync(Guid billId, CancellationToken cancellationToken = default)
     {
         var result = await _mediator.Send(new GetBillByIdQuery(billId), cancellationToken);
-        
+
         if (result.IsFailure)
         {
             return Result.Failure<BillDto>(result.Error);

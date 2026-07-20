@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.IAM.Application.Commands;
 using Obss.IAM.Application.Queries;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
 
@@ -19,7 +20,7 @@ public static class PartyRoleEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/iam/party-roles/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.RoleWrite));
 
         group.MapGet("/party-roles/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -27,7 +28,7 @@ public static class PartyRoleEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.RoleRead));
 
         group.MapGet("/party-roles", async ([AsParameters] GetPartyRolesQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -38,7 +39,7 @@ public static class PartyRoleEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.RoleRead));
 
         group.MapPut("/party-roles/{id:guid}", async (Guid id, UpdatePartyRoleCommand command, IMediator mediator) =>
         {
@@ -48,7 +49,7 @@ public static class PartyRoleEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.RoleWrite));
 
         group.MapPost("/party-roles/{id:guid}/suspend", async (Guid id, IMediator mediator) =>
         {
@@ -56,7 +57,7 @@ public static class PartyRoleEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.RoleWrite));
 
         group.MapDelete("/party-roles/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -64,6 +65,6 @@ public static class PartyRoleEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Iam.RoleWrite));
     }
 }

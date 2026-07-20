@@ -148,8 +148,13 @@ public class EfDbContext : DbContext
             entity.Property(e => e.ProcessedAt);
             entity.Property(e => e.TenantId).HasMaxLength(100);
             entity.Property(e => e.CorrelationId).HasMaxLength(200);
+            entity.Property(e => e.LastError).HasMaxLength(2000);
+            entity.Property(e => e.NextAttemptAt);
+            entity.Property(e => e.LockId);
+            entity.Property(e => e.LockExpiresAt);
             entity.HasIndex(e => e.ProcessedAt).HasDatabaseName("ix_outbox_messages_processed_at");
             entity.HasIndex(e => e.CreatedAt).HasDatabaseName("ix_outbox_messages_created_at");
+            entity.HasIndex(e => new { e.ProcessedAt, e.NextAttemptAt, e.IsDeadLettered }).HasDatabaseName("ix_outbox_messages_pending");
         });
     }
 

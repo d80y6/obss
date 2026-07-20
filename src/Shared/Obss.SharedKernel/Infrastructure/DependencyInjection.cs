@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Infrastructure.Diagnostics;
 using Obss.SharedKernel.Infrastructure.EventBus;
 using Obss.SharedKernel.Infrastructure.Services;
 using OpenTelemetry.Metrics;
@@ -37,6 +38,7 @@ public static class DependencyInjection
 
         services.TryAddScoped<ICurrentUser, CurrentUserService>();
         services.TryAddScoped<ICurrentTenant, CurrentTenantService>();
+        services.TryAddScoped<ITenantStore, DefaultTenantStore>();
         services.TryAddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.TryAddSingleton<IDistributedCacheService, CacheService>();
         services.TryAddSingleton<IEventBus, EventBusService>();
@@ -48,6 +50,9 @@ public static class DependencyInjection
             options.Configuration = redisConnectionString;
             options.InstanceName = configuration.GetValue<string>("Redis:InstanceName") ?? "Obss";
         });
+
+        services.TryAddSingleton<OutboxMetrics>();
+        services.TryAddSingleton<RabbitMqMetrics>();
 
         services.AddOpenTelemetry()
             .ConfigureResource(resource => resource.AddService(serviceName))

@@ -154,7 +154,7 @@ export interface ProductOrderSummaryDto {
 // Queries
 export function useProductOrders(filters: Record<string, string> = {}) {
   return useQuery({
-    queryKey: queryKeys.productOrders.list(filters),
+    queryKey: queryKeys.orders.list(filters),
     queryFn: async () => {
       const params = new URLSearchParams()
       Object.entries(filters).forEach(([k, v]) => { if (v) params.set(k, v) })
@@ -167,7 +167,7 @@ export function useProductOrders(filters: Record<string, string> = {}) {
 
 export function useProductOrder(id: string) {
   return useQuery({
-    queryKey: queryKeys.productOrders.detail(id),
+    queryKey: queryKeys.orders.detail(id),
     queryFn: async () => {
       const res = await api.get(`/api/v1/productOrder/orders/${id}`)
       return res.data as ProductOrderDto
@@ -178,7 +178,7 @@ export function useProductOrder(id: string) {
 
 export function useProductOrderRelationships(orderId: string) {
   return useQuery({
-    queryKey: queryKeys.productOrders.relationships(orderId),
+    queryKey: queryKeys.orders.relationships(orderId),
     queryFn: async () => {
       const res = await api.get(`/api/v1/productOrder/${orderId}/relationships`)
       return res.data as ProductOrderItemRelationshipDto[]
@@ -189,7 +189,7 @@ export function useProductOrderRelationships(orderId: string) {
 
 export function useProductOrderMilestones(orderId: string) {
   return useQuery({
-    queryKey: queryKeys.productOrders.milestones(orderId),
+    queryKey: queryKeys.orders.milestones(orderId),
     queryFn: async () => {
       const res = await api.get(`/api/v1/productOrder/${orderId}/milestones`)
       return res.data as ProductOrderMilestoneDto[]
@@ -207,7 +207,7 @@ export function useCreateProductOrder() {
       return res.data as ProductOrderDto
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() })
     },
   })
 }
@@ -220,8 +220,8 @@ export function useUpdateProductOrder() {
       return res.data as ProductOrderDto
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.detail(variables.id) })
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.lists() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(variables.id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.lists() })
     },
   })
 }
@@ -233,7 +233,7 @@ export function useDeleteProductOrder() {
       await api.delete(`/api/v1/productOrder/orders/${id}`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -245,7 +245,7 @@ export function useSubmitProductOrder() {
       await api.post(`/api/v1/productOrder/orders/${id}/submit`)
     },
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(id) })
     },
   })
 }
@@ -257,7 +257,7 @@ export function useApproveProductOrder() {
       await api.post(`/api/v1/productOrder/orders/${id}/approve`)
     },
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(id) })
     },
   })
 }
@@ -269,7 +269,7 @@ export function useCancelProductOrder() {
       await api.post(`/api/v1/productOrder/orders/${id}/cancel`, { orderId: id, reason } as Record<string, unknown>)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.detail(variables.id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(variables.id) })
     },
   })
 }
@@ -282,7 +282,7 @@ export function useValidateProductOrder() {
       return res.data
     },
     onSuccess: (_data, id) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.detail(id) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.detail(id) })
     },
   })
 }
@@ -295,7 +295,7 @@ export function useAcknowledgeProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/acknowledge`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -307,7 +307,7 @@ export function useStartProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/start`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -319,7 +319,7 @@ export function useHoldProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/hold`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -331,7 +331,7 @@ export function useResumeProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/resume`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -343,7 +343,7 @@ export function useAssessProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/assess`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -355,7 +355,7 @@ export function useRejectProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/reject`, { reason } as Record<string, unknown>)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -367,7 +367,7 @@ export function useCompleteProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/complete`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -379,7 +379,7 @@ export function useFailProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/fail`, { error } as Record<string, unknown>)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -391,7 +391,7 @@ export function useCancelProductOrderItem() {
       await api.post(`/api/v1/productOrder/${orderId}/items/${itemId}/cancel`)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.all })
     },
   })
 }
@@ -414,7 +414,7 @@ export function useAddProductOrderRelationship() {
       } as Record<string, unknown>)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.relationships(variables.orderId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.relationships(variables.orderId) })
     },
   })
 }
@@ -426,7 +426,7 @@ export function useRemoveProductOrderRelationship() {
       await api.delete(`/api/v1/productOrder/${orderId}/relationships/${relationshipId}`)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.relationships(variables.orderId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.relationships(variables.orderId) })
     },
   })
 }
@@ -449,7 +449,7 @@ export function useCreateProductOrderMilestone() {
       } as Record<string, unknown>)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.milestones(variables.orderId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.milestones(variables.orderId) })
     },
   })
 }
@@ -469,7 +469,7 @@ export function useUpdateProductOrderMilestone() {
       } as Record<string, unknown>)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.milestones(variables.orderId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.milestones(variables.orderId) })
     },
   })
 }
@@ -481,7 +481,7 @@ export function useRemoveProductOrderMilestone() {
       await api.delete(`/api/v1/productOrder/${orderId}/milestones/${milestoneId}`)
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.productOrders.milestones(variables.orderId) })
+      queryClient.invalidateQueries({ queryKey: queryKeys.orders.milestones(variables.orderId) })
     },
   })
 }

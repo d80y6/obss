@@ -14,9 +14,13 @@ public sealed class WebhookEventRepository : EfRepository<WebhookEvent>, IWebhoo
 
     public async Task<IReadOnlyList<WebhookEvent>> GetPendingEventsAsync(CancellationToken cancellationToken = default)
     {
+        var now = DateTime.UtcNow;
+
         return await DbSet
-            .Where(e => e.Status == "pending" || (e.Status == "failed" && e.RetryCount < 3))
+            .Where(e => e.Status == "pending"
+                || (e.Status == "failed" && e.NextAttemptAt != null && e.NextAttemptAt <= now))
             .OrderBy(e => e.CreatedAt)
+            .Take(50)
             .ToListAsync(cancellationToken);
     }
 }

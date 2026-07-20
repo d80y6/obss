@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Obss.SharedKernel.Application.Abstractions;
@@ -7,10 +6,8 @@ namespace Obss.SharedKernel.Infrastructure.Services;
 
 public sealed class CurrentTenantService : ICurrentTenant
 {
-    private const string TenantIdHeader = "X-Tenant-Id";
-
     private readonly ICurrentUser _currentUser;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly ITenantStore _tenantStore;
     private readonly IMemoryCache _cache;
     private readonly ILogger<CurrentTenantService> _logger;
 
@@ -18,34 +15,17 @@ public sealed class CurrentTenantService : ICurrentTenant
 
     public CurrentTenantService(
         ICurrentUser currentUser,
-        IHttpContextAccessor httpContextAccessor,
+        ITenantStore tenantStore,
         IMemoryCache cache,
         ILogger<CurrentTenantService> logger)
     {
         _currentUser = currentUser;
-        _httpContextAccessor = httpContextAccessor;
+        _tenantStore = tenantStore;
         _cache = cache;
         _logger = logger;
     }
 
-    public string? TenantId
-    {
-        get
-        {
-            var tenantId = _currentUser.TenantId;
-
-            if (string.IsNullOrEmpty(tenantId))
-            {
-                var httpContext = _httpContextAccessor.HttpContext;
-                if (httpContext?.Request.Headers.TryGetValue(TenantIdHeader, out var headerValues) == true)
-                {
-                    tenantId = headerValues.FirstOrDefault();
-                }
-            }
-
-            return tenantId;
-        }
-    }
+    public string? TenantId => _currentUser.TenantId;
 
     public string? Name
     {
@@ -100,31 +80,24 @@ public sealed class CurrentTenantService : ICurrentTenant
             entry.SlidingExpiration = TimeSpan.FromMinutes(5);
 
             _logger.LogDebug("Loading tenant info for tenant {TenantId}", tenantId);
-            return LoadTenantFromDatabase(tenantId);
+            return LoadTenantFromStoreAsync(tenantId).GetAwaiter().GetResult();
         });
 
         return _cachedTenant;
     }
 
-    private TenantInfo? LoadTenantFromDatabase(string tenantId)
+    private async Task<TenantInfo?> LoadTenantFromStoreAsync(string tenantId)
     {
-        _logger.LogInformation("Loading tenant {TenantId} from database", tenantId);
+        _logger.LogInformation("Loading tenant {TenantId} from store", tenantId);
 
-        return new TenantInfo
+        var tenant = await _tenantStore.GetTenantAsync(tenantId);
+
+        if (tenant is null)
         {
-            Id = tenantId,
-            Name = tenantId,
-            IsReseller = false,
-            IsActive = true
-        };
-    }
+            _logger.LogWarning("Tenant {TenantId} not found in store", tenantId);
+            return null;
+        }
 
-    private sealed class TenantInfo
-    {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-        public string? ConnectionString { get; set; } = null;
-        public bool IsReseller { get; set; }
-        public bool IsActive { get; set; }
+        return tenant;
     }
 }

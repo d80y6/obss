@@ -4,6 +4,8 @@ namespace Obss.EventManagement.Domain.Entities;
 
 public class WebhookEvent : AggregateRoot<Guid>
 {
+    private const int _maxRetryCount = 5;
+
     private WebhookEvent() { }
 
     public WebhookEvent(
@@ -31,17 +33,34 @@ public class WebhookEvent : AggregateRoot<Guid>
     public DateTime CreatedAt { get; private set; }
     public DateTime? DeliveredAt { get; private set; }
     public string? LastError { get; private set; }
+    public DateTime? NextAttemptAt { get; private set; }
 
     public void MarkDelivered()
     {
         Status = "delivered";
         DeliveredAt = DateTime.UtcNow;
+        NextAttemptAt = null;
     }
 
     public void MarkFailed(string error)
     {
-        Status = "failed";
-        LastError = error;
         RetryCount++;
+        LastError = error;
+
+        if (RetryCount >= _maxRetryCount)
+        {
+            Status = "dead_letter";
+            NextAttemptAt = null;
+        }
+        else
+        {
+            Status = "failed";
+            NextAttemptAt = DateTime.UtcNow.AddSeconds(CalculateBackoff());
+        }
+    }
+
+    private double CalculateBackoff()
+    {
+        return Math.Min(Math.Pow(2, RetryCount) * 10, 300);
     }
 }

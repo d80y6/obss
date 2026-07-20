@@ -58,15 +58,17 @@ export const queryKeys = {
       [...queryKeys.offers.lists(), filters] as const,
     detail: (id: string) => [...queryKeys.offers.all, "detail", id] as const,
   },
-  productOrders: {
+  orders: {
     all: ["orders", "product-orders"] as const,
-    lists: () => [...queryKeys.productOrders.all, "list"] as const,
+    lists: () => [...queryKeys.orders.all, "list"] as const,
     list: (filters: Record<string, string> = {}) =>
-      [...queryKeys.productOrders.lists(), filters] as const,
-    details: () => [...queryKeys.productOrders.all, "detail"] as const,
-    detail: (id: string) => [...queryKeys.productOrders.details(), id] as const,
-    relationships: (id: string) => [...queryKeys.productOrders.detail(id), "relationships"] as const,
-    milestones: (id: string) => [...queryKeys.productOrders.detail(id), "milestones"] as const,
+      [...queryKeys.orders.lists(), filters] as const,
+    details: () => [...queryKeys.orders.all, "detail"] as const,
+    detail: (id: string) => [...queryKeys.orders.details(), id] as const,
+    relationships: (id: string) => [...queryKeys.orders.detail(id), "relationships"] as const,
+    milestones: (id: string) => [...queryKeys.orders.detail(id), "milestones"] as const,
+    timeline: (id: string) => [...queryKeys.orders.detail(id), "timeline"] as const,
+    fulfillment: (id: string) => [...queryKeys.orders.detail(id), "fulfillment"] as const,
   },
   subscriptions: {
     all: ["subscriptions"] as const,

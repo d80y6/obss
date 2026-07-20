@@ -425,7 +425,8 @@
           "Microsoft.Extensions.Hosting.Abstractions": "[9.0.4, )",
           "Microsoft.Extensions.Logging.Abstractions": "[9.0.4, )",
           "Obss.Billing.Application": "[1.0.0, )",
-          "Obss.Invoices.Domain": "[1.0.0, )"
+          "Obss.Invoices.Domain": "[1.0.0, )",
+          "QuestPDF": "[2024.12.0, )"
         }
       },
       "obss.invoices.domain": {
@@ -748,6 +749,12 @@
           "StackExchange.Redis": "[2.6.122, 3.0.0)",
           "System.Reflection.Emit.Lightweight": "4.7.0"
         }
+      },
+      "QuestPDF": {
+        "type": "CentralTransitive",
+        "requested": "[2024.12.0, )",
+        "resolved": "2024.12.0",
+        "contentHash": "Yn7jQyaJdbCsU05IG5qZijKrIJAREzZ7QgbMfppcmuHOwdzkPyW1WvJXScu7keuzhtPXjTZjOXFLDwo9YSU+FQ=="
       },
       "RabbitMQ.Client": {
         "type": "CentralTransitive",

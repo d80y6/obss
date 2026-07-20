@@ -48,6 +48,11 @@ namespace Obss.Invoices.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("customer_id");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid")
                         .HasColumnName("invoice_id");
@@ -122,6 +127,11 @@ namespace Obss.Invoices.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("InvoiceLineId")
                         .HasColumnType("uuid")
@@ -202,6 +212,21 @@ namespace Obss.Invoices.Infrastructure.Persistence.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("amount_paid");
 
+                    b.Property<string>("AtBaseType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_base_type");
+
+                    b.Property<string>("AtSchemaLocation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("at_schema_location");
+
+                    b.Property<string>("AtType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_type");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -242,9 +267,19 @@ namespace Obss.Invoices.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("due_date");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
                     b.Property<decimal>("GrandTotal")
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("grand_total");
+
+                    b.Property<string>("Href")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("href");
 
                     b.Property<DateTime>("InvoiceDate")
                         .HasColumnType("timestamp with time zone")
@@ -416,6 +451,11 @@ namespace Obss.Invoices.Infrastructure.Persistence.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid")
@@ -647,6 +687,52 @@ namespace Obss.Invoices.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_dispute_attachments_invoice_disputes_invoice_dispute_id");
+                });
+
+            modelBuilder.Entity("Obss.Invoices.Domain.Entities.Invoice", b =>
+                {
+                    b.OwnsMany("Obss.Invoices.Domain.Entities.RelatedParty", "RelatedParties", b1 =>
+                        {
+                            b1.Property<Guid>("invoice_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("invoice_id");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("PartyId")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("party_id");
+
+                            b1.Property<string>("PartyName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("party_name");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("role");
+
+                            b1.HasKey("invoice_id", "Id")
+                                .HasName("pk_invoice_related_parties");
+
+                            b1.ToTable("invoice_related_parties", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("invoice_id")
+                                .HasConstraintName("fk_invoice_related_parties_invoices_invoice_id");
+                        });
+
+                    b.Navigation("RelatedParties");
                 });
 
             modelBuilder.Entity("Obss.Invoices.Domain.Entities.InvoiceLine", b =>

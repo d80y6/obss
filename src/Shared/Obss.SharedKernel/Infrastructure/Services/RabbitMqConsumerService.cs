@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Domain.Events;
+using Obss.SharedKernel.Infrastructure.Diagnostics;
 using Obss.SharedKernel.Infrastructure.EventBus;
 using Obss.SharedKernel.Infrastructure.Serialization;
 using RabbitMQ.Client;
@@ -15,19 +16,24 @@ namespace Obss.SharedKernel.Infrastructure.Services;
 
 public sealed class RabbitMqConsumerService : BackgroundService
 {
+    private const int _maxRetryCount = 3;
+
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly IOptions<RabbitMqConfiguration> _rabbitMqConfiguration;
     private readonly ILogger<RabbitMqConsumerService> _logger;
+    private readonly RabbitMqMetrics _metrics;
     private readonly Dictionary<string, Type> _eventTypes;
 
     public RabbitMqConsumerService(
         IServiceScopeFactory scopeFactory,
         IOptions<RabbitMqConfiguration> rabbitMqConfiguration,
-        ILogger<RabbitMqConsumerService> logger)
+        ILogger<RabbitMqConsumerService> logger,
+        RabbitMqMetrics metrics)
     {
         _scopeFactory = scopeFactory;
         _rabbitMqConfiguration = rabbitMqConfiguration;
         _logger = logger;
+        _metrics = metrics;
         _eventTypes = DiscoverEventTypes();
     }
 
@@ -75,16 +81,48 @@ public sealed class RabbitMqConsumerService : BackgroundService
         await using var connection = await factory.CreateConnectionAsync(stoppingToken);
         await using var channel = await connection.CreateChannelAsync(cancellationToken: stoppingToken);
 
-        var queueName = $"obss_integration_events_{Guid.NewGuid():N}";
+        var mainQueueName = "obss_integration_events";
+        var dlxExchangeName = "obss_integration_events.dlx";
+        var dlxQueueName = "obss_integration_events.dlq";
 
-        var queueDeclareOk = await channel.QueueDeclareAsync(
-            queue: queueName,
-            durable: false,
-            exclusive: false,
-            autoDelete: true,
+        await channel.ExchangeDeclareAsync(
+            exchange: dlxExchangeName,
+            type: ExchangeType.Direct,
+            durable: true,
+            autoDelete: false,
             cancellationToken: stoppingToken);
 
-        _logger.LogInformation("Declared queue {QueueName}", queueDeclareOk.QueueName);
+        await channel.QueueDeclareAsync(
+            queue: dlxQueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: new Dictionary<string, object?>(),
+            cancellationToken: stoppingToken);
+
+        await channel.QueueBindAsync(
+            queue: dlxQueueName,
+            exchange: dlxExchangeName,
+            routingKey: "dead-letter",
+            cancellationToken: stoppingToken);
+
+        _logger.LogInformation("Declared dead-letter queue {DlxQueueName}", dlxQueueName);
+
+        var mainQueueArgs = new Dictionary<string, object?>
+        {
+            { "x-dead-letter-exchange", dlxExchangeName },
+            { "x-dead-letter-routing-key", "dead-letter" }
+        };
+
+        await channel.QueueDeclareAsync(
+            queue: mainQueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: mainQueueArgs,
+            cancellationToken: stoppingToken);
+
+        _logger.LogInformation("Declared main queue {MainQueueName} with DLX", mainQueueName);
 
         foreach (var (eventTypeName, _) in _eventTypes)
         {
@@ -98,12 +136,12 @@ public sealed class RabbitMqConsumerService : BackgroundService
                 cancellationToken: stoppingToken);
 
             await channel.QueueBindAsync(
-                queue: queueDeclareOk.QueueName,
+                queue: mainQueueName,
                 exchange: exchangeName,
                 routingKey: eventTypeName,
                 cancellationToken: stoppingToken);
 
-            _logger.LogDebug("Bound queue {QueueName} to exchange {Exchange}", queueDeclareOk.QueueName, exchangeName);
+            _logger.LogDebug("Bound queue {QueueName} to exchange {Exchange}", mainQueueName, exchangeName);
         }
 
         _logger.LogInformation(
@@ -114,7 +152,7 @@ public sealed class RabbitMqConsumerService : BackgroundService
         consumer.ReceivedAsync += (_, ea) => ProcessMessageAsync(ea, channel, stoppingToken);
 
         await channel.BasicConsumeAsync(
-            queue: queueDeclareOk.QueueName,
+            queue: mainQueueName,
             autoAck: false,
             consumer: consumer,
             cancellationToken: stoppingToken);
@@ -138,10 +176,12 @@ public sealed class RabbitMqConsumerService : BackgroundService
     {
         var eventTypeName = ea.RoutingKey;
         var messageId = ea.BasicProperties?.MessageId ?? Guid.NewGuid().ToString();
+        var retryCount = ExtractRetryCount(ea);
+
         if (!_eventTypes.TryGetValue(eventTypeName, out var eventType))
         {
-            _logger.LogWarning("Unknown event type: {EventType}", eventTypeName);
-            await TryAckAsync(ea, channel);
+            _logger.LogWarning("Unknown event type: {EventType} - sending to dead-letter", eventTypeName);
+            await TryNackAsync(ea, channel, requeue: false);
             return;
         }
 
@@ -150,14 +190,13 @@ public sealed class RabbitMqConsumerService : BackgroundService
 
         if (integrationEvent is null)
         {
-            _logger.LogError("Failed to deserialize event {EventType}: {Body}", eventTypeName, body);
-            await TryAckAsync(ea, channel);
+            _logger.LogError("Failed to deserialize event {EventType} - sending to dead-letter", eventTypeName);
+            await TryNackAsync(ea, channel, requeue: false);
             return;
         }
 
         using var scope = _scopeFactory.CreateScope();
         var inboxService = scope.ServiceProvider.GetRequiredService<IInboxService>();
-
         var handlerName = integrationEvent.EventType;
 
         var alreadyProcessed = await inboxService.IsProcessedAsync(messageId, handlerName, cancellationToken);
@@ -167,6 +206,8 @@ public sealed class RabbitMqConsumerService : BackgroundService
             await TryAckAsync(ea, channel);
             return;
         }
+
+        _metrics.MessageConsumed();
 
         try
         {
@@ -178,15 +219,47 @@ public sealed class RabbitMqConsumerService : BackgroundService
             _logger.LogInformation(
                 "Processed integration event {EventType}/{MessageId}",
                 eventTypeName, messageId);
+
+            await TryAckAsync(ea, channel);
         }
         catch (Exception ex)
         {
+            _metrics.MessageFailed();
+
             _logger.LogError(ex,
-                "Failed to process integration event {EventType}/{MessageId}",
-                eventTypeName, messageId);
+                "Failed to process integration event {EventType}/{MessageId} (retry {RetryCount}/{MaxRetryCount})",
+                eventTypeName, messageId, retryCount, _maxRetryCount);
+
+            if (retryCount >= _maxRetryCount)
+            {
+                _metrics.MessageDeadLettered();
+
+                _logger.LogWarning(
+                    "Event {EventType}/{MessageId} exceeded max retries - sending to dead-letter",
+                    eventTypeName, messageId);
+
+                await TryNackAsync(ea, channel, requeue: false);
+            }
+            else
+            {
+                _metrics.MessageRetried();
+
+                await TryNackAsync(ea, channel, requeue: true);
+            }
+        }
+    }
+
+    private static int ExtractRetryCount(BasicDeliverEventArgs ea)
+    {
+        if (ea.BasicProperties?.Headers is not null &&
+            ea.BasicProperties.Headers.TryGetValue("x-retry-count", out var retryObj) &&
+            retryObj is byte[] retryBytes &&
+            int.TryParse(Encoding.UTF8.GetString(retryBytes), out var count))
+        {
+            return count;
         }
 
-        await TryAckAsync(ea, channel);
+        return 0;
     }
 
     private static async Task TryAckAsync(BasicDeliverEventArgs ea, IChannel channel)
@@ -198,6 +271,18 @@ public sealed class RabbitMqConsumerService : BackgroundService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to ack message: {ex.Message}");
+        }
+    }
+
+    private static async Task TryNackAsync(BasicDeliverEventArgs ea, IChannel channel, bool requeue)
+    {
+        try
+        {
+            await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: requeue);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to nack message: {ex.Message}");
         }
     }
 

@@ -17,6 +17,7 @@
     <PackageReference Include="Mapster" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="QuestPDF" />
   </ItemGroup>
 
 </Project>

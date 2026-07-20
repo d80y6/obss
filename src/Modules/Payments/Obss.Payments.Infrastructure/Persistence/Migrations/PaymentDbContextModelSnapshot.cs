@@ -33,6 +33,23 @@ namespace Obss.Payments.Infrastructure.Persistence.Migrations
                         .HasColumnType("numeric(18,2)")
                         .HasColumnName("amount");
 
+                    b.Property<string>("AtBaseType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_base_type");
+
+                    b.Property<string>("AtSchemaLocation")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("at_schema_location");
+
+                    b.Property<string>("AtType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("at_type");
+
                     b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("completed_at");
@@ -50,6 +67,16 @@ namespace Obss.Payments.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid")
                         .HasColumnName("customer_id");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("Href")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("href");
 
                     b.Property<Guid?>("InvoiceId")
                         .HasColumnType("uuid")
@@ -135,6 +162,11 @@ namespace Obss.Payments.Infrastructure.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid")
@@ -454,6 +486,11 @@ namespace Obss.Payments.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<string>("ExternalId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("external_id");
+
                     b.Property<Guid>("PaymentId")
                         .HasColumnType("uuid")
                         .HasColumnName("payment_id");
@@ -580,6 +617,52 @@ namespace Obss.Payments.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_outbox_messages_processed_at");
 
                     b.ToTable("outbox_messages", (string)null);
+                });
+
+            modelBuilder.Entity("Obss.Payments.Domain.Entities.Payment", b =>
+                {
+                    b.OwnsMany("Obss.Payments.Domain.Entities.RelatedParty", "RelatedParties", b1 =>
+                        {
+                            b1.Property<Guid>("payment_id")
+                                .HasColumnType("uuid")
+                                .HasColumnName("payment_id");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("PartyId")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("party_id");
+
+                            b1.Property<string>("PartyName")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("character varying(200)")
+                                .HasColumnName("party_name");
+
+                            b1.Property<string>("Role")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("character varying(50)")
+                                .HasColumnName("role");
+
+                            b1.HasKey("payment_id", "Id")
+                                .HasName("pk_payment_related_parties");
+
+                            b1.ToTable("payment_related_parties", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("payment_id")
+                                .HasConstraintName("fk_payment_related_parties_payments_payment_id");
+                        });
+
+                    b.Navigation("RelatedParties");
                 });
 
             modelBuilder.Entity("Obss.Payments.Domain.Entities.PaymentAllocation", b =>
