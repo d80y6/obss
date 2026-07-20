@@ -65,33 +65,46 @@ public sealed class ProvisioningJobProcessor : BackgroundService
                             var result = await adapter.ExecuteAsync(task, cts.Token);
                             var elapsed = (DateTime.UtcNow - startedAt).TotalMilliseconds;
 
-                            if (result.Success)
+                            switch (result.State)
                             {
-                                if (result.ResultData is not null)
-                                {
-                                    task.Complete(JsonSerializer.Deserialize<JsonDocument>(result.ResultData));
-                                }
-                                else
-                                {
-                                    task.Complete();
-                                }
+                                case ProvisioningState.Success:
+                                case ProvisioningState.PendingVendorConfirmation:
+                                    if (result.ResultData is not null)
+                                    {
+                                        task.Complete(JsonSerializer.Deserialize<JsonDocument>(result.ResultData));
+                                    }
+                                    else
+                                    {
+                                        task.Complete();
+                                    }
 
-                                _metrics.TaskCompleted();
-                                _metrics.RecordTaskDuration(elapsed);
+                                    _metrics.TaskCompleted();
+                                    _metrics.RecordTaskDuration(elapsed);
 
-                                _logger.LogInformation(
-                                    "Task {TaskId} ({TaskType}) completed via adapter {Adapter}",
-                                    task.Id, task.TaskType, adapter.AdapterName);
-                            }
-                            else
-                            {
-                                task.Fail(result.ErrorMessage ?? "Unknown error");
-                                _metrics.TaskFailed();
-                                _metrics.RecordTaskDuration(elapsed);
+                                    _logger.LogInformation(
+                                        "Task {TaskId} ({TaskType}) completed via adapter {Adapter} (state: {State})",
+                                        task.Id, task.TaskType, adapter.AdapterName, result.State);
+                                    break;
 
-                                _logger.LogWarning(
-                                    "Task {TaskId} ({TaskType}) failed via adapter {Adapter}: {Error}",
-                                    task.Id, task.TaskType, adapter.AdapterName, result.ErrorMessage);
+                                case ProvisioningState.BlockedNeedsOperator:
+                                    task.Fail($"BLOCKED - needs operator intervention: {result.ErrorMessage}");
+                                    _metrics.TaskFailed();
+                                    _metrics.RecordTaskDuration(elapsed);
+
+                                    _logger.LogWarning(
+                                        "Task {TaskId} ({TaskType}) blocked via adapter {Adapter}: {Error}",
+                                        task.Id, task.TaskType, adapter.AdapterName, result.ErrorMessage);
+                                    break;
+
+                                default:
+                                    task.Fail(result.ErrorMessage ?? "Unknown error");
+                                    _metrics.TaskFailed();
+                                    _metrics.RecordTaskDuration(elapsed);
+
+                                    _logger.LogWarning(
+                                        "Task {TaskId} ({TaskType}) failed via adapter {Adapter}: {Error}",
+                                        task.Id, task.TaskType, adapter.AdapterName, result.ErrorMessage);
+                                    break;
                             }
                         }
 
@@ -129,9 +142,10 @@ public sealed class ProvisioningJobProcessor : BackgroundService
         }
     }
 
-    private static IProvisioningAdapter? ResolveAdapter(IEnumerable<IProvisioningAdapter> adapters, ProvisioningTask task)
+    private IProvisioningAdapter? ResolveAdapter(IEnumerable<IProvisioningAdapter> adapters, ProvisioningTask task)
     {
         var adapterList = adapters.ToList();
+        var adapterRegistry = _serviceProvider.GetService<IAdapterRegistry>();
 
         if (!string.IsNullOrWhiteSpace(task.AssignedTo))
         {
@@ -139,6 +153,24 @@ public sealed class ProvisioningJobProcessor : BackgroundService
                 a.AdapterName.Equals(task.AssignedTo, StringComparison.OrdinalIgnoreCase));
             if (named is not null)
                 return named;
+        }
+
+        var technologyType = TryGetTechnologyType(task);
+        if (technologyType is not null && AdapterTypeConstants.TechnologyMapping.TryGetValue(technologyType, out var mappedAdapter))
+        {
+            var registryAdapter = adapterRegistry?.GetAdapter(technologyType, mappedAdapter);
+            if (registryAdapter is not null)
+            {
+                _logger.LogInformation(
+                    "Resolved {TechnologyType} to adapter {AdapterName} via adapter registry",
+                    technologyType, registryAdapter.AdapterName);
+                return registryAdapter;
+            }
+
+            var namedAdapter = adapterList.FirstOrDefault(a =>
+                a.AdapterName.Equals(mappedAdapter, StringComparison.OrdinalIgnoreCase));
+            if (namedAdapter is not null)
+                return namedAdapter;
         }
 
         var supportedTypes = task.TaskType switch
@@ -149,8 +181,38 @@ public sealed class ProvisioningJobProcessor : BackgroundService
             _ => "TestAdapter"
         };
 
-        return adapterList.FirstOrDefault(a =>
+        var fallback = adapterList.FirstOrDefault(a =>
             a.AdapterName.Equals(supportedTypes, StringComparison.OrdinalIgnoreCase))
             ?? adapterList.FirstOrDefault(a => a.AdapterName == "TestAdapter");
+
+        if (fallback is not null && supportedTypes == "TestAdapter")
+        {
+            _logger.LogWarning(
+                "No specific adapter found for task {TaskId} ({TaskType}, technology={Technology}), falling back to TestAdapter (will return BLOCKED)",
+                task.Id, task.TaskType, technologyType);
+        }
+
+        return fallback;
+    }
+
+    private static string? TryGetTechnologyType(ProvisioningTask task)
+    {
+        if (task.Configuration is null)
+            return null;
+
+        try
+        {
+            var config = task.Configuration.RootElement;
+            if (config.TryGetProperty("serviceType", out var st))
+                return st.GetString()?.ToUpperInvariant();
+            if (config.TryGetProperty("technologyType", out var tt))
+                return tt.GetString()?.ToUpperInvariant();
+        }
+        catch
+        {
+            // Swallow - best-effort parsing of optional configuration
+        }
+
+        return null;
     }
 }

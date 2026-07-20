@@ -9,10 +9,12 @@ namespace Obss.Provisioning.Infrastructure.Services;
 public sealed class NetworkProvisioningAdapter : IProvisioningAdapter
 {
     private readonly ILogger<NetworkProvisioningAdapter> _logger;
+    private readonly string _subnetMask;
 
-    public NetworkProvisioningAdapter(ILogger<NetworkProvisioningAdapter> logger)
+    public NetworkProvisioningAdapter(ILogger<NetworkProvisioningAdapter> logger, string subnetMask = "255.255.255.0")
     {
         _logger = logger;
+        _subnetMask = subnetMask;
     }
 
     public string AdapterName => "NetworkAdapter";
@@ -52,23 +54,10 @@ public sealed class NetworkProvisioningAdapter : IProvisioningAdapter
         var serviceType = config.TryGetProperty("serviceType", out var st) ? st.GetString() : "unknown";
         var speed = config.TryGetProperty("speedMbps", out var sp) ? sp.GetInt32() : 100;
 
-        _logger.LogInformation("Configuring network for {ServiceType} at {Speed} Mbps", serviceType, speed);
+        _logger.LogInformation("Configuring network for {ServiceType} at {Speed} Mbps - vendor confirmation required", serviceType, speed);
 
-        var routerId = Guid.NewGuid();
-        var portId = Guid.NewGuid();
-        var vlanId = new Random().Next(100, 4000);
-
-        return Task.FromResult(ProvisioningResult.Ok(
-            JsonSerializer.Serialize(new
-            {
-                routerId,
-                portId,
-                vlanId,
-                serviceType,
-                configuredSpeed = speed,
-                status = "active",
-                configApplied = true
-            }),
+        return Task.FromResult(ProvisioningResult.Blocked(
+            $"Network configuration for {serviceType} at {speed} Mbps requires vendor confirmation - adapter cannot complete without real network element",
             TimeSpan.FromMilliseconds(150)));
     }
 
@@ -81,21 +70,10 @@ public sealed class NetworkProvisioningAdapter : IProvisioningAdapter
         var bandwidth = config.TryGetProperty("bandwidthMbps", out var bw) ? bw.GetInt32() : 1000;
         var ipCount = config.TryGetProperty("ipAddresses", out var ipc) ? ipc.GetInt32() : 1;
 
-        _logger.LogInformation("Allocating resources: {Bandwidth} Mbps, {IPCount} IPs", bandwidth, ipCount);
+        _logger.LogInformation("Resource allocation requires vendor confirmation: {Bandwidth} Mbps, {IPCount} IPs", bandwidth, ipCount);
 
-        var ips = Enumerable.Range(0, ipCount)
-            .Select(i => $"10.0.{new Random().Next(1, 255)}.{new Random().Next(2, 254)}")
-            .ToList();
-
-        return Task.FromResult(ProvisioningResult.Ok(
-            JsonSerializer.Serialize(new
-            {
-                allocated = true,
-                bandwidthMbps = bandwidth,
-                ipAddresses = ips,
-                subnetMask = "255.255.255.0",
-                gateway = $"10.0.{new Random().Next(1, 255)}.1"
-            }),
+        return Task.FromResult(ProvisioningResult.Blocked(
+            $"Resource allocation ({bandwidth} Mbps, {ipCount} IPs, subnet {_subnetMask}) requires vendor network element confirmation",
             TimeSpan.FromMilliseconds(200)));
     }
 

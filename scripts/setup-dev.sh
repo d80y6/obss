@@ -91,7 +91,7 @@ if [ -f "$ROOT_DIR/.env" ]; then
 fi
 
 cd "$ROOT_DIR" || exit 1
-$DOCKER_COMPOSE up -d --wait 2>&1 | while IFS= read -r line; do
+HOST_IP=$(hostname -I | awk '{print $1}') $DOCKER_COMPOSE up -d --wait 2>&1 | while IFS= read -r line; do
     log_info "  docker: $line"
 done
 
@@ -192,6 +192,14 @@ if [ -f "$SEED_SCRIPT" ]; then
     log_ok "Seed data applied successfully."
 else
     log_warn "Seed script not found at $SEED_SCRIPT. Skipping."
+fi
+
+# ── Apply Yemen PTC Catalog ───────────────────────────────────────────────────
+YEMEN_CATALOG="$ROOT_DIR/infrastructure/database/seed/yemen-ptc-catalog.sql"
+if [ -f "$YEMEN_CATALOG" ]; then
+    log_info "Loading Yemen PTC catalog..."
+    docker exec -i obss-postgres psql -U "$POSTGRES_USER" -d obss_catalog < "$YEMEN_CATALOG"
+    log_ok "Yemen PTC catalog applied."
 fi
 
 # ── Step 6: Build Solution ───────────────────────────────────────────────────

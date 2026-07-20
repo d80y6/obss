@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Obss.ServiceQualification.Application.Abstractions;
+using Obss.ServiceQualification.Domain.Abstractions;
 using Obss.ServiceQualification.Domain.Entities;
 using Obss.ServiceQualification.Domain.ValueObjects;
 using Obss.ServiceQualification.Infrastructure.Persistence;

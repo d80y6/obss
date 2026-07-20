@@ -57,33 +57,38 @@ public sealed class Money : ValueObject
 
 public sealed class Currency : ValueObject
 {
-    public static readonly Currency Usd = new("USD", "US Dollar", 2, "840");
-    public static readonly Currency Yer = new("YER", "Yemeni Rial", 2, "886");
+    public static readonly Currency Usd = new("USD", "US Dollar", "دولار أمريكي", 2, "840", "en-US");
+    public static readonly Currency Yer = new("YER", "Yemeni Rial", "ريال يمني", 2, "886", "ar-YE");
+    public static readonly Currency Sar = new("SAR", "Saudi Riyal", "ريال سعودي", 2, "682", "ar-SA");
 
-    private Currency(string code, string name, int decimalPlaces, string numericCode)
+    private static readonly Dictionary<string, Currency> _all = new()
+    {
+        [Usd.Code] = Usd,
+        [Yer.Code] = Yer,
+        [Sar.Code] = Sar,
+    };
+
+    private Currency(string code, string name, string nameAr, int decimalPlaces, string numericCode, string defaultCulture)
     {
         Code = code;
         Name = name;
+        NameAr = nameAr;
         DecimalPlaces = decimalPlaces;
         NumericCode = numericCode;
+        DefaultCulture = defaultCulture;
     }
 
     public string Code { get; }
     public string Name { get; }
+    public string NameAr { get; }
     public int DecimalPlaces { get; }
     public string NumericCode { get; }
+    public string DefaultCulture { get; }
 
     public static Currency FromCode(string code)
-    {
-        return code.ToUpperInvariant() switch
-        {
-            "USD" => Usd,
-            "YER" => Yer,
-            _ => throw new ArgumentException($"Unsupported currency code: {code}", nameof(code))
-        };
-    }
+        => _all.TryGetValue(code.ToUpperInvariant(), out var currency) ? currency : Yer;
 
-    public static IReadOnlyCollection<Currency> GetAll() => [Usd, Yer];
+    public static IReadOnlyCollection<Currency> GetAll() => [.. _all.Values];
 
     protected override IEnumerable<object> GetEqualityComponents()
     {

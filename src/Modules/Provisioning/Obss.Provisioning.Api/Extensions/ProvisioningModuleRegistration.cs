@@ -8,6 +8,7 @@ using Obss.Provisioning.Application.Diagnostics;
 using Obss.Provisioning.Application.Mappings;
 using Obss.Provisioning.Infrastructure.Persistence;
 using Obss.Provisioning.Infrastructure.Persistence.Repositories;
+using Obss.Provisioning.Infrastructure.Adapters.Common;
 using Obss.Provisioning.Infrastructure.Services;
 
 namespace Obss.Provisioning.Api.Extensions;
@@ -21,6 +22,7 @@ public static class ProvisioningModuleRegistration
         services.AddScoped<IServiceOrderRepository, ServiceOrderRepository>();
 
         services.AddSingleton<ProvisioningMetrics>();
+        services.AddSingleton<IAdapterRegistry, AdapterRegistry>();
         services.AddScoped<IProvisioningAdapter, NetworkProvisioningAdapter>();
         services.AddScoped<IProvisioningAdapter, DnsSetupAdapter>();
         services.AddScoped<IProvisioningAdapter, AccountSetupAdapter>();

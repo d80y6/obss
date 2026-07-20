@@ -26,7 +26,7 @@ export function toCreateCustomerCommand(form: CustomerFormData): CreateCustomerC
     phoneNumber: form.phone || null,
     countryCode: form.country || null,
     website: null,
-    currency: 'USD',
+    currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'YER',
   }
 }
 
@@ -79,7 +79,7 @@ export function toCreateOrderCommand(form: OrderFormData): CreateOrderCommand {
     shippingAddressState: null,
     shippingAddressPostalCode: null,
     shippingAddressCountry: null,
-    currency: 'USD',
+    currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'YER',
     items: form.items.map(item => ({
       productId: item.productId,
       offerId: item.offerId,
@@ -113,7 +113,7 @@ export function toRecordPaymentCommand(form: PaymentFormData) {
     amount: form.amount,
     paymentMethod: form.method,
     paymentReference: form.reference || null,
-    currency: 'USD',
+    currency: process.env.NEXT_PUBLIC_DEFAULT_CURRENCY || 'YER',
     notes: null,
   }
 }

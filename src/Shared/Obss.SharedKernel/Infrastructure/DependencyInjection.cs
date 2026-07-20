@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Application.Services;
 using Obss.SharedKernel.Infrastructure.Diagnostics;
 using Obss.SharedKernel.Infrastructure.EventBus;
 using Obss.SharedKernel.Infrastructure.Services;
@@ -44,6 +45,8 @@ public static class DependencyInjection
         services.TryAddSingleton<IEventBus, EventBusService>();
         services.TryAddScoped<IOutboxService, OutboxService>();
         services.TryAddScoped<IInboxService, InboxService>();
+        services.TryAddSingleton<ILocalizationService, LocalizationService>();
+        services.TryAddSingleton<ITimeZoneService, AdenTimeZoneService>();
 
         services.AddStackExchangeRedisCache(options =>
         {

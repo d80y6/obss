@@ -36,8 +36,8 @@ public sealed class AccountSetupAdapter : IProvisioningAdapter
 
         return task.TaskType switch
         {
-            ProvisioningTaskType.AccountSetup => Task.FromResult(ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { accountClosed = true }),
+            ProvisioningTaskType.AccountSetup => Task.FromResult(ProvisioningResult.Blocked(
+                "Account closure requires real billing system - adapter cannot compensate",
                 TimeSpan.FromMilliseconds(40))),
             _ => Task.FromResult(ProvisioningResult.Ok(
                 JsonSerializer.Serialize(new { compensated = true })))
@@ -53,22 +53,10 @@ public sealed class AccountSetupAdapter : IProvisioningAdapter
         var customerName = config.TryGetProperty("customerName", out var cn) ? cn.GetString() : "Unknown";
         var plan = config.TryGetProperty("plan", out var p) ? p.GetString() : "standard";
 
-        _logger.LogInformation("Creating billing account for {Customer} on {Plan} plan", customerName, plan);
+        _logger.LogInformation("Billing account creation for {Customer} on {Plan} plan requires billing system", customerName, plan);
 
-        var accountId = Guid.NewGuid();
-        var billingCycle = new Random().Next(1, 29);
-
-        return Task.FromResult(ProvisioningResult.Ok(
-            JsonSerializer.Serialize(new
-            {
-                accountId,
-                customerName,
-                plan,
-                billingCycleDay = billingCycle,
-                currency = "USD",
-                status = "active",
-                autoPay = false
-            }),
+        return Task.FromResult(ProvisioningResult.Blocked(
+            $"Billing account creation for {customerName} on {plan} plan requires real billing system integration",
             TimeSpan.FromMilliseconds(120)));
     }
 

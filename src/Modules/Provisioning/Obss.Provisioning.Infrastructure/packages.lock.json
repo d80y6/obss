@@ -244,7 +244,8 @@
           "MediatR": "[12.5.0, )",
           "Obss.CRM.Application": "[1.0.0, )",
           "Obss.Orders.Domain": "[1.0.0, )",
-          "Obss.ProductCatalog.Application": "[1.0.0, )"
+          "Obss.ProductCatalog.Application": "[1.0.0, )",
+          "Obss.Provisioning.Domain": "[1.0.0, )"
         }
       },
       "obss.orders.domain": {

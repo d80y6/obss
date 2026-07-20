@@ -259,6 +259,12 @@
           "Obss.SharedKernel": "[1.0.0, )"
         }
       },
+      "obss.provisioning.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Obss.SharedKernel": "[1.0.0, )"
+        }
+      },
       "obss.sharedkernel": {
         "type": "Project",
         "dependencies": {

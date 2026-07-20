@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Obss.Host.Middleware;
 
 public sealed class SecurityHeadersMiddleware
@@ -21,6 +23,29 @@ public sealed class SecurityHeadersMiddleware
         context.Response.Headers["Content-Security-Policy"] = _csp;
         context.Response.Headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
         context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+
+        if (context.Request.Path.StartsWithSegments("/api/auth/logout", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Headers["Clear-Site-Data"] = "\"cache\", \"cookies\", \"storage\", \"executionContexts\"";
+        }
+
+        if (context.User.Identity?.IsAuthenticated == true)
+        {
+            context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate";
+            context.Response.Headers["Pragma"] = "no-cache";
+            context.Response.Headers["Expires"] = "0";
+        }
+
+        context.Response.Headers["X-Permitted-Cross-Domain-Policies"] = "none";
+        context.Response.Headers["X-DNS-Prefetch-Control"] = "off";
+        context.Response.Headers["Cross-Origin-Opener-Policy"] = "same-origin";
+        context.Response.Headers["Cross-Origin-Resource-Policy"] = "same-origin";
+        context.Response.Headers["Cross-Origin-Embedder-Policy"] = "require-corp";
+        context.Response.Headers["Origin-Agent-Cluster"] = "?1";
+
+        context.Response.Headers.Remove("Server");
+        context.Response.Headers.Remove("X-AspNet-Version");
+        context.Response.Headers.Remove("X-Powered-By");
 
         await _next(context);
     }

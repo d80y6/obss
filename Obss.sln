@@ -263,6 +263,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.ServiceQualification.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obss.ServiceQualification.Api", "src\Modules\ServiceQualification\Obss.ServiceQualification.Api\Obss.ServiceQualification.Api.csproj", "{7C4867E2-4351-4DFE-864F-C5840C29C50C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflow.Tests", "Workflow.Tests", "{53E7EFAD-1293-25EE-F2A2-3B2D091215DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkflowIntegrationTests", "tests\Modules\Workflow.Tests\WorkflowIntegrationTests.csproj", "{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1413,6 +1417,18 @@ Global
 		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x64.Build.0 = Release|Any CPU
 		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x86.ActiveCfg = Release|Any CPU
 		{7C4867E2-4351-4DFE-864F-C5840C29C50C}.Release|x86.Build.0 = Release|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Debug|x64.Build.0 = Debug|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Debug|x86.Build.0 = Debug|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Release|x64.ActiveCfg = Release|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Release|x64.Build.0 = Release|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Release|x86.ActiveCfg = Release|Any CPU
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1543,5 +1559,7 @@ Global
 		{02515317-6FE0-4A3B-9EF3-762B3B45E63A} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
 		{1B8D849C-E733-4C9D-8738-25B0CA8B8C33} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
 		{7C4867E2-4351-4DFE-864F-C5840C29C50C} = {F993F516-5F07-89E4-0B12-C44DFA2A0798}
+		{53E7EFAD-1293-25EE-F2A2-3B2D091215DE} = {D7DC9B74-6BC4-2470-2038-1E57C2DCB73B}
+		{7ACD9418-04D6-4E86-BC02-BAB0E2FB9DDF} = {53E7EFAD-1293-25EE-F2A2-3B2D091215DE}
 	EndGlobalSection
 EndGlobal

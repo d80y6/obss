@@ -23,18 +23,18 @@ public sealed class TestProvisioningAdapter : IProvisioningAdapter
 
         var result = task.TaskType switch
         {
-            ProvisioningTaskType.NetworkConfig => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { configured = true, config = "default" })),
-            ProvisioningTaskType.ResourceAllocation => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { allocated = true, resourceId = Guid.NewGuid() })),
-            ProvisioningTaskType.AccountSetup => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { accountCreated = true, accountId = Guid.NewGuid() })),
+            ProvisioningTaskType.NetworkConfig => ProvisioningResult.Blocked(
+                "Network configuration requires vendor adapter - TestAdapter cannot complete this operation"),
+            ProvisioningTaskType.ResourceAllocation => ProvisioningResult.Blocked(
+                "Resource allocation requires vendor adapter - TestAdapter cannot complete this operation"),
+            ProvisioningTaskType.AccountSetup => ProvisioningResult.Blocked(
+                "Account setup requires billing system - TestAdapter cannot complete this operation"),
+            ProvisioningTaskType.DNSSetup => ProvisioningResult.Blocked(
+                "DNS setup requires DNS infrastructure adapter - TestAdapter cannot complete this operation"),
+            ProvisioningTaskType.PhysicalInstall => ProvisioningResult.Blocked(
+                "Physical install requires field operations - TestAdapter cannot complete this operation"),
             ProvisioningTaskType.EmailNotification => ProvisioningResult.Ok(
                 JsonSerializer.Serialize(new { notified = true, channel = "email" })),
-            ProvisioningTaskType.PhysicalInstall => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { installed = true })),
-            ProvisioningTaskType.DNSSetup => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { dnsConfigured = true })),
             ProvisioningTaskType.Custom => ProvisioningResult.Ok(
                 JsonSerializer.Serialize(new { customTask = true, processed = true })),
             _ => ProvisioningResult.Fail($"Unknown task type: {task.TaskType}")
@@ -49,12 +49,12 @@ public sealed class TestProvisioningAdapter : IProvisioningAdapter
 
         var result = task.TaskType switch
         {
-            ProvisioningTaskType.ResourceAllocation => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { deallocated = true })),
-            ProvisioningTaskType.NetworkConfig => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { reverted = true })),
-            ProvisioningTaskType.AccountSetup => ProvisioningResult.Ok(
-                JsonSerializer.Serialize(new { deleted = true })),
+            ProvisioningTaskType.ResourceAllocation => ProvisioningResult.Blocked(
+                "Resource deallocation requires vendor adapter - TestAdapter cannot compensate"),
+            ProvisioningTaskType.NetworkConfig => ProvisioningResult.Blocked(
+                "Network revert requires vendor adapter - TestAdapter cannot compensate"),
+            ProvisioningTaskType.AccountSetup => ProvisioningResult.Blocked(
+                "Account deletion requires billing system - TestAdapter cannot compensate"),
             _ => ProvisioningResult.Ok(JsonSerializer.Serialize(new { compensated = true }))
         };
 

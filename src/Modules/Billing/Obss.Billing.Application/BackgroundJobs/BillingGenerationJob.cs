@@ -2,8 +2,10 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Obss.Billing.Application.Abstractions;
 using Obss.Billing.Application.Commands.GenerateBill;
+using Obss.Billing.Application.Configuration;
 using Obss.Billing.Domain.Entities;
 
 namespace Obss.Billing.Application.BackgroundJobs;
@@ -12,14 +14,17 @@ public sealed class BillingGenerationJob : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<BillingGenerationJob> _logger;
+    private readonly IOptions<BillingConfiguration> _billingConfig;
     private readonly TimeSpan _checkInterval = TimeSpan.FromHours(24);
 
     public BillingGenerationJob(
         IServiceProvider serviceProvider,
-        ILogger<BillingGenerationJob> logger)
+        ILogger<BillingGenerationJob> logger,
+        IOptions<BillingConfiguration> billingConfig)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _billingConfig = billingConfig;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -68,7 +73,7 @@ public sealed class BillingGenerationJob : BackgroundService
                         periodStart,
                         periodEnd,
                         dueDate,
-                        "USD"),
+                        _billingConfig.Value.DefaultCurrency),
                     cancellationToken);
 
                 if (result.IsSuccess)

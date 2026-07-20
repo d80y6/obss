@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.CRM.Domain.ValueObjects;
+using Obss.SharedKernel.Domain.ValueObjects;
 
 namespace Obss.CRM.Api.Endpoints;
 
@@ -17,13 +18,12 @@ public static class LookupEndpoints
 
         group.MapGet("/lookups/currencies", () =>
         {
-            var currencies = new[]
+            var currencies = Currency.GetAll().Select(c => new
             {
-                new { value = "USD", label = "US Dollar" },
-                new { value = "YER", label = "Yemeni Rial" },
-                new { value = "SAR", label = "Saudi Riyal" },
-                new { value = "EUR", label = "Euro" },
-            };
+                value = c.Code,
+                label = c.Name,
+                labelAr = c.NameAr
+            });
             return TypedResults.Ok(currencies);
         }).AllowAnonymous();
     }

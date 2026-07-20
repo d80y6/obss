@@ -1,6 +1,6 @@
 namespace Obss.SharedKernel.Application.Contracts;
 
-public class Result
+public class Result : IOperationResult
 {
     protected Result(bool isSuccess, Error error)
     {

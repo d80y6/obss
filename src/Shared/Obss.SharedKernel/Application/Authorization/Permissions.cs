@@ -140,5 +140,40 @@ public static class Permissions
         public const string PreferenceManage = "notifications:preferences:manage";
     }
 
+    public static class Telecom
+    {
+        public const string ServiceRead = "telecom.service.read";
+        public const string ServiceWrite = "telecom.service.write";
+        public const string ServiceQualify = "telecom.service.qualify";
+        public const string ServiceActivate = "telecom.service.activate";
+        public const string ServiceSuspend = "telecom.service.suspend";
+        public const string ServiceResume = "telecom.service.resume";
+        public const string ServiceTerminate = "telecom.service.terminate";
+        public const string ServiceChange = "telecom.service.change";
+        public const string FtthRead = "telecom.ftth.read";
+        public const string FtthWrite = "telecom.ftth.write";
+        public const string AdslRead = "telecom.adsl.read";
+        public const string AdslWrite = "telecom.adsl.write";
+        public const string LteRead = "telecom.lte.read";
+        public const string LteWrite = "telecom.lte.write";
+        public const string TelephonyRead = "telecom.telephony.read";
+        public const string TelephonyWrite = "telecom.telephony.write";
+        public const string BundleRead = "telecom.bundle.read";
+        public const string BundleWrite = "telecom.bundle.write";
+        public const string AdapterManage = "telecom.adapter.manage";
+        public const string AdapterRead = "telecom.adapter.read";
+        public const string UsageRead = "telecom.usage.read";
+        public const string CdrIngest = "telecom.cdr.ingest";
+        public const string CdrMediate = "telecom.cdr.mediate";
+        public const string AlarmRead = "telecom.alarm.read";
+        public const string AlarmAck = "telecom.alarm.acknowledge";
+        public const string AlarmManage = "telecom.alarm.manage";
+        public const string PerformanceRead = "telecom.performance.read";
+        public const string SlaRead = "telecom.sla.read";
+        public const string ReconciliationRead = "telecom.reconciliation.read";
+        public const string ReconciliationExecute = "telecom.reconciliation.execute";
+        public const string MaintenanceManage = "telecom.maintenance.manage";
+    }
+
     public static string PolicyName(string permission) => $"{PolicyPrefix}{permission}";
 }

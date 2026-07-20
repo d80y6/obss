@@ -19,6 +19,7 @@ public class TicketDbContext : EfDbContext
     public DbSet<TicketComment> TicketComments => Set<TicketComment>();
     public DbSet<TicketAttachment> TicketAttachments => Set<TicketAttachment>();
     public DbSet<SlaDefinition> SlaDefinitions => Set<SlaDefinition>();
+    public DbSet<Alarm> Alarms => Set<Alarm>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

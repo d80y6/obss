@@ -384,6 +384,39 @@
           "xunit.extensibility.core": "[2.9.3]"
         }
       },
+      "obss.crm.application": {
+        "type": "Project",
+        "dependencies": {
+          "FluentValidation": "[11.11.0, )",
+          "Mapster": "[7.4.0, )",
+          "MediatR": "[12.5.0, )",
+          "Obss.CRM.Domain": "[1.0.0, )"
+        }
+      },
+      "obss.crm.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Obss.SharedKernel": "[1.0.0, )"
+        }
+      },
+      "obss.orders.application": {
+        "type": "Project",
+        "dependencies": {
+          "FluentValidation": "[11.11.0, )",
+          "Mapster": "[7.4.0, )",
+          "MediatR": "[12.5.0, )",
+          "Obss.CRM.Application": "[1.0.0, )",
+          "Obss.Orders.Domain": "[1.0.0, )",
+          "Obss.ProductCatalog.Application": "[1.0.0, )",
+          "Obss.Provisioning.Domain": "[1.0.0, )"
+        }
+      },
+      "obss.orders.domain": {
+        "type": "Project",
+        "dependencies": {
+          "Obss.SharedKernel": "[1.0.0, )"
+        }
+      },
       "obss.productcatalog.application": {
         "type": "Project",
         "dependencies": {
@@ -406,6 +439,7 @@
           "Mapster": "[7.4.0, )",
           "MediatR": "[12.5.0, )",
           "Microsoft.Extensions.Hosting.Abstractions": "[9.0.4, )",
+          "Obss.Orders.Application": "[1.0.0, )",
           "Obss.Provisioning.Domain": "[1.0.0, )",
           "Obss.ServiceInventory.Application": "[1.0.0, )",
           "Obss.Workflow.Application": "[1.0.0, )"
@@ -472,6 +506,7 @@
           "FluentValidation": "[11.11.0, )",
           "Mapster": "[7.4.0, )",
           "MediatR": "[12.5.0, )",
+          "Obss.Orders.Application": "[1.0.0, )",
           "Obss.ProductCatalog.Application": "[1.0.0, )",
           "Obss.Subscriptions.Domain": "[1.0.0, )"
         }

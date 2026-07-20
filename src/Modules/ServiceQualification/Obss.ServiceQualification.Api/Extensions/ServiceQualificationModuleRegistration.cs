@@ -1,5 +1,6 @@
 using Obss.ServiceQualification.Api.Endpoints;
 using Obss.ServiceQualification.Application.Abstractions;
+using Obss.ServiceQualification.Domain.Abstractions;
 using Obss.ServiceQualification.Application.Mappings;
 using Obss.ServiceQualification.Application.Services;
 using Obss.ServiceQualification.Infrastructure.Persistence.Repositories;

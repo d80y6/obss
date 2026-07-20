@@ -26,6 +26,8 @@ public class NetworkDbContext : EfDbContext
     public DbSet<ConnectivityLink> ConnectivityLinks => Set<ConnectivityLink>();
     public DbSet<CapacityRecord> CapacityRecords => Set<CapacityRecord>();
     public DbSet<TopologyMap> TopologyMaps => Set<TopologyMap>();
+    public DbSet<PerformanceMetric> PerformanceMetrics => Set<PerformanceMetric>();
+    public DbSet<MaintenanceWindow> MaintenanceWindows => Set<MaintenanceWindow>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

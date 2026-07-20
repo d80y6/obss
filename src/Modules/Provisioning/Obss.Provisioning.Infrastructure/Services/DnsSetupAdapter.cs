@@ -33,30 +33,18 @@ public sealed class DnsSetupAdapter : IProvisioningAdapter
         var domain = config.TryGetProperty("domain", out var d) ? d.GetString() : "example.com";
         var recordType = config.TryGetProperty("recordType", out var rt) ? rt.GetString() : "A";
 
-        _logger.LogInformation("Creating DNS {RecordType} record for {Domain}", recordType, domain);
+        _logger.LogInformation("DNS {RecordType} record for {Domain} requires vendor DNS platform confirmation", recordType, domain);
 
-        var zoneId = Guid.NewGuid();
-        var recordId = Guid.NewGuid();
-
-        return Task.FromResult(ProvisioningResult.Ok(
-            JsonSerializer.Serialize(new
-            {
-                domain,
-                recordType,
-                zoneId,
-                recordId,
-                ttl = 300,
-                dnsServer = "ns1.obss.example.com",
-                status = "active"
-            }),
+        return Task.FromResult(ProvisioningResult.Blocked(
+            $"DNS {recordType} record creation for {domain} requires real DNS infrastructure - adapter cannot generate fake records",
             TimeSpan.FromMilliseconds(80)));
     }
 
     public Task<ProvisioningResult> CompensateAsync(ProvisioningTask task, CancellationToken cancellationToken)
     {
         _logger.LogInformation("DnsSetupAdapter removing DNS records for task {TaskId}", task.Id);
-        return Task.FromResult(ProvisioningResult.Ok(
-            JsonSerializer.Serialize(new { recordsRemoved = true }),
+        return Task.FromResult(ProvisioningResult.Blocked(
+            $"DNS record removal for task {task.Id} requires real DNS infrastructure - adapter cannot compensate",
             TimeSpan.FromMilliseconds(30)));
     }
 }

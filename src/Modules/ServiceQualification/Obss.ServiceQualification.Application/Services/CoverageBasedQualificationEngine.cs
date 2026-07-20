@@ -1,4 +1,5 @@
 using Obss.ServiceQualification.Application.Abstractions;
+using Obss.ServiceQualification.Domain.Abstractions;
 using Obss.ServiceQualification.Domain.ValueObjects;
 
 namespace Obss.ServiceQualification.Application.Services;

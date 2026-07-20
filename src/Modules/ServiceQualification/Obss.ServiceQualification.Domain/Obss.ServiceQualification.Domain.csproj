@@ -6,5 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Shared\Obss.SharedKernel\Obss.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\NetworkInventory\Obss.NetworkInventory.Application\Obss.NetworkInventory.Application.csproj" />
+    <ProjectReference Include="..\..\NetworkInventory\Obss.NetworkInventory.Domain\Obss.NetworkInventory.Domain.csproj" />
   </ItemGroup>
 </Project>

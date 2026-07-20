@@ -237,6 +237,38 @@ builder.Services.AddAuthorization(options =>
     AddPermissionPolicy(Permissions.Notifications.NotificationSend);
     AddPermissionPolicy(Permissions.Notifications.TemplateManage);
     AddPermissionPolicy(Permissions.Notifications.PreferenceManage);
+
+    AddPermissionPolicy(Permissions.Telecom.ServiceRead);
+    AddPermissionPolicy(Permissions.Telecom.ServiceWrite);
+    AddPermissionPolicy(Permissions.Telecom.ServiceQualify);
+    AddPermissionPolicy(Permissions.Telecom.ServiceActivate);
+    AddPermissionPolicy(Permissions.Telecom.ServiceSuspend);
+    AddPermissionPolicy(Permissions.Telecom.ServiceResume);
+    AddPermissionPolicy(Permissions.Telecom.ServiceTerminate);
+    AddPermissionPolicy(Permissions.Telecom.ServiceChange);
+    AddPermissionPolicy(Permissions.Telecom.FtthRead);
+    AddPermissionPolicy(Permissions.Telecom.FtthWrite);
+    AddPermissionPolicy(Permissions.Telecom.AdslRead);
+    AddPermissionPolicy(Permissions.Telecom.AdslWrite);
+    AddPermissionPolicy(Permissions.Telecom.LteRead);
+    AddPermissionPolicy(Permissions.Telecom.LteWrite);
+    AddPermissionPolicy(Permissions.Telecom.TelephonyRead);
+    AddPermissionPolicy(Permissions.Telecom.TelephonyWrite);
+    AddPermissionPolicy(Permissions.Telecom.BundleRead);
+    AddPermissionPolicy(Permissions.Telecom.BundleWrite);
+    AddPermissionPolicy(Permissions.Telecom.AdapterManage);
+    AddPermissionPolicy(Permissions.Telecom.AdapterRead);
+    AddPermissionPolicy(Permissions.Telecom.UsageRead);
+    AddPermissionPolicy(Permissions.Telecom.CdrIngest);
+    AddPermissionPolicy(Permissions.Telecom.CdrMediate);
+    AddPermissionPolicy(Permissions.Telecom.AlarmRead);
+    AddPermissionPolicy(Permissions.Telecom.AlarmAck);
+    AddPermissionPolicy(Permissions.Telecom.AlarmManage);
+    AddPermissionPolicy(Permissions.Telecom.PerformanceRead);
+    AddPermissionPolicy(Permissions.Telecom.SlaRead);
+    AddPermissionPolicy(Permissions.Telecom.ReconciliationRead);
+    AddPermissionPolicy(Permissions.Telecom.ReconciliationExecute);
+    AddPermissionPolicy(Permissions.Telecom.MaintenanceManage);
 });
 
 builder.Services.AddApiVersioning(options =>
@@ -330,6 +362,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuditBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehavior<,>));
     // TransactionBehavior disabled - handlers call SaveChangesAsync explicitly via IUnitOfWork
 });
 
@@ -357,6 +390,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceCatalog.Applicatio
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.EventManagement.Application.Commands.CreateSubscriptionCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceQualification.Application.Commands.CheckServiceQualification.CheckServiceQualificationCommandValidator).Assembly);
 
+builder.Services.AddSingleton<RateLimitingConfiguration>();
 builder.Services.AddSingleton<IModelCacheKeyFactory, Obss.SharedKernel.Infrastructure.Persistence.TenantModelCacheKeyFactory>();
 builder.Services.AddOutboxProcessing(TimeSpan.FromSeconds(10));
 builder.Services.AddRabbitMqConsumer();

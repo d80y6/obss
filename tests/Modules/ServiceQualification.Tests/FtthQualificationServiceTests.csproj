@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Coverlet.Collector" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Modules\ServiceQualification\Obss.ServiceQualification.Domain\Obss.ServiceQualification.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\ServiceQualification\Obss.ServiceQualification.Infrastructure\Obss.ServiceQualification.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\NetworkInventory\Obss.NetworkInventory.Domain\Obss.NetworkInventory.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\NetworkInventory\Obss.NetworkInventory.Application\Obss.NetworkInventory.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Modules\Orders\Obss.Orders.Application\Obss.Orders.Application.csproj" />
+  </ItemGroup>
+</Project>

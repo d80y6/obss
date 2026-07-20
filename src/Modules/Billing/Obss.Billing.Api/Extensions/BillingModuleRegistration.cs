@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Obss.Billing.Api.Endpoints;
 using Obss.Billing.Application.Abstractions;
 using Obss.Billing.Application.BackgroundJobs;
+using Obss.Billing.Application.Configuration;
 using Obss.Billing.Application.Mappings;
 using Obss.Billing.Domain.Services;
 using Obss.Billing.Infrastructure.Persistence;
@@ -18,6 +19,11 @@ public static class BillingModuleRegistration
 {
     public static IServiceCollection AddBillingModule(this IServiceCollection services)
     {
+        services.Configure<BillingConfiguration>(config =>
+        {
+            config.DefaultCurrency = "YER";
+        });
+
         services.AddScoped<IBillRepository, BillRepository>();
         services.AddScoped<IBillingCycleRepository, BillingCycleRepository>();
         services.AddScoped<IBillingCalculator, BillingCalculator>();
