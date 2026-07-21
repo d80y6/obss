@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.EventManagement.Application.Commands;
+using Obss.EventManagement.Application.Commands.PublishEvent;
 using Obss.EventManagement.Application.Queries;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
@@ -41,6 +42,14 @@ public static class EventManagementEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
+        });
+
+        group.MapPost("/events/publish", async (PublishEventCommand command, IMediator mediator) =>
+        {
+            var result = await mediator.Send(command);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
         });
     }
 }

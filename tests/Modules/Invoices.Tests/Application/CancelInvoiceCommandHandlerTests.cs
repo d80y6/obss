@@ -7,15 +7,13 @@ using Obss.Invoices.Application.Commands.CancelInvoice;
 using Obss.Invoices.Domain.Entities;
 using Obss.Invoices.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Abstractions;
-using Obss.SharedKernel.Domain.ValueObjects;
-
 namespace Obss.Invoices.Tests.Application;
 
 public class CancelInvoiceCommandHandlerTests
 {
     private static Invoice CreateDraftInvoice()
     {
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         return Invoice.Create(tenantId, "INV-2026-00001", Guid.NewGuid(),
             "Test", "test@example.com", "Addr",
             DateTime.UtcNow, DateTime.UtcNow.AddDays(30), "USD");

@@ -35,6 +35,8 @@
     <ProjectReference Include="..\..\Modules\ServiceCatalog\Obss.ServiceCatalog.Api\Obss.ServiceCatalog.Api.csproj" />
     <ProjectReference Include="..\..\Modules\EventManagement\Obss.EventManagement.Api\Obss.EventManagement.Api.csproj" />
     <ProjectReference Include="..\..\Modules\ServiceQualification\Obss.ServiceQualification.Api\Obss.ServiceQualification.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\AAA\Obss.AAA.Api\Obss.AAA.Api.csproj" />
+    <ProjectReference Include="..\..\Modules\OCS\Obss.OCS.Api\Obss.OCS.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

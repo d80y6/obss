@@ -2,10 +2,11 @@ using System.Text.Json;
 using Obss.Provisioning.Domain.Events;
 using Obss.Provisioning.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Provisioning.Domain.Entities;
 
-public class ProvisioningJob : AggregateRoot<Guid>
+public class ProvisioningJob : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<ProvisioningTask> _tasks = [];
 
@@ -33,6 +34,7 @@ public class ProvisioningJob : AggregateRoot<Guid>
     }
 
     public Guid TenantId { get; private set; }
+    string ITenantEntity.TenantId => TenantId.ToString("N");
     public Guid OrderId { get; private set; }
     public Guid OrderItemId { get; private set; }
     public Guid CustomerId { get; private set; }

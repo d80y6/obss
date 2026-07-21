@@ -1,18 +1,20 @@
 using Obss.Billing.Domain.Events;
 using Obss.Billing.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Billing.Domain.Entities;
 
-public class AccountBalance : AggregateRoot<Guid>
+public class AccountBalance : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<BalanceTransaction> _transactions = [];
 
     private AccountBalance() { }
 
-    public AccountBalance(Guid billingAccountId, decimal currentBalance, decimal outstandingBalance, decimal availableCredit, string currency)
+    public AccountBalance(string tenantId, Guid billingAccountId, decimal currentBalance, decimal outstandingBalance, decimal availableCredit, string currency)
     {
         Id = Guid.NewGuid();
+        TenantId = tenantId;
         BillingAccountId = billingAccountId;
         CurrentBalance = currentBalance;
         OutstandingBalance = outstandingBalance;
@@ -22,6 +24,7 @@ public class AccountBalance : AggregateRoot<Guid>
         LastUpdatedAt = DateTime.UtcNow;
     }
 
+    public string TenantId { get; private set; } = string.Empty;
     public Guid BillingAccountId { get; private set; }
     public decimal CurrentBalance { get; private set; }
     public decimal OutstandingBalance { get; private set; }

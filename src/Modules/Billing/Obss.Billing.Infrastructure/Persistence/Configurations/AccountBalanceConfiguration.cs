@@ -16,6 +16,11 @@ public sealed class AccountBalanceConfiguration : IEntityTypeConfiguration<Accou
             .HasColumnName("id")
             .ValueGeneratedNever();
 
+        builder.Property(ab => ab.TenantId)
+            .HasColumnName("tenant_id")
+            .HasMaxLength(100)
+            .IsRequired();
+
         builder.Property(ab => ab.BillingAccountId)
             .HasColumnName("billing_account_id")
             .IsRequired();

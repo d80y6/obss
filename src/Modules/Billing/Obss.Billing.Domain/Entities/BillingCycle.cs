@@ -1,10 +1,11 @@
 using Obss.Billing.Domain.Events;
 using Obss.Billing.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Billing.Domain.Entities;
 
-public class BillingCycle : Entity<Guid>
+public class BillingCycle : Entity<Guid>, ITenantEntity
 {
     private BillingCycle() { }
 

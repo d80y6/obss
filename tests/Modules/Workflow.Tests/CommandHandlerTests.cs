@@ -5,6 +5,7 @@ using NSubstitute;
 using Obss.Workflow.Application.Commands.CreateWorkflowDefinition;
 using Obss.Workflow.Application.Commands.StartWorkflowInstance;
 using Obss.Workflow.Infrastructure.Persistence.Repositories;
+using Obss.Workflow.Application.Abstractions;
 using Obss.Workflow.Infrastructure.Services;
 using Obss.SharedKernel.Application.Abstractions;
 
@@ -96,7 +97,8 @@ public class CommandHandlerTests : WorkflowIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<WorkflowEngine>>();
 
-        var workflowEngine = new WorkflowEngine(definitionRepository, instanceRepository, logger);
+        var handlerRegistry = Substitute.For<IWorkflowStepHandlerRegistry>();
+        var workflowEngine = new WorkflowEngine(definitionRepository, instanceRepository, handlerRegistry, logger);
 
         var handler = new StartWorkflowInstanceCommandHandler(
             workflowEngine, definitionRepository, unitOfWork);
@@ -154,7 +156,8 @@ public class CommandHandlerTests : WorkflowIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<WorkflowEngine>>();
 
-        var workflowEngine = new WorkflowEngine(definitionRepository, instanceRepository, logger);
+        var handlerRegistry = Substitute.For<IWorkflowStepHandlerRegistry>();
+        var workflowEngine = new WorkflowEngine(definitionRepository, instanceRepository, handlerRegistry, logger);
 
         var handler = new StartWorkflowInstanceCommandHandler(
             workflowEngine, definitionRepository, unitOfWork);
@@ -180,7 +183,8 @@ public class CommandHandlerTests : WorkflowIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<WorkflowEngine>>();
 
-        var workflowEngine = new WorkflowEngine(definitionRepository, instanceRepository, logger);
+        var handlerRegistry = Substitute.For<IWorkflowStepHandlerRegistry>();
+        var workflowEngine = new WorkflowEngine(definitionRepository, instanceRepository, handlerRegistry, logger);
 
         var handler = new StartWorkflowInstanceCommandHandler(
             workflowEngine, definitionRepository, unitOfWork);

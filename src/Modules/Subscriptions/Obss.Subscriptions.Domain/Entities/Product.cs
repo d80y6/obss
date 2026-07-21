@@ -1,10 +1,11 @@
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 using Obss.Subscriptions.Domain.Events;
 using Obss.Subscriptions.Domain.ValueObjects;
 
 namespace Obss.Subscriptions.Domain.Entities;
 
-public class Product : AggregateRoot<Guid>
+public class Product : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<ProductRelationship> _relationships = [];
     private readonly List<ProductCharacteristic> _characteristics = [];
@@ -37,6 +38,7 @@ public class Product : AggregateRoot<Guid>
     }
 
     public Guid TenantId { get; private set; }
+    string ITenantEntity.TenantId => TenantId.ToString("N");
     public Guid CustomerId { get; private set; }
     public string? Name { get; private set; }
     public string? Description { get; private set; }

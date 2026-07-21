@@ -90,7 +90,10 @@ public class EfDbContext : DbContext
             .Where(e => e.State is EntityState.Added)
             .Select(e => e.Entity))
         {
-            entity.GetType().GetProperty("TenantId")?.SetValue(entity, tenantId);
+            var prop = entity.GetType().GetProperty("TenantId");
+            if (prop is null || prop.PropertyType != typeof(string))
+                continue;
+            prop.SetValue(entity, tenantId);
         }
     }
 
@@ -191,7 +194,8 @@ public class EfDbContext : DbContext
             .Select(e => e.ClrType))
         {
             var parameter = Expression.Parameter(clrType, "e");
-            var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
+            var asInterface = Expression.Convert(parameter, typeof(ITenantEntity));
+            var property = Expression.Property(asInterface, nameof(ITenantEntity.TenantId));
             var value = Expression.Constant(tenantId);
             var body = Expression.Equal(property, value);
             var lambda = Expression.Lambda(body, parameter);

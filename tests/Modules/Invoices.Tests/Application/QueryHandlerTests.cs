@@ -8,15 +8,13 @@ using Obss.Invoices.Application.Queries.GetInvoicesByCustomer;
 using Obss.Invoices.Application.Queries.GetOverdueInvoices;
 using Obss.Invoices.Domain.Entities;
 using Obss.Invoices.Domain.ValueObjects;
-using Obss.SharedKernel.Domain.ValueObjects;
-
 namespace Obss.Invoices.Tests.Application;
 
 public class QueryHandlerTests
 {
     private static Invoice CreateInvoice(string number = "INV-2026-00001")
     {
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         return Invoice.Create(tenantId, number, Guid.NewGuid(),
             "Test Customer", "test@example.com", "123 Test St",
             DateTime.UtcNow, DateTime.UtcNow.AddDays(30), "USD");

@@ -20,6 +20,7 @@ public static class RatingModuleRegistration
         services.AddScoped<IUsageRecordRepository, UsageRecordRepository>();
         services.AddScoped<IRatingRuleRepository, RatingRuleRepository>();
         services.AddScoped<IPromotionRepository, PromotionRepository>();
+        services.AddScoped<ICdrRecordRepository, CdrRecordRepository>();
         services.AddScoped<IRatingEngine, RatingEngine>();
         services.AddScoped<IPromotionEngine, PromotionEngine>();
 

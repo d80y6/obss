@@ -40,13 +40,12 @@ public sealed class CreateInvoiceFromBillCommandHandler : IRequestHandler<Create
         }
 
         var bill = billResult.Value;
-        var tenantId = TenantId.Create(request.TenantId);
         var invoiceNumber = await _invoiceRepository.GenerateNextInvoiceNumberAsync(cancellationToken);
         var invoiceDate = DateTime.UtcNow;
         var dueDate = invoiceDate.AddDays(30);
 
         var invoice = Invoice.Create(
-            tenantId,
+            request.TenantId,
             invoiceNumber,
             bill.CustomerId,
             bill.CustomerName,

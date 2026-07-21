@@ -3,8 +3,6 @@ using FluentAssertions;
 using Obss.Invoices.Domain.Entities;
 using Obss.Invoices.Domain.ValueObjects;
 using Obss.Invoices.Infrastructure.Persistence.Repositories;
-using Obss.SharedKernel.Domain.ValueObjects;
-
 namespace Obss.Invoices.Tests;
 
 public class RepositoryTests : InvoiceIntegrationTests
@@ -15,7 +13,7 @@ public class RepositoryTests : InvoiceIntegrationTests
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var customerId = Guid.NewGuid();
         var invoice = Invoice.Create(
             tenantId,
@@ -46,7 +44,7 @@ public class RepositoryTests : InvoiceIntegrationTests
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var customerId = Guid.NewGuid();
         var invoice = Invoice.Create(
             tenantId,
@@ -104,7 +102,7 @@ public class RepositoryTests : InvoiceIntegrationTests
     {
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var customerId = Guid.NewGuid();
 
         for (var i = 1; i <= 3; i++)
@@ -132,7 +130,7 @@ public class RepositoryTests : InvoiceIntegrationTests
     {
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
 
         var firstNumber = await repository.GenerateNextInvoiceNumberAsync();
         firstNumber.Should().Match("INV-2026-*");
@@ -162,7 +160,7 @@ public class RepositoryTests : InvoiceIntegrationTests
     {
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var customerId = Guid.NewGuid();
 
         var invoice1 = Invoice.Create(tenantId, "INV-2026-01001", customerId, "S1", "s1@example.com", "Addr",
@@ -185,7 +183,7 @@ public class RepositoryTests : InvoiceIntegrationTests
     {
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var customerId = Guid.NewGuid();
 
         var invoice = Invoice.Create(
@@ -212,7 +210,7 @@ public class RepositoryTests : InvoiceIntegrationTests
     {
         using var context = CreateDbContext();
         var repository = new InvoiceRepository(context);
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var customerId = Guid.NewGuid();
 
         var invoice1 = Invoice.Create(tenantId, "INV-2026-03001", customerId, "Filter A",
@@ -243,7 +241,7 @@ public class RepositoryTests : InvoiceIntegrationTests
         using var context = CreateDbContext();
         var invoiceRepository = new InvoiceRepository(context);
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(tenantId, "INV-2026-04001", Guid.NewGuid(),
             "CN Customer", "cn@example.com", "Addr",
             DateTime.UtcNow, DateTime.UtcNow.AddDays(30), "USD");

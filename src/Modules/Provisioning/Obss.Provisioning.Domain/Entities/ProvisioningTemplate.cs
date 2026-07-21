@@ -1,8 +1,9 @@
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Provisioning.Domain.Entities;
 
-public class ProvisioningTemplate : AggregateRoot<Guid>
+public class ProvisioningTemplate : AggregateRoot<Guid>, ITenantEntity
 {
     private ProvisioningTemplate() { }
 
@@ -29,6 +30,7 @@ public class ProvisioningTemplate : AggregateRoot<Guid>
     }
 
     public Guid TenantId { get; private set; }
+    string ITenantEntity.TenantId => TenantId.ToString("N");
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }
     public string ServiceType { get; private set; } = string.Empty;

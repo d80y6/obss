@@ -20,7 +20,6 @@ public class HuaweiBroadbandSimulatorTests
         {
             ControllerUrl = "https://huawei-controller:8443",
             Username = "admin",
-            DeviceModel = "MA5800",
             TimeoutSeconds = 30,
         };
         _sut = new HuaweiBroadbandSimulator(_logger, _config);

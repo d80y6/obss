@@ -1,6 +1,6 @@
-using Xunit;
 using FluentAssertions;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Obss.Provisioning.Application.Commands.CreateProvisioningJob;
 using Obss.Provisioning.Application.Commands.CreateProvisioningTemplate;
@@ -10,6 +10,8 @@ using Obss.Provisioning.Application.Commands.StartProvisioningJob;
 using Obss.Provisioning.Domain.ValueObjects;
 using Obss.Provisioning.Infrastructure.Persistence;
 using Obss.Provisioning.Infrastructure.Persistence.Repositories;
+using Obss.SharedKernel.Application.Abstractions;
+using Xunit;
 
 namespace Obss.Provisioning.Tests;
 
@@ -21,11 +23,13 @@ public class CommandHandlerTests : ProvisioningIntegrationTests
         using var context = CreateDbContext();
         var jobRepository = new ProvisioningJobRepository(context);
         var templateRepository = new ProvisioningTemplateRepository(context);
+        var outboxService = Substitute.For<IOutboxService>();
         var mediator = Substitute.For<IMediator>();
         var unitOfWork = CreateUnitOfWork(context);
+        var logger = Substitute.For<ILogger<CreateProvisioningJobCommandHandler>>();
 
         var handler = new CreateProvisioningJobCommandHandler(
-            jobRepository, templateRepository, mediator, unitOfWork);
+            jobRepository, templateRepository, outboxService, mediator, unitOfWork, logger);
 
         var tenantId = Guid.NewGuid();
         var command = new CreateProvisioningJobCommand(
@@ -60,11 +64,13 @@ public class CommandHandlerTests : ProvisioningIntegrationTests
         using var context = CreateDbContext();
         var jobRepository = new ProvisioningJobRepository(context);
         var templateRepository = new ProvisioningTemplateRepository(context);
+        var outboxService = Substitute.For<IOutboxService>();
         var mediator = Substitute.For<IMediator>();
         var unitOfWork = CreateUnitOfWork(context);
+        var logger = Substitute.For<ILogger<CreateProvisioningJobCommandHandler>>();
 
         var handler = new CreateProvisioningJobCommandHandler(
-            jobRepository, templateRepository, mediator, unitOfWork);
+            jobRepository, templateRepository, outboxService, mediator, unitOfWork, logger);
 
         var command = new CreateProvisioningJobCommand(
             Guid.NewGuid(),
@@ -86,11 +92,13 @@ public class CommandHandlerTests : ProvisioningIntegrationTests
         using var context = CreateDbContext();
         var jobRepository = new ProvisioningJobRepository(context);
         var templateRepository = new ProvisioningTemplateRepository(context);
+        var outboxService = Substitute.For<IOutboxService>();
         var mediator = Substitute.For<IMediator>();
         var unitOfWork = CreateUnitOfWork(context);
+        var logger = Substitute.For<ILogger<CreateProvisioningJobCommandHandler>>();
 
         var handler = new CreateProvisioningJobCommandHandler(
-            jobRepository, templateRepository, mediator, unitOfWork);
+            jobRepository, templateRepository, outboxService, mediator, unitOfWork, logger);
 
         var command = new CreateProvisioningJobCommand(
             Guid.NewGuid(),
@@ -145,11 +153,13 @@ public class CommandHandlerTests : ProvisioningIntegrationTests
         using var context = CreateDbContext();
         var jobRepository = new ProvisioningJobRepository(context);
         var templateRepository = new ProvisioningTemplateRepository(context);
+        var outboxService = Substitute.For<IOutboxService>();
         var mediator = Substitute.For<IMediator>();
         var unitOfWork = CreateUnitOfWork(context);
+        var logger = Substitute.For<ILogger<CreateProvisioningJobCommandHandler>>();
 
         var createHandler = new CreateProvisioningJobCommandHandler(
-            jobRepository, templateRepository, mediator, unitOfWork);
+            jobRepository, templateRepository, outboxService, mediator, unitOfWork, logger);
 
         var createCommand = new CreateProvisioningJobCommand(
             Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),
@@ -174,11 +184,13 @@ public class CommandHandlerTests : ProvisioningIntegrationTests
         using var context = CreateDbContext();
         var jobRepository = new ProvisioningJobRepository(context);
         var templateRepository = new ProvisioningTemplateRepository(context);
+        var outboxService = Substitute.For<IOutboxService>();
         var mediator = Substitute.For<IMediator>();
         var unitOfWork = CreateUnitOfWork(context);
+        var logger = Substitute.For<ILogger<CreateProvisioningJobCommandHandler>>();
 
         var createHandler = new CreateProvisioningJobCommandHandler(
-            jobRepository, templateRepository, mediator, unitOfWork);
+            jobRepository, templateRepository, outboxService, mediator, unitOfWork, logger);
 
         var createResult = await createHandler.Handle(
             new CreateProvisioningJobCommand(
@@ -209,11 +221,13 @@ public class CommandHandlerTests : ProvisioningIntegrationTests
         using var context = CreateDbContext();
         var jobRepository = new ProvisioningJobRepository(context);
         var templateRepository = new ProvisioningTemplateRepository(context);
+        var outboxService = Substitute.For<IOutboxService>();
         var mediator = Substitute.For<IMediator>();
         var unitOfWork = CreateUnitOfWork(context);
+        var logger = Substitute.For<ILogger<CreateProvisioningJobCommandHandler>>();
 
         var createHandler = new CreateProvisioningJobCommandHandler(
-            jobRepository, templateRepository, mediator, unitOfWork);
+            jobRepository, templateRepository, outboxService, mediator, unitOfWork, logger);
 
         var createResult = await createHandler.Handle(
             new CreateProvisioningJobCommand(

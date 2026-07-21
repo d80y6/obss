@@ -1,12 +1,13 @@
 using MediatR;
 using Obss.Rating.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Rating.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class UsageRecord : AggregateRoot<Guid>
+public class UsageRecord : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<RelatedParty> _relatedParties = [];
 

@@ -181,6 +181,39 @@ dotnet ef database update \
 done
 log_ok "Collections migrations applied."
 
+log_info "Applying Ticketing module migrations..."
+dotnet ef database update \
+    -p "$ROOT_DIR/src/Modules/Ticketing/Obss.Ticketing.Infrastructure" \
+    -s "$ROOT_DIR/src/Host/Obss.Host" \
+    -c TicketDbContext \
+    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
+    2>&1 | while IFS= read -r line; do
+    log_info "  ef: $line"
+done
+log_ok "Ticketing migrations applied."
+
+log_info "Applying NetworkInventory module migrations..."
+dotnet ef database update \
+    -p "$ROOT_DIR/src/Modules/NetworkInventory/Obss.NetworkInventory.Infrastructure" \
+    -s "$ROOT_DIR/src/Host/Obss.Host" \
+    -c NetworkDbContext \
+    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
+    2>&1 | while IFS= read -r line; do
+    log_info "  ef: $line"
+done
+log_ok "NetworkInventory migrations applied."
+
+log_info "Applying ServiceQualification module migrations..."
+dotnet ef database update \
+    -p "$ROOT_DIR/src/Modules/ServiceQualification/Obss.ServiceQualification.Infrastructure" \
+    -s "$ROOT_DIR/src/Host/Obss.Host" \
+    -c ServiceQualificationDbContext \
+    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=obss_service_qualification;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
+    2>&1 | while IFS= read -r line; do
+    log_info "  ef: $line"
+done
+log_ok "ServiceQualification migrations applied."
+
 # ── Step 5: Apply Seed Data ──────────────────────────────────────────────────
 print_header "Applying Seed Data"
 

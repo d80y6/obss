@@ -2,11 +2,11 @@ using Obss.Invoices.Domain.Events;
 using Obss.Invoices.Domain.Exceptions;
 using Obss.Invoices.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
-using Obss.SharedKernel.Domain.ValueObjects;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Invoices.Domain.Entities;
 
-public class CreditNote : AggregateRoot<Guid>
+public class CreditNote : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<CreditNoteLine> _lines = [];
 
@@ -14,7 +14,7 @@ public class CreditNote : AggregateRoot<Guid>
 
     private CreditNote(
         Guid id,
-        TenantId tenantId,
+        string tenantId,
         string creditNoteNumber,
         Guid invoiceId,
         Guid customerId,
@@ -34,7 +34,7 @@ public class CreditNote : AggregateRoot<Guid>
         TotalAmount = 0;
     }
 
-    public TenantId TenantId { get; private set; } = default!;
+    public string TenantId { get; private set; } = string.Empty;
     public string CreditNoteNumber { get; private set; } = string.Empty;
     public Guid InvoiceId { get; private set; }
     public Guid CustomerId { get; private set; }
@@ -53,7 +53,7 @@ public class CreditNote : AggregateRoot<Guid>
     public IReadOnlyCollection<CreditNoteLine> Lines => _lines.AsReadOnly();
 
     public static CreditNote Create(
-        TenantId tenantId,
+        string tenantId,
         string creditNoteNumber,
         Guid invoiceId,
         Guid customerId,

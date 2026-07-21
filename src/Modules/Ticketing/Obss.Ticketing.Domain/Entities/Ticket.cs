@@ -1,11 +1,12 @@
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 using Obss.Ticketing.Domain.Events;
 using Obss.Ticketing.Domain.Exceptions;
 using Obss.Ticketing.Domain.ValueObjects;
 
 namespace Obss.Ticketing.Domain.Entities;
 
-public class Ticket : AggregateRoot<Guid>
+public class Ticket : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<TicketComment> _comments = [];
     private readonly List<TicketAttachment> _attachments = [];

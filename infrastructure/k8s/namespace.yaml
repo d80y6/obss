@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: obss
+  labels:
+    name: obss
+    environment: production
+    app.kubernetes.io/name: obss
+    app.kubernetes.io/part-of: obss-platform

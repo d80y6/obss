@@ -1,19 +1,21 @@
 using Obss.Billing.Domain.Events;
 using Obss.Billing.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Billing.Domain.Entities;
 
-public class BillingAccount : AggregateRoot<Guid>
+public class BillingAccount : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<RelatedParty> _relatedParties = [];
     private readonly List<BillPresentationMedia> _billPresentationMedia = [];
 
     private BillingAccount() { }
 
-    public BillingAccount(Guid customerId, AccountType accountType, string name, decimal creditLimit, string currency)
+    public BillingAccount(string tenantId, Guid customerId, AccountType accountType, string name, decimal creditLimit, string currency)
     {
         Id = Guid.NewGuid();
+        TenantId = tenantId;
         CustomerId = customerId;
         AccountType = accountType;
         Name = name;
@@ -26,6 +28,7 @@ public class BillingAccount : AggregateRoot<Guid>
         AddDomainEvent(new BillingAccountCreatedEvent(Id, customerId, accountType.ToString()));
     }
 
+    public string TenantId { get; private set; } = string.Empty;
     public Guid CustomerId { get; private set; }
     public AccountType AccountType { get; private set; }
     public string Name { get; private set; } = string.Empty;

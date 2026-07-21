@@ -60,7 +60,7 @@ To become the definitive open-standard Telecom OSS/BSS platform that enables Com
 | **Scale** | Transaction volume | Peak rating events per second | 10,000 TPS |
 | **Security** | Audit coverage | All state-changing operations logged | 100% |
 | **Security** | Tenant isolation | Cross-tenant data leakage incidents | Zero |
-| **Development** | Module independence | Number of modules deployable independently | All 19 |
+| **Development** | Module independence | Number of modules deployable independently | All 22 |
 | **Quality** | Test coverage | Line coverage across all modules | > 80% |
 
 ---

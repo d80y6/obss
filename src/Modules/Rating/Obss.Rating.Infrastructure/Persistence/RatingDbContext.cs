@@ -19,6 +19,7 @@ public class RatingDbContext : EfDbContext
     public DbSet<RatingRule> RatingRules => Set<RatingRule>();
     public DbSet<Promotion> Promotions => Set<Promotion>();
     public DbSet<PromotionRule> PromotionRules => Set<PromotionRule>();
+    public DbSet<CdrRecord> CdrRecords => Set<CdrRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

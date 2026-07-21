@@ -18,7 +18,6 @@ public sealed class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
 
         builder.Property(i => i.TenantId)
             .HasColumnName("tenant_id")
-            .HasConversion<TenantIdValueConverter>()
             .HasMaxLength(100)
             .IsRequired();
 

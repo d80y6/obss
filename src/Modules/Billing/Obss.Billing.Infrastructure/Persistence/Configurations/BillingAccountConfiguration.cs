@@ -16,6 +16,11 @@ public sealed class BillingAccountConfiguration : IEntityTypeConfiguration<Billi
             .HasColumnName("id")
             .ValueGeneratedNever();
 
+        builder.Property(ba => ba.TenantId)
+            .HasColumnName("tenant_id")
+            .HasMaxLength(100)
+            .IsRequired();
+
         builder.Property(ba => ba.CustomerId)
             .HasColumnName("customer_id")
             .IsRequired();

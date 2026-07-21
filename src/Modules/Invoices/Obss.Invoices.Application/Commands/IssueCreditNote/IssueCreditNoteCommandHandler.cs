@@ -36,11 +36,10 @@ public sealed class IssueCreditNoteCommandHandler : IRequestHandler<IssueCreditN
         var totalAmount = request.Lines.Sum(l => l.Amount);
         invoice.IssueCreditNote(totalAmount, request.Reason);
 
-        var tenantId = TenantId.Create(request.TenantId);
         var creditNoteNumber = $"CN-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid():N}"[..20];
 
         var creditNote = CreditNote.Create(
-            tenantId,
+            request.TenantId,
             creditNoteNumber,
             request.InvoiceId,
             request.CustomerId,

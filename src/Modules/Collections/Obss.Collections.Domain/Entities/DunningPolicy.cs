@@ -1,8 +1,9 @@
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Collections.Domain.Entities;
 
-public class DunningPolicy : AggregateRoot<Guid>
+public class DunningPolicy : AggregateRoot<Guid>, ITenantEntity
 {
     private Dictionary<int, decimal> _dunningFees = [];
 

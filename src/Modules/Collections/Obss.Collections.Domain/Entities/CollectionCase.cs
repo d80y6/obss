@@ -2,10 +2,11 @@ using Obss.Collections.Domain.Events;
 using Obss.Collections.Domain.Exceptions;
 using Obss.Collections.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Collections.Domain.Entities;
 
-public class CollectionCase : AggregateRoot<Guid>
+public class CollectionCase : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<CollectionAction> _actions = [];
     private readonly List<PaymentArrangement> _paymentArrangements = [];

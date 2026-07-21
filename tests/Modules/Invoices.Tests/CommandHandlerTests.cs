@@ -18,7 +18,6 @@ using Obss.Invoices.Application.Commands.ResolveDispute;
 using Obss.Invoices.Infrastructure.Persistence.Repositories;
 using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Application.Contracts;
-using Obss.SharedKernel.Domain.ValueObjects;
 
 namespace Obss.Invoices.Tests;
 
@@ -117,7 +116,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<FinalizeInvoiceCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId,
             "INV-2026-10001",
@@ -184,7 +183,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<FinalizeInvoiceCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId,
             "INV-2026-10002",
@@ -216,7 +215,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<FinalizeInvoiceCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId,
             "INV-2026-10003",
@@ -265,7 +264,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<CancelInvoiceCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId, "INV-2026-10010", Guid.NewGuid(), "Cancel Test",
             "cancel@example.com", "Addr",
@@ -312,7 +311,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<MarkInvoiceAsSentCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId, "INV-2026-10011", Guid.NewGuid(), "Send Test",
             "send@example.com", "Addr",
@@ -348,7 +347,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<RecordInvoicePaymentCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId, "INV-2026-10012", Guid.NewGuid(), "Payment Test",
             "pay@example.com", "Addr",
@@ -389,7 +388,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var unitOfWork = CreateUnitOfWork(context);
         var logger = Substitute.For<ILogger<OpenDisputeCommandHandler>>();
 
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(
             tenantId, "INV-2026-10013", Guid.NewGuid(), "Dispute Test",
             "dispute@example.com", "Addr",
@@ -422,7 +421,7 @@ public class CommandHandlerTests : InvoiceIntegrationTests
         var logger = Substitute.For<ILogger<ResolveDisputeCommandHandler>>();
 
         var invoice = Invoice.Create(
-            TenantId.Create(Guid.NewGuid().ToString("N")),
+            Guid.NewGuid().ToString("N"),
             "INV-2026-10014", Guid.NewGuid(), "Resolve Test",
             "resolve@example.com", "Addr",
             DateTime.UtcNow, DateTime.UtcNow.AddDays(30), "USD");

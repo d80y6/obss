@@ -482,4 +482,46 @@ export const queryKeys = {
     details: () => [...queryKeys.serviceQualification.all, "detail"] as const,
     detail: (id: string) => [...queryKeys.serviceQualification.details(), id] as const,
   },
+  ocs: {
+    all: ["ocs"] as const,
+    balances: {
+      all: () => [...queryKeys.ocs.all, "balances"] as const,
+      lists: () => [...queryKeys.ocs.balances.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.ocs.balances.lists(), filters] as const,
+      details: () => [...queryKeys.ocs.balances.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.ocs.balances.details(), id] as const,
+    },
+    creditPools: {
+      all: () => [...queryKeys.ocs.all, "credit-pools"] as const,
+      lists: () => [...queryKeys.ocs.creditPools.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.ocs.creditPools.lists(), filters] as const,
+      details: () => [...queryKeys.ocs.creditPools.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.ocs.creditPools.details(), id] as const,
+    },
+    transactions: {
+      all: () => [...queryKeys.ocs.all, "transactions"] as const,
+      lists: () => [...queryKeys.ocs.transactions.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.ocs.transactions.lists(), filters] as const,
+    },
+  },
+  eventManagement: {
+    all: ["event-management"] as const,
+    subscriptions: {
+      all: () => [...queryKeys.eventManagement.all, "subscriptions"] as const,
+      lists: () => [...queryKeys.eventManagement.subscriptions.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.eventManagement.subscriptions.lists(), filters] as const,
+      details: () => [...queryKeys.eventManagement.subscriptions.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.eventManagement.subscriptions.details(), id] as const,
+    },
+    events: {
+      all: () => [...queryKeys.eventManagement.all, "events"] as const,
+      lists: () => [...queryKeys.eventManagement.events.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.eventManagement.events.lists(), filters] as const,
+    },
+  },
 } as const

@@ -2,12 +2,13 @@ using Obss.Billing.Domain.Events;
 using Obss.Billing.Domain.Exceptions;
 using Obss.Billing.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Billing.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class Bill : AggregateRoot<Guid>
+public class Bill : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<BillLine> _lines = [];
     private readonly List<RelatedParty> _relatedParties = [];

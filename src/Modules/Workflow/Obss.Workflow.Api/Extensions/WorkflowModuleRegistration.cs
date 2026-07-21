@@ -9,6 +9,7 @@ using Obss.Workflow.Domain.Services;
 using Obss.Workflow.Infrastructure.Persistence;
 using Obss.Workflow.Infrastructure.Persistence.Repositories;
 using Obss.Workflow.Infrastructure.Services;
+using Obss.Workflow.Infrastructure.Services.StepHandlers;
 
 namespace Obss.Workflow.Api.Extensions;
 
@@ -20,6 +21,11 @@ public static class WorkflowModuleRegistration
         services.AddScoped<IWorkflowInstanceRepository, WorkflowInstanceRepository>();
         services.AddScoped<IWorkflowSlaRepository, WorkflowSlaRepository>();
         services.AddScoped<IWorkflowEngine, WorkflowEngine>();
+
+        services.AddSingleton<IWorkflowStepHandler, AutomatedStepHandler>();
+        services.AddSingleton<IWorkflowStepHandler, NotificationStepHandler>();
+        services.AddSingleton<IWorkflowStepHandler, ScriptStepHandler>();
+        services.AddSingleton<IWorkflowStepHandlerRegistry, WorkflowStepHandlerRegistry>();
 
         services.AddHostedService<WorkflowTaskExecutionJob>();
         services.AddHostedService<WorkflowSlaMonitorJob>();

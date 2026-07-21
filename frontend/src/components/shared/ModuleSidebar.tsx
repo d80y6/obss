@@ -31,6 +31,8 @@ import {
   FileSpreadsheet,
   CircuitBoard,
   FileSearch,
+  Wallet,
+  Radio,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -57,6 +59,8 @@ const modules: NavItem[] = [
   { href: "/payments/summary", label: "Payment Summary", icon: FileText },
   { href: "/payments/gateways", label: "Gateways", icon: CreditCard },
   { href: "/rating", label: "Rating", icon: Scale },
+  { href: "/ocs", label: "OCS", icon: Wallet },
+  { href: "/event-management", label: "Events", icon: Radio },
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/network", label: "Network", icon: Cable },
   { href: "/provisioning", label: "Provisioning", icon: Settings },

@@ -1,9 +1,10 @@
 using Obss.ServiceInventory.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.ServiceInventory.Domain.Entities;
 
-public class ResourceDiscoveryJob : AggregateRoot<Guid>
+public class ResourceDiscoveryJob : AggregateRoot<Guid>, ITenantEntity
 {
     private ResourceDiscoveryJob() { }
 
@@ -24,6 +25,7 @@ public class ResourceDiscoveryJob : AggregateRoot<Guid>
     }
 
     public Guid TenantId { get; private set; }
+    string ITenantEntity.TenantId => TenantId.ToString("N");
     public DiscoveryType DiscoveryType { get; private set; }
     public string? Configuration { get; private set; }
     public DiscoveryStatus Status { get; private set; }

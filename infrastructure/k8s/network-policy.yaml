@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obss-api
+  namespace: obss
+  labels:
+    app: obss-api
+    app.kubernetes.io/name: obss-api
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/part-of: obss-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: obss-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 8080
+        - port: 8081
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: obss-infra
+      ports:
+        - port: 5432
+        - port: 6379
+        - port: 5672
+        - port: 9200
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 53
+          protocol: UDP

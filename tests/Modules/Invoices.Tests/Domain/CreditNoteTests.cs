@@ -3,15 +3,13 @@ using FluentAssertions;
 using Obss.Invoices.Domain.Entities;
 using Obss.Invoices.Domain.Exceptions;
 using Obss.Invoices.Domain.ValueObjects;
-using Obss.SharedKernel.Domain.ValueObjects;
-
 namespace Obss.Invoices.Tests.Domain;
 
 public class CreditNoteTests
 {
     private static CreditNote CreateDraftCreditNote()
     {
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         return CreditNote.Create(
             tenantId, "CN-2026-00001", Guid.NewGuid(), Guid.NewGuid(),
             "Customer refund", "USD");

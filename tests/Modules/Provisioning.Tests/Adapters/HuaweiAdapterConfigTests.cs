@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Obss.Provisioning.Infrastructure.Adapters.Huawei;
+using Obss.Provisioning.Infrastructure.Transports.Snmp;
 using Xunit;
 
 namespace Obss.Provisioning.Tests.Adapters;
@@ -21,10 +22,11 @@ public class HuaweiAdapterConfigTests
         config.EnableCircuitBreaker.Should().BeFalse();
         config.CircuitBreakerThreshold.Should().Be(5);
         config.CircuitBreakerDuration.Should().Be(TimeSpan.FromMinutes(5));
-        config.SnmpCommunity.Should().BeNull();
-        config.SnmpPort.Should().Be(161);
-        config.DeviceModel.Should().BeNull();
-        config.ControllerProfile.Should().BeNull();
+        config.UseSimulator.Should().BeFalse();
+        config.SnmpTransport.Should().BeNull();
+        config.SshTransport.Should().BeNull();
+        config.NetconfTransport.Should().BeNull();
+        config.RestTransport.Should().BeNull();
     }
 
     [Fact]
@@ -42,10 +44,13 @@ public class HuaweiAdapterConfigTests
             EnableCircuitBreaker = true,
             CircuitBreakerThreshold = 10,
             CircuitBreakerDuration = TimeSpan.FromMinutes(10),
-            SnmpCommunity = "public",
-            SnmpPort = 1161,
-            DeviceModel = "MA5800-X17",
-            ControllerProfile = "access",
+            UseSimulator = true,
+            SnmpTransport = new SnmpTransportConfig
+            {
+                Host = "10.0.0.1",
+                Port = 161,
+                Community = "public"
+            }
         };
 
         config.ControllerUrl.Should().Be("https://huawei-olt:8443");
@@ -58,9 +63,34 @@ public class HuaweiAdapterConfigTests
         config.EnableCircuitBreaker.Should().BeTrue();
         config.CircuitBreakerThreshold.Should().Be(10);
         config.CircuitBreakerDuration.Should().Be(TimeSpan.FromMinutes(10));
-        config.SnmpCommunity.Should().Be("public");
-        config.SnmpPort.Should().Be(1161);
-        config.DeviceModel.Should().Be("MA5800-X17");
-        config.ControllerProfile.Should().Be("access");
+        config.UseSimulator.Should().BeTrue();
+        config.SnmpTransport.Should().NotBeNull();
+        config.SnmpTransport!.Host.Should().Be("10.0.0.1");
+        config.SnmpTransport.Community.Should().Be("public");
+    }
+
+    [Fact]
+    public void TryGetMethods_ShouldReturnNullWhenSimulatorEnabled()
+    {
+        var config = new HuaweiAdapterConfig
+        {
+            UseSimulator = true,
+            SnmpTransport = new SnmpTransportConfig { Host = "10.0.0.1" }
+        };
+
+        config.TryGetSnmpConfig().Should().BeNull();
+    }
+
+    [Fact]
+    public void TryGetMethods_ShouldReturnConfigWhenSimulatorDisabled()
+    {
+        var config = new HuaweiAdapterConfig
+        {
+            UseSimulator = false,
+            SnmpTransport = new SnmpTransportConfig { Host = "10.0.0.1" }
+        };
+
+        config.TryGetSnmpConfig().Should().NotBeNull();
+        config.TryGetSnmpConfig()!.Host.Should().Be("10.0.0.1");
     }
 }

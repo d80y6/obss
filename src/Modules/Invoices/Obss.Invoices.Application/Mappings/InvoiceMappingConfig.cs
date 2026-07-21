@@ -10,7 +10,7 @@ public static class InvoiceMappingConfig
     public static void Configure()
     {
         TypeAdapterConfig<Invoice, InvoiceDto>.NewConfig()
-            .Map(dest => dest.TenantId, src => src.TenantId.Value)
+            .Map(dest => dest.TenantId, src => src.TenantId)
             .Map(dest => dest.Status, src => src.Status.ToString())
             .Map(dest => dest.Lines, src => src.Lines.Adapt<List<InvoiceLineDto>>())
             .Map(dest => dest.Payments, src => src.Payments.Adapt<List<InvoicePaymentDto>>())
@@ -28,7 +28,7 @@ public static class InvoiceMappingConfig
             .Map(dest => dest.Id, src => src.Id);
 
         TypeAdapterConfig<CreditNote, CreditNoteDto>.NewConfig()
-            .Map(dest => dest.TenantId, src => src.TenantId.Value)
+            .Map(dest => dest.TenantId, src => src.TenantId)
             .Map(dest => dest.Status, src => src.Status.ToString())
             .Map(dest => dest.Lines, src => src.Lines.Adapt<List<CreditNoteLineDto>>())
             .Map(dest => dest.Id, src => src.Id);

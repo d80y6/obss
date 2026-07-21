@@ -40,13 +40,12 @@ public sealed class BillFinalizedIntegrationEventHandler : INotificationHandler<
         }
 
         var bill = billResult.Value;
-        var tenantId = TenantId.Create(notification.TenantId);
         var invoiceNumber = await _invoiceRepository.GenerateNextInvoiceNumberAsync(cancellationToken);
         var invoiceDate = DateTime.UtcNow;
         var dueDate = invoiceDate.AddDays(30);
 
         var invoice = Invoice.Create(
-            tenantId,
+            notification.TenantId,
             invoiceNumber,
             bill.CustomerId,
             bill.CustomerName,

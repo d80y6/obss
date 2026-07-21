@@ -1,4 +1,5 @@
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 using Obss.Subscriptions.Domain.Events;
 using Obss.Subscriptions.Domain.Exceptions;
 using Obss.Subscriptions.Domain.ValueObjects;
@@ -7,7 +8,7 @@ namespace Obss.Subscriptions.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class Subscription : AggregateRoot<Guid>
+public class Subscription : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<SubscriptionService> _services = [];
     private readonly List<SubscriptionAddOn> _addOns = [];

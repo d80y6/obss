@@ -1,10 +1,11 @@
 using Obss.Rating.Domain.Events;
 using Obss.Rating.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Rating.Domain.Entities;
 
-public class Promotion : AggregateRoot<Guid>
+public class Promotion : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<PromotionRule> _rules = [];
 

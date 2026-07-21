@@ -1,9 +1,10 @@
 using Obss.Rating.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Rating.Domain.Entities;
 
-public class RatingRule : AggregateRoot<Guid>
+public class RatingRule : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<RatingTier> _tiers = [];
 

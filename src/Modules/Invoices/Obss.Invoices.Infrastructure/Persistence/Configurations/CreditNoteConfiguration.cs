@@ -18,7 +18,6 @@ public sealed class CreditNoteConfiguration : IEntityTypeConfiguration<CreditNot
 
         builder.Property(cn => cn.TenantId)
             .HasColumnName("tenant_id")
-            .HasConversion<TenantIdValueConverter>()
             .HasMaxLength(100)
             .IsRequired();
 

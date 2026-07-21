@@ -3,10 +3,11 @@ using Obss.CRM.Domain.Exceptions;
 using Obss.CRM.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 using Obss.SharedKernel.Domain.ValueObjects;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.CRM.Domain.Entities;
 
-public class Customer : AggregateRoot<Guid>
+public class Customer : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<CustomerNote> _notes = [];
     private readonly List<Contact> _contacts = [];

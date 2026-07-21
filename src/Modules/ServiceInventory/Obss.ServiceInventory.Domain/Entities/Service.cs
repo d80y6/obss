@@ -2,10 +2,11 @@ using Obss.ServiceInventory.Domain.Events;
 using Obss.ServiceInventory.Domain.Exceptions;
 using Obss.ServiceInventory.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.ServiceInventory.Domain.Entities;
 
-public class Service : AggregateRoot<Guid>
+public class Service : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<ServiceResource> _resources = [];
 
@@ -40,6 +41,7 @@ public class Service : AggregateRoot<Guid>
     }
 
     public Guid TenantId { get; private set; }
+    string ITenantEntity.TenantId => TenantId.ToString("N");
     public Guid CustomerId { get; private set; }
     public Guid SubscriptionId { get; private set; }
     public ServiceType ServiceType { get; private set; }

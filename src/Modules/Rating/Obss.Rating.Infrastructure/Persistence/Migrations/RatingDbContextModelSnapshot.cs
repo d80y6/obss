@@ -22,6 +22,84 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Obss.Rating.Domain.Entities.CdrRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("CorrelationId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("correlation_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("ErrorReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("error_reason");
+
+                    b.Property<string>("NormalizedData")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("normalized_data");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("SourceIp")
+                        .IsRequired()
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)")
+                        .HasColumnName("source_ip");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<string>("Vendor")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("vendor");
+
+                    b.HasKey("Id")
+                        .HasName("pk_cdr_records");
+
+                    b.HasIndex("CorrelationId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_cdr_records_correlation_id");
+
+                    b.HasIndex("ReceivedAt")
+                        .HasDatabaseName("ix_cdr_records_received_at");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_cdr_records_status");
+
+                    b.HasIndex("Vendor")
+                        .HasDatabaseName("ix_cdr_records_vendor");
+
+                    b.ToTable("cdr_records", (string)null);
+                });
+
             modelBuilder.Entity("Obss.Rating.Domain.Entities.Promotion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -472,9 +550,34 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("event_type");
 
+                    b.Property<bool>("IsDeadLettered")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_dead_lettered");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTime?>("LockExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lock_expires_at");
+
+                    b.Property<Guid?>("LockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lock_id");
+
+                    b.Property<DateTime?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("processed_at");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("retry_count");
 
                     b.Property<string>("TenantId")
                         .HasMaxLength(100)
@@ -489,6 +592,9 @@ namespace Obss.Rating.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProcessedAt")
                         .HasDatabaseName("ix_outbox_messages_processed_at");
+
+                    b.HasIndex("ProcessedAt", "NextAttemptAt", "IsDeadLettered")
+                        .HasDatabaseName("ix_outbox_messages_pending");
 
                     b.ToTable("outbox_messages", (string)null);
                 });

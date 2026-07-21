@@ -1,21 +1,32 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Obss.Provisioning.Api.Endpoints;
 using Obss.Provisioning.Application.Abstractions;
 using Obss.Provisioning.Application.BackgroundJobs;
 using Obss.Provisioning.Application.Diagnostics;
 using Obss.Provisioning.Application.Mappings;
+using Obss.Provisioning.Application.Services;
+using Obss.Provisioning.Infrastructure.Adapters.Common;
+using Obss.Provisioning.Infrastructure.Adapters.Huawei;
 using Obss.Provisioning.Infrastructure.Persistence;
 using Obss.Provisioning.Infrastructure.Persistence.Repositories;
-using Obss.Provisioning.Infrastructure.Adapters.Common;
 using Obss.Provisioning.Infrastructure.Services;
+using Obss.Provisioning.Infrastructure.Transports;
+using Obss.Provisioning.Infrastructure.Transports.Abstractions;
+using Obss.Provisioning.Infrastructure.Transports.Extensions;
+using Obss.Provisioning.Infrastructure.Transports.Netconf;
+using Obss.Provisioning.Infrastructure.Transports.Rest;
+using Obss.Provisioning.Infrastructure.Transports.Snmp;
+using Obss.Provisioning.Infrastructure.Transports.Ssh;
 
 namespace Obss.Provisioning.Api.Extensions;
 
 public static class ProvisioningModuleRegistration
 {
-    public static IServiceCollection AddProvisioningModule(this IServiceCollection services)
+    public static IServiceCollection AddProvisioningModule(this IServiceCollection services, IConfiguration? configuration = null)
     {
         services.AddScoped<IProvisioningJobRepository, ProvisioningJobRepository>();
         services.AddScoped<IProvisioningTemplateRepository, ProvisioningTemplateRepository>();
@@ -23,16 +34,73 @@ public static class ProvisioningModuleRegistration
 
         services.AddSingleton<ProvisioningMetrics>();
         services.AddSingleton<IAdapterRegistry, AdapterRegistry>();
+        services.AddSingleton<ITransportFactory, TransportFactory>();
+
+        services.AddScoped<IProvisioningJobCoordinator, ProvisioningJobCoordinator>();
+        services.AddHostedService<ProvisioningJobProcessor>();
+
+        RegisterHuaweiAdapter(services, configuration);
+
         services.AddScoped<IProvisioningAdapter, NetworkProvisioningAdapter>();
         services.AddScoped<IProvisioningAdapter, DnsSetupAdapter>();
         services.AddScoped<IProvisioningAdapter, AccountSetupAdapter>();
         services.AddScoped<IProvisioningAdapter, TestProvisioningAdapter>();
 
-        services.AddHostedService<ProvisioningJobProcessor>();
-
         ProvisioningMappingConfig.Configure();
 
         return services;
+    }
+
+    private static void RegisterHuaweiAdapter(IServiceCollection services, IConfiguration? configuration)
+    {
+        var config = new HuaweiAdapterConfig();
+
+        if (configuration is not null)
+        {
+            var section = configuration.GetSection("Provisioning:Huawei");
+            if (section.Exists())
+            {
+                section.Bind(config);
+
+                config.SnmpTransport = section.GetSection("SnmpTransport").Exists()
+                    ? section.GetSection("SnmpTransport").Get<SnmpTransportConfig>()
+                    : null;
+
+                config.SshTransport = section.GetSection("SshTransport").Exists()
+                    ? section.GetSection("SshTransport").Get<SshTransportConfig>()
+                    : null;
+
+                config.NetconfTransport = section.GetSection("NetconfTransport").Exists()
+                    ? section.GetSection("NetconfTransport").Get<NetconfTransportConfig>()
+                    : null;
+
+                config.RestTransport = section.GetSection("RestTransport").Exists()
+                    ? section.GetSection("RestTransport").Get<RestTransportConfig>()
+                    : null;
+            }
+        }
+
+        services.AddSingleton(config);
+
+        if (config.UseSimulator)
+        {
+            services.AddSingleton<IHuaweiBroadbandAdapter>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<HuaweiBroadbandSimulator>>();
+                return new HuaweiBroadbandSimulator(logger, config);
+            });
+        }
+        else
+        {
+            services.AddSingleton<IHuaweiBroadbandAdapter>(sp =>
+            {
+                var logger = sp.GetRequiredService<ILogger<HuaweiBroadbandAdapter>>();
+                var transportFactory = sp.GetRequiredService<ITransportFactory>();
+                return new HuaweiBroadbandAdapter(logger, config, transportFactory);
+            });
+        }
+
+        services.AddScoped<IProvisioningAdapter, HuaweiProvisioningAdapter>();
     }
 
     public static IEndpointRouteBuilder MapProvisioningEndpoints(this IEndpointRouteBuilder app)

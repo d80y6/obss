@@ -2,13 +2,13 @@ using Obss.Invoices.Domain.Events;
 using Obss.Invoices.Domain.Exceptions;
 using Obss.Invoices.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
-using Obss.SharedKernel.Domain.ValueObjects;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Invoices.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class Invoice : AggregateRoot<Guid>
+public class Invoice : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<InvoiceLine> _lines = [];
     private readonly List<InvoicePayment> _payments = [];
@@ -19,7 +19,7 @@ public class Invoice : AggregateRoot<Guid>
 
     private Invoice(
         Guid id,
-        TenantId tenantId,
+        string tenantId,
         string invoiceNumber,
         Guid customerId,
         string customerName,
@@ -49,7 +49,7 @@ public class Invoice : AggregateRoot<Guid>
         CreatedAt = DateTime.UtcNow;
     }
 
-    public TenantId TenantId { get; private set; } = default!;
+    public string TenantId { get; private set; } = string.Empty;
     public string InvoiceNumber { get; private set; } = string.Empty;
     public Guid CustomerId { get; private set; }
     public string CustomerName { get; private set; } = string.Empty;
@@ -86,7 +86,7 @@ public class Invoice : AggregateRoot<Guid>
     public IReadOnlyCollection<RelatedParty> RelatedParties => _relatedParties.AsReadOnly();
 
     public static Invoice Create(
-        TenantId tenantId,
+        string tenantId,
         string invoiceNumber,
         Guid customerId,
         string customerName,

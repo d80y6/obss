@@ -31,6 +31,8 @@ using Obss.ServiceCatalog.Api.Extensions;
 using Obss.EventManagement.Api.Extensions;
 using Obss.ServiceInventory.Api.Extensions;
 using Obss.ServiceQualification.Api.Extensions;
+using Obss.AAA.Api.Extensions;
+using Obss.OCS.Api.Extensions;
 using Obss.SharedKernel.Application.Abstractions;
 using Obss.SharedKernel.Application.Authorization;
 using Obss.SharedKernel.Application.Behaviors;
@@ -43,6 +45,8 @@ using Obss.Workflow.Api.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
+
+#pragma warning disable S3903 // Types in top-level statement files are allowed for minimal API records
 
 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
 {
@@ -329,6 +333,8 @@ AddModuleDbContext<Obss.ApiGateway.Infrastructure.Persistence.GatewayDbContext>(
 AddModuleDbContext<Obss.ServiceCatalog.Infrastructure.Persistence.ServiceCatalogDbContext>("service_catalog");
 AddModuleDbContext<Obss.EventManagement.Infrastructure.Persistence.EventDbContext>("event_management");
 AddModuleDbContext<Obss.ServiceQualification.Infrastructure.Persistence.ServiceQualificationDbContext>("service_qualification");
+AddModuleDbContext<Obss.AAA.Infrastructure.Persistence.AaaDbContext>("aaa");
+AddModuleDbContext<Obss.OCS.Infrastructure.Persistence.OcsDbContext>("ocs");
 
 builder.Services.TryAddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
@@ -359,6 +365,8 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Obss.ServiceCatalog.Application.Commands.ServiceCategory.CreateServiceCategory.CreateServiceCategoryCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.EventManagement.Application.Commands.CreateSubscriptionCommand).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(Obss.ServiceQualification.Application.Commands.CheckServiceQualification.CheckServiceQualificationCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Obss.AAA.Application.Commands.RegisterNas.RegisterNasCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(Obss.OCS.Application.Commands.CreateBalance.CreateBalanceCommand).Assembly);
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuditBehavior<,>));
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -389,6 +397,8 @@ builder.Services.AddValidatorsFromAssembly(typeof(Obss.NumberInventory.Applicati
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceCatalog.Application.Commands.ServiceCategory.CreateServiceCategory.CreateServiceCategoryCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.EventManagement.Application.Commands.CreateSubscriptionCommandValidator).Assembly);
 builder.Services.AddValidatorsFromAssembly(typeof(Obss.ServiceQualification.Application.Commands.CheckServiceQualification.CheckServiceQualificationCommandValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Obss.AAA.Application.Commands.RegisterNas.RegisterNasCommandValidator).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(Obss.OCS.Application.Commands.CreateBalance.CreateBalanceCommandValidator).Assembly);
 
 builder.Services.AddSingleton<RateLimitingConfiguration>();
 builder.Services.AddSingleton<IModelCacheKeyFactory, Obss.SharedKernel.Infrastructure.Persistence.TenantModelCacheKeyFactory>();
@@ -417,6 +427,8 @@ builder.Services.AddNumberInventoryModule();
 builder.Services.AddServiceCatalogModule();
 builder.Services.AddEventModule();
 builder.Services.AddServiceQualificationModule();
+builder.Services.AddAaaModule(builder.Configuration);
+builder.Services.AddOcsModule(builder.Configuration);
 
 var pgConnString = connectionString;
 var healthChecksBuilder = builder.Services.AddHealthChecks();
@@ -467,6 +479,8 @@ AddDbHealthCheck<Obss.ApiGateway.Infrastructure.Persistence.GatewayDbContext>("a
 AddDbHealthCheck<Obss.ServiceCatalog.Infrastructure.Persistence.ServiceCatalogDbContext>("service_catalog");
 AddDbHealthCheck<Obss.EventManagement.Infrastructure.Persistence.EventDbContext>("events");
 AddDbHealthCheck<Obss.ServiceQualification.Infrastructure.Persistence.ServiceQualificationDbContext>("service_qualification");
+AddDbHealthCheck<Obss.AAA.Infrastructure.Persistence.AaaDbContext>("aaa");
+AddDbHealthCheck<Obss.OCS.Infrastructure.Persistence.OcsDbContext>("ocs");
 
 var infraAsms = new[] {
     typeof(Obss.IAM.Infrastructure.Persistence.IamDbContext).Assembly,
@@ -492,6 +506,8 @@ var infraAsms = new[] {
     typeof(Obss.ServiceCatalog.Infrastructure.Persistence.ServiceCatalogDbContext).Assembly,
     typeof(Obss.EventManagement.Infrastructure.Persistence.EventDbContext).Assembly,
     typeof(Obss.ServiceQualification.Infrastructure.Persistence.ServiceQualificationDbContext).Assembly,
+    typeof(Obss.AAA.Infrastructure.Persistence.AaaDbContext).Assembly,
+    typeof(Obss.OCS.Infrastructure.Persistence.OcsDbContext).Assembly,
 };
 var skipInterfaces = new HashSet<string> { "IDisposable", "IAsyncDisposable", "IEquatable`1" };
 foreach (var asm in infraAsms)
@@ -552,6 +568,8 @@ app.MapNumberInventoryEndpoints();
 app.MapServiceCatalogEndpoints();
 app.MapEventEndpoints();
 app.MapServiceQualificationEndpoints();
+app.MapAaaEndpoints();
+app.MapOcsEndpoints();
 
 var healthOptions = new HealthCheckOptions
 {
@@ -593,4 +611,37 @@ app.MapGet("/health/detailed", async (HealthCheckService healthCheckService) =>
     });
 }).WithTags("Health").AllowAnonymous();
 
+app.MapPost("/api/v1/bootstrap/tenant", async (
+    BootstrapTenantRequest request,
+    IMediator mediator,
+    Obss.IAM.Infrastructure.Persistence.IamDbContext dbContext) =>
+{
+    var tenantExists = await dbContext.Tenants.AnyAsync();
+    if (tenantExists)
+        return Results.Conflict(new { Error = "Tenant already exists. Bootstrap can only run once." });
+
+    var command = new Obss.IAM.Application.Commands.CreateTenant.CreateTenantCommand(
+        request.Name,
+        request.Slug,
+        null,
+        null,
+        request.AdminUsername,
+        request.AdminEmail,
+        request.AdminFirstName,
+        request.AdminLastName);
+
+    var result = await mediator.Send(command);
+    return result.IsSuccess
+        ? Results.Created($"/api/v1/iam/tenants/{result.Value.Id}", result.Value)
+        : Results.Conflict(result.Error);
+}).AllowAnonymous();
+
 await app.RunAsync();
+
+internal sealed record BootstrapTenantRequest(
+    string Name,
+    string Slug,
+    string AdminUsername,
+    string AdminEmail,
+    string AdminFirstName,
+    string AdminLastName);

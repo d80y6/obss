@@ -123,6 +123,15 @@ COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Application/Ob
 COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Infrastructure/Obss.ServiceQualification.Infrastructure.csproj", "src/Modules/ServiceQualification/Obss.ServiceQualification.Infrastructure/"]
 COPY ["src/Modules/ServiceQualification/Obss.ServiceQualification.Api/Obss.ServiceQualification.Api.csproj", "src/Modules/ServiceQualification/Obss.ServiceQualification.Api/"]
 
+COPY ["src/Modules/AAA/Obss.AAA.Domain/Obss.AAA.Domain.csproj", "src/Modules/AAA/Obss.AAA.Domain/"]
+COPY ["src/Modules/AAA/Obss.AAA.Application/Obss.AAA.Application.csproj", "src/Modules/AAA/Obss.AAA.Application/"]
+COPY ["src/Modules/AAA/Obss.AAA.Infrastructure/Obss.AAA.Infrastructure.csproj", "src/Modules/AAA/Obss.AAA.Infrastructure/"]
+COPY ["src/Modules/AAA/Obss.AAA.Api/Obss.AAA.Api.csproj", "src/Modules/AAA/Obss.AAA.Api/"]
+COPY ["src/Modules/OCS/Obss.OCS.Domain/Obss.OCS.Domain.csproj", "src/Modules/OCS/Obss.OCS.Domain/"]
+COPY ["src/Modules/OCS/Obss.OCS.Application/Obss.OCS.Application.csproj", "src/Modules/OCS/Obss.OCS.Application/"]
+COPY ["src/Modules/OCS/Obss.OCS.Infrastructure/Obss.OCS.Infrastructure.csproj", "src/Modules/OCS/Obss.OCS.Infrastructure/"]
+COPY ["src/Modules/OCS/Obss.OCS.Api/Obss.OCS.Api.csproj", "src/Modules/OCS/Obss.OCS.Api/"]
+
 COPY ["src/Host/Obss.Host/Obss.Host.csproj", "src/Host/Obss.Host/"]
 
 RUN dotnet restore "src/Host/Obss.Host/Obss.Host.csproj"
@@ -152,6 +161,8 @@ COPY ["src/Modules/NumberInventory/", "src/Modules/NumberInventory/"]
 COPY ["src/Modules/ServiceCatalog/", "src/Modules/ServiceCatalog/"]
 COPY ["src/Modules/EventManagement/", "src/Modules/EventManagement/"]
 COPY ["src/Modules/ServiceQualification/", "src/Modules/ServiceQualification/"]
+COPY ["src/Modules/AAA/", "src/Modules/AAA/"]
+COPY ["src/Modules/OCS/", "src/Modules/OCS/"]
 COPY ["src/Host/Obss.Host/", "src/Host/Obss.Host/"]
 
 RUN dotnet publish "src/Host/Obss.Host/Obss.Host.csproj" \

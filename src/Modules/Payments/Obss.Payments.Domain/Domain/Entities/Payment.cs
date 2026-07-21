@@ -2,12 +2,13 @@ using Obss.Payments.Domain.Events;
 using Obss.Payments.Domain.Exceptions;
 using Obss.Payments.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Payments.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class Payment : AggregateRoot<Guid>
+public class Payment : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<PaymentAllocation> _allocations = [];
     private readonly List<Refund> _refunds = [];

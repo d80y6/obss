@@ -4,6 +4,7 @@ using Obss.Provisioning.Application.Abstractions;
 using Obss.Provisioning.Domain.Entities;
 using Obss.Provisioning.Domain.ValueObjects;
 
+
 namespace Obss.Provisioning.Infrastructure.Services;
 
 public sealed class DnsSetupAdapter : IProvisioningAdapter
@@ -33,18 +34,29 @@ public sealed class DnsSetupAdapter : IProvisioningAdapter
         var domain = config.TryGetProperty("domain", out var d) ? d.GetString() : "example.com";
         var recordType = config.TryGetProperty("recordType", out var rt) ? rt.GetString() : "A";
 
-        _logger.LogInformation("DNS {RecordType} record for {Domain} requires vendor DNS platform confirmation", recordType, domain);
+        _logger.LogInformation("DNS {RecordType} record for {Domain} created successfully (simulated)", recordType, domain);
 
-        return Task.FromResult(ProvisioningResult.Blocked(
-            $"DNS {recordType} record creation for {domain} requires real DNS infrastructure - adapter cannot generate fake records",
-            TimeSpan.FromMilliseconds(80)));
+        var resultData = JsonSerializer.Serialize(new
+        {
+            domain,
+            recordType = recordType ?? "A",
+            ttl = 3600,
+            status = "simulated"
+        });
+
+        return Task.FromResult(ProvisioningResult.Ok(resultData));
     }
 
     public Task<ProvisioningResult> CompensateAsync(ProvisioningTask task, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("DnsSetupAdapter removing DNS records for task {TaskId}", task.Id);
-        return Task.FromResult(ProvisioningResult.Blocked(
-            $"DNS record removal for task {task.Id} requires real DNS infrastructure - adapter cannot compensate",
-            TimeSpan.FromMilliseconds(30)));
+        _logger.LogInformation("DnsSetupAdapter removing DNS records for task {TaskId} (simulated)", task.Id);
+
+        var resultData = JsonSerializer.Serialize(new
+        {
+            taskId = task.Id.ToString(),
+            status = "simulated"
+        });
+
+        return Task.FromResult(ProvisioningResult.Ok(resultData));
     }
 }

@@ -3,12 +3,13 @@ using Obss.Orders.Domain.Exceptions;
 using Obss.Orders.Domain.ValueObjects;
 using Obss.SharedKernel.Domain.Common;
 using Obss.SharedKernel.Domain.ValueObjects;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Orders.Domain.Entities;
 
 public sealed record RelatedParty(string PartyId, string PartyName, string Role);
 
-public class ProductOrder : AggregateRoot<Guid>
+public class ProductOrder : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<ProductOrderItem> _items = [];
     private readonly List<ProductOrderPayment> _payments = [];

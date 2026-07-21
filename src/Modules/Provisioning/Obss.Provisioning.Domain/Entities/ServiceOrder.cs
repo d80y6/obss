@@ -1,9 +1,10 @@
 using Obss.Provisioning.Domain.Events;
 using Obss.SharedKernel.Domain.Common;
+using Obss.SharedKernel.Infrastructure.Persistence;
 
 namespace Obss.Provisioning.Domain.Entities;
 
-public class ServiceOrder : AggregateRoot<Guid>
+public class ServiceOrder : AggregateRoot<Guid>, ITenantEntity
 {
     private readonly List<ServiceOrderItem> _items = [];
     private readonly List<ServiceOrderRelatedParty> _relatedParties = [];
@@ -35,6 +36,7 @@ public class ServiceOrder : AggregateRoot<Guid>
     }
 
     public Guid TenantId { get; private set; }
+    string ITenantEntity.TenantId => TenantId.ToString("N");
     public string? ExternalId { get; private set; }
     public ServiceOrderState State { get; private set; }
     public string? Priority { get; private set; }

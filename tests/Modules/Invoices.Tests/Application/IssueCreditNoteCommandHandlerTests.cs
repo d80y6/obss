@@ -7,15 +7,13 @@ using Obss.Invoices.Application.Commands.IssueCreditNote;
 using Obss.Invoices.Domain.Entities;
 using Obss.Invoices.Domain.ValueObjects;
 using Obss.SharedKernel.Application.Abstractions;
-using Obss.SharedKernel.Domain.ValueObjects;
-
 namespace Obss.Invoices.Tests.Application;
 
 public class IssueCreditNoteCommandHandlerTests
 {
     private static Invoice CreateSentInvoice()
     {
-        var tenantId = TenantId.Create(Guid.NewGuid().ToString("N"));
+        var tenantId = Guid.NewGuid().ToString("N");
         var invoice = Invoice.Create(tenantId, "INV-2026-00001", Guid.NewGuid(),
             "Test", "test@example.com", "Addr",
             DateTime.UtcNow, DateTime.UtcNow.AddDays(30), "USD");
@@ -33,7 +31,7 @@ public class IssueCreditNoteCommandHandlerTests
         var repository = Substitute.For<IInvoiceRepository>();
         repository.GetByIdAsync(invoice.Id, Arg.Any<CancellationToken>()).Returns(invoice);
         repository.AddCreditNoteAsync(Arg.Any<CreditNote>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(CreditNote.Create(TenantId.Create("test"), "CN-001", Guid.NewGuid(), Guid.NewGuid(), "test", "USD")));
+            .Returns(Task.FromResult(CreditNote.Create("test", "CN-001", Guid.NewGuid(), Guid.NewGuid(), "test", "USD")));
         var unitOfWork = Substitute.For<IUnitOfWork>();
         var logger = Substitute.For<ILogger<IssueCreditNoteCommandHandler>>();
 

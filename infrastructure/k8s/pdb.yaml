@@ -1,0 +1,15 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: obss-api
+  namespace: obss
+  labels:
+    app: obss-api
+    app.kubernetes.io/name: obss-api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: obss-platform
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: obss-api

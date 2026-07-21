@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: obss-platform
+  labels:
+    app.kubernetes.io/part-of: obss-platform
+
+namespace: obss
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - pdb.yaml
+  - ingress.yaml
+  - network-policy.yaml
+
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/instance: obss-production
+
+images:
+  - name: obss-api
+    newName: your-registry/obss-api
+    newTag: latest

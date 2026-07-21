@@ -10,7 +10,8 @@ namespace Obss.Billing.Application.Commands.RecordBalanceTransaction;
 public sealed class RecordBalanceTransactionCommandHandler(
     IAccountBalanceRepository balanceRepository,
     IRepository<BillingAccount> accountRepository,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    ICurrentTenant currentTenant)
     : IRequestHandler<RecordBalanceTransactionCommand, Result>
 {
     public async Task<Result> Handle(RecordBalanceTransactionCommand request, CancellationToken cancellationToken)
@@ -25,7 +26,7 @@ public sealed class RecordBalanceTransactionCommandHandler(
         var balance = await balanceRepository.GetByBillingAccountIdAsync(request.BillingAccountId, cancellationToken);
         if (balance is null)
         {
-            balance = new AccountBalance(request.BillingAccountId, 0, 0, account.CreditLimit, account.Currency);
+            balance = new AccountBalance(currentTenant.TenantId!, request.BillingAccountId, 0, 0, account.CreditLimit, account.Currency);
             await balanceRepository.AddAsync(balance, cancellationToken);
         }
 
