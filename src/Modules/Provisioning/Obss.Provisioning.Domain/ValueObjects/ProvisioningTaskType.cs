@@ -41,5 +41,14 @@ public enum ProvisioningTaskType
     StaticIpAllocation,
     WifiAccessConfig,
     QualificationCheck,
-    InventoryReservation
+    InventoryReservation,
+    RouterInterfaceConfig = 46,
+    RouterBgpConfig = 47,
+    RouterOspfConfig = 48,
+    RouterStaticRouteConfig = 49,
+    RouterSystemConfig = 50,
+    RouterAclConfig = 51,
+    GetRouterStatus = 52,
+    GetRouterInventory = 53,
+    GetRouterAlarms = 54
 }

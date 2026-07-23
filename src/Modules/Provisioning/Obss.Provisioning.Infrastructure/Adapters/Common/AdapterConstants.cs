@@ -2,6 +2,14 @@ namespace Obss.Provisioning.Infrastructure.Adapters.Common;
 
 public static class AdapterConstants
 {
+    public const string TechnologyCiscoRouter = "cisco_router";
+    public const string TechnologyJuniperRouter = "juniper_router";
+    public const string TechnologyNokiaRouter = "nokia_router";
+
+    public const string AdapterCiscoRouter = "CISCO_ROUTER";
+    public const string AdapterJuniperRouter = "JUNIPER_ROUTER";
+    public const string AdapterNokiaRouter = "NOKIA_ROUTER";
+
     public static class TechnologyTypes
     {
         public const string Ftth = "ftth";

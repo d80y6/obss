@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>ProvisioningIntegrationTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Obss.Provisioning.Domain\Obss.Provisioning.Domain.csproj" />
     <ProjectReference Include="..\..\Orders\Obss.Orders.Application\Obss.Orders.Application.csproj" />
     <ProjectReference Include="..\..\ServiceInventory\Obss.ServiceInventory.Application\Obss.ServiceInventory.Application.csproj" />

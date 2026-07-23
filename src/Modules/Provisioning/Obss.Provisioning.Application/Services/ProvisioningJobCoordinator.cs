@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Obss.Provisioning.Application.Abstractions;
 using Obss.Provisioning.Domain.Entities;
@@ -107,7 +108,7 @@ public sealed class ProvisioningJobCoordinator : IProvisioningJobCoordinator
 
     private async Task<TaskExecutionResult> ExecuteTaskWithRetryAsync(ProvisioningTask task, CancellationToken ct)
     {
-        var adapterName = ResolveAdapterName(task.TaskType);
+        var adapterName = ResolveAdapterName(task.TaskType, task.AssignedTo, task.Configuration);
         var adapter = _adapterRegistry.GetAdapter(adapterName, adapterName);
 
         if (adapter is null)
@@ -183,7 +184,7 @@ public sealed class ProvisioningJobCoordinator : IProvisioningJobCoordinator
         {
             try
             {
-                var adapterName = ResolveAdapterName(task.TaskType);
+                var adapterName = ResolveAdapterName(task.TaskType, task.AssignedTo, task.Configuration);
                 var adapter = _adapterRegistry.GetAdapter(adapterName, adapterName);
 
                 if (adapter is not null)
@@ -202,8 +203,14 @@ public sealed class ProvisioningJobCoordinator : IProvisioningJobCoordinator
         job.Rollback();
     }
 
-    private static string ResolveAdapterName(ProvisioningTaskType taskType)
+    internal static string ResolveAdapterName(ProvisioningTaskType taskType)
+        => ResolveAdapterName(taskType, null, null);
+
+    internal static string ResolveAdapterName(ProvisioningTaskType taskType, string? assignedTo, JsonDocument? config)
     {
+        if (IsRouterTask(taskType))
+            return ResolveVendorAdapter(assignedTo, config);
+
         return taskType switch
         {
             ProvisioningTaskType.FtthOntProvision or ProvisioningTaskType.FtthServicePortConfig
@@ -233,6 +240,38 @@ public sealed class ProvisioningJobCoordinator : IProvisioningJobCoordinator
 
             _ => "INTERNAL"
         };
+    }
+
+    private static bool IsRouterTask(ProvisioningTaskType taskType)
+        => taskType is ProvisioningTaskType.RouterInterfaceConfig
+            or ProvisioningTaskType.RouterBgpConfig
+            or ProvisioningTaskType.RouterOspfConfig
+            or ProvisioningTaskType.RouterStaticRouteConfig
+            or ProvisioningTaskType.RouterSystemConfig
+            or ProvisioningTaskType.RouterAclConfig
+            or ProvisioningTaskType.GetRouterStatus
+            or ProvisioningTaskType.GetRouterInventory
+            or ProvisioningTaskType.GetRouterAlarms;
+
+    private static string ResolveVendorAdapter(string? assignedTo, JsonDocument? config)
+    {
+        if (config?.RootElement.TryGetProperty("vendor", out var vendorProp) == true)
+        {
+            var vendor = vendorProp.GetString();
+            if (string.Equals(vendor, "juniper", StringComparison.OrdinalIgnoreCase))
+                return "JUNIPER_ROUTER";
+            if (string.Equals(vendor, "nokia", StringComparison.OrdinalIgnoreCase))
+                return "NOKIA_ROUTER";
+        }
+
+        if (!string.IsNullOrEmpty(assignedTo))
+        {
+            var lower = assignedTo.ToLowerInvariant();
+            if (lower.Contains("juniper")) return "JUNIPER_ROUTER";
+            if (lower.Contains("nokia")) return "NOKIA_ROUTER";
+        }
+
+        return "CISCO_ROUTER";
     }
 
     private static void UpdateProgress(Guid jobId, int completed, int total, string status, string? currentTask, string? error)
