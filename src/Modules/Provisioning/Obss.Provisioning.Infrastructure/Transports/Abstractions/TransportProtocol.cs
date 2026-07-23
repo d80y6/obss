@@ -10,5 +10,6 @@ public enum TransportProtocol
     Rest,
     Soap,
     Tr069,
-    Cli
+    Cli,
+    Restconf
 }

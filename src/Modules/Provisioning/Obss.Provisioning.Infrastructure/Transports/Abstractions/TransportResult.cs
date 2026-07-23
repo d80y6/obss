@@ -1,6 +1,6 @@
 namespace Obss.Provisioning.Infrastructure.Transports.Abstractions;
 
-public sealed record TransportResult
+public record TransportResult
 {
     public bool Success { get; init; }
     public string? Data { get; init; }
