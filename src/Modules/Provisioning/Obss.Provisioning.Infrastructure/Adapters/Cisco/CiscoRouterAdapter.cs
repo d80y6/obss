@@ -298,6 +298,15 @@ public sealed class CiscoRouterAdapter : ICiscoRouterAdapter, IDisposable
         }
     }
 
+    public async Task<AdapterResult<DeviceStatus>> HealthCheckAsync()
+    {
+        var result = await _transport.GetAsync(CiscoAdapterConstants.DeviceStatusPath);
+        if (!result.Success)
+            return AdapterResult<DeviceStatus>.Failure(result.ErrorMessage ?? "Device unreachable");
+
+        return await GetDeviceStatusAsync();
+    }
+
     public async Task<AdapterResult<IReadOnlyList<AlarmInfo>>> GetActiveAlarmsAsync()
     {
         var result = await _transport.GetAsync(CiscoAdapterConstants.AlarmsPath);

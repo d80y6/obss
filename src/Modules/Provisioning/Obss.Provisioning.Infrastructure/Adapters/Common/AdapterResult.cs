@@ -112,3 +112,13 @@ public sealed record AdapterResult<T>
 
     public static AdapterResult<T> Failure(string error) => new() { IsSuccess = false, ErrorMessage = error };
 }
+
+public static class AdapterResultExtensions
+{
+    public static AdapterResult ToAdapterResult<T>(this AdapterResult<T> result)
+    {
+        return result.IsSuccess
+            ? AdapterResult.Ok()
+            : AdapterResult.Fail(result.ErrorMessage ?? "Unknown error");
+    }
+}

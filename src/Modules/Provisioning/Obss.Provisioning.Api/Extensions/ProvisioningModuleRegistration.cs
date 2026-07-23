@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Obss.Provisioning.Api.Endpoints;
 using Obss.Provisioning.Application.Abstractions;
@@ -10,6 +11,7 @@ using Obss.Provisioning.Application.Diagnostics;
 using Obss.Provisioning.Application.Mappings;
 using Obss.Provisioning.Application.Services;
 using Obss.Provisioning.Infrastructure.Adapters.Common;
+using Obss.Provisioning.Infrastructure.Adapters.Cisco;
 using Obss.Provisioning.Infrastructure.Adapters.Huawei;
 using Obss.Provisioning.Infrastructure.Persistence;
 using Obss.Provisioning.Infrastructure.Persistence.Repositories;
@@ -17,6 +19,7 @@ using Obss.Provisioning.Infrastructure.Services;
 using Obss.Provisioning.Infrastructure.Transports;
 using Obss.Provisioning.Infrastructure.Transports.Abstractions;
 using Obss.Provisioning.Infrastructure.Transports.Extensions;
+using Obss.Provisioning.Infrastructure.Transports.Restconf;
 using Obss.Provisioning.Infrastructure.Transports.Netconf;
 using Obss.Provisioning.Infrastructure.Transports.Rest;
 using Obss.Provisioning.Infrastructure.Transports.Snmp;
@@ -40,6 +43,7 @@ public static class ProvisioningModuleRegistration
         services.AddHostedService<ProvisioningJobProcessor>();
 
         RegisterHuaweiAdapter(services, configuration);
+        RegisterCiscoAdapter(services, configuration);
 
         services.AddScoped<IProvisioningAdapter, NetworkProvisioningAdapter>();
         services.AddScoped<IProvisioningAdapter, DnsSetupAdapter>();
@@ -101,6 +105,44 @@ public static class ProvisioningModuleRegistration
         }
 
         services.AddScoped<IProvisioningAdapter, HuaweiProvisioningAdapter>();
+    }
+
+    private static void RegisterCiscoAdapter(IServiceCollection services, IConfiguration? configuration)
+    {
+        var config = new CiscoAdapterConfig();
+
+        if (configuration is not null)
+        {
+            var section = configuration.GetSection("Provisioning:Cisco");
+            if (section.Exists())
+            {
+                section.Bind(config);
+
+                config.RestconfTransport = section.GetSection("RestconfTransport").Exists()
+                    ? section.GetSection("RestconfTransport").Get<RestconfTransportConfig>()
+                    : null;
+            }
+        }
+
+        services.AddSingleton(config);
+
+        if (config.UseSimulator)
+        {
+            services.AddSingleton<ICiscoRouterAdapter>(_ => new CiscoRouterSimulator());
+        }
+        else
+        {
+            services.AddSingleton<ICiscoRouterAdapter>(_ =>
+            {
+                var restconfTransport = new RestconfTransport(new RestconfTransportConfig
+                {
+                    BaseUri = config.BaseUri
+                });
+                return new CiscoRouterAdapter(config, restconfTransport);
+            });
+        }
+
+        services.AddScoped<IProvisioningAdapter, CiscoProvisioningAdapter>();
     }
 
     public static IEndpointRouteBuilder MapProvisioningEndpoints(this IEndpointRouteBuilder app)

@@ -137,6 +137,11 @@ public sealed class CiscoRouterSimulator : ICiscoRouterAdapter
         return Task.FromResult(AdapterResult<DeviceInventory>.Success(inventory));
     }
 
+    public Task<AdapterResult<DeviceStatus>> HealthCheckAsync()
+    {
+        return GetDeviceStatusAsync();
+    }
+
     public Task<AdapterResult<IReadOnlyList<AlarmInfo>>> GetActiveAlarmsAsync()
     {
         return Task.FromResult(AdapterResult<IReadOnlyList<AlarmInfo>>.Success(Array.Empty<AlarmInfo>()));

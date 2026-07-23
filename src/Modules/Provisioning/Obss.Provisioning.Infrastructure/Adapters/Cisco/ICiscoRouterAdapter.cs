@@ -27,4 +27,6 @@ public interface ICiscoRouterAdapter
     Task<AdapterResult<DeviceInventory>> GetInventoryAsync();
 
     Task<AdapterResult<IReadOnlyList<AlarmInfo>>> GetActiveAlarmsAsync();
+
+    Task<AdapterResult<DeviceStatus>> HealthCheckAsync();
 }
