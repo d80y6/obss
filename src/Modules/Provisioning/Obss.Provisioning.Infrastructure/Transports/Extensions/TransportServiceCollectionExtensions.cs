@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Obss.Provisioning.Infrastructure.Transports.Abstractions;
 using Obss.Provisioning.Infrastructure.Transports.Netconf;
 using Obss.Provisioning.Infrastructure.Transports.Rest;
+using Obss.Provisioning.Infrastructure.Transports.Restconf;
 using Obss.Provisioning.Infrastructure.Transports.Snmp;
 using Obss.Provisioning.Infrastructure.Transports.Ssh;
 
@@ -53,6 +54,16 @@ public static class TransportServiceCollectionExtensions
             var logger = sp.GetRequiredService<ILogger<RestTransport>>();
             var httpClientFactory = sp.GetService<IHttpClientFactory>();
             return new RestTransport(config, logger, httpClientFactory);
+        });
+        return services;
+    }
+
+    public static IServiceCollection AddRestconfTransport(this IServiceCollection services, RestconfTransportConfig config)
+    {
+        services.AddSingleton<IRestconfTransport>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger<RestconfTransport>>();
+            return new RestconfTransport(config, logger);
         });
         return services;
     }

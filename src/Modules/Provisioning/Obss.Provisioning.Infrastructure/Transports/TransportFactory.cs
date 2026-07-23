@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Obss.Provisioning.Infrastructure.Transports.Abstractions;
 using Obss.Provisioning.Infrastructure.Transports.Netconf;
 using Obss.Provisioning.Infrastructure.Transports.Rest;
+using Obss.Provisioning.Infrastructure.Transports.Restconf;
 using Obss.Provisioning.Infrastructure.Transports.Snmp;
 using Obss.Provisioning.Infrastructure.Transports.Ssh;
 
@@ -24,7 +25,8 @@ public sealed class TransportFactory : ITransportFactory
         TransportProtocol.SnmpV3,
         TransportProtocol.Ssh,
         TransportProtocol.Netconf,
-        TransportProtocol.Rest
+        TransportProtocol.Rest,
+        TransportProtocol.Restconf
     ];
 
     public bool SupportsProtocol(TransportProtocol protocol) => SupportedProtocols.Contains(protocol);
@@ -46,6 +48,9 @@ public sealed class TransportFactory : ITransportFactory
 
             TransportProtocol.Rest
                 => CreateRestTransport(config, loggerFactory),
+
+            TransportProtocol.Restconf
+                => CreateRestconfTransport(config, loggerFactory),
 
             _ => throw new NotSupportedException($"Transport protocol {config.Protocol} is not supported")
         };
@@ -73,6 +78,14 @@ public sealed class TransportFactory : ITransportFactory
             throw new InvalidOperationException($"Expected NetconfTransportConfig but got {config.GetType().Name}");
 
         return new NetconfTransport(netconfConfig);
+    }
+
+    private static INetworkTransport CreateRestconfTransport(ITransportConfig config, ILoggerFactory loggerFactory)
+    {
+        if (config is not RestconfTransportConfig restconfConfig)
+            throw new InvalidOperationException($"Expected RestconfTransportConfig but got {config.GetType().Name}");
+
+        return new RestconfTransport(restconfConfig, loggerFactory.CreateLogger<RestconfTransport>());
     }
 
     private INetworkTransport CreateRestTransport(ITransportConfig config, ILoggerFactory loggerFactory)
