@@ -12,6 +12,7 @@ public enum AdapterOperationState
 public sealed record AdapterResult
 {
     public bool Success { get; init; }
+    public bool IsSuccess => Success;
     public string? ErrorMessage { get; init; }
     public string? ResultData { get; init; }
     public AdapterOperationState State { get; init; }
@@ -99,4 +100,15 @@ public sealed record AdapterResult
             CorrelationId = correlationId ?? string.Empty
         };
     }
+}
+
+public sealed record AdapterResult<T>
+{
+    public bool IsSuccess { get; init; }
+    public T Data { get; init; } = default!;
+    public string? ErrorMessage { get; init; }
+
+    public static AdapterResult<T> Success(T data) => new() { IsSuccess = true, Data = data };
+
+    public static AdapterResult<T> Failure(string error) => new() { IsSuccess = false, ErrorMessage = error };
 }
