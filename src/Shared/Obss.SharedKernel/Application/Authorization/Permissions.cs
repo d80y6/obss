@@ -140,6 +140,17 @@ public static class Permissions
         public const string PreferenceManage = "notifications:preferences:manage";
     }
 
+    public static class Ocs
+    {
+        public const string BalanceRead = "ocs:balances:read";
+        public const string BalanceWrite = "ocs:balances:write";
+        public const string BalanceAdjust = "ocs:balances:adjust";
+        public const string ReserveCredit = "ocs:reserve";
+        public const string ReservationDebit = "ocs:reservations:debit";
+        public const string ReservationRelease = "ocs:reservations:release";
+        public const string CreditPoolRead = "ocs:credit-pools:read";
+    }
+
     public static class Telecom
     {
         public const string ServiceRead = "telecom.service.read";

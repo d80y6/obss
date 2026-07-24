@@ -1,0 +1,12 @@
+testuser Cleartext-Password := "testpass123"
+    Reply-Message = "Welcome to OBSS Platform",
+    Framed-IP-Address = 10.10.10.100,
+    Session-Timeout = 3600
+
+admin Cleartext-Password := "admin456"
+    Reply-Message = "Admin access granted",
+    Framed-IP-Address = 10.10.10.1,
+    Idle-Timeout = 1800
+
+monitor Cleartext-Password := "healthcheck"
+    Reply-Message = "Health check OK"

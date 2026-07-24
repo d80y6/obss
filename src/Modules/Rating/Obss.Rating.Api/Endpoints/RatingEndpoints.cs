@@ -14,6 +14,7 @@ using Obss.Rating.Application.Queries.GetPromotions;
 using Obss.Rating.Application.Queries.GetRules;
 using Obss.Rating.Application.Queries.GetUnratedRecords;
 using Obss.Rating.Application.Queries.GetUsageBySubscription;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
 
@@ -29,7 +30,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/rating/usage/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.UsageRead));
 
         group.MapPost("/usage/rate", async (IMediator mediator) =>
         {
@@ -37,7 +38,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(new { Rated = result.Value })
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.CdrMediate));
 
         group.MapPost("/usage/{id:guid}/rate-realtime", async (Guid id, IMediator mediator) =>
         {
@@ -45,7 +46,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.CdrMediate));
 
         group.MapGet("/usage/unrated", async (IMediator mediator) =>
         {
@@ -53,7 +54,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.UsageRead));
 
         group.MapGet("/usage/subscription/{subscriptionId:guid}", async (
             Guid subscriptionId,
@@ -68,7 +69,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.UsageRead));
 
         group.MapPost("/rules", async (CreateRatingRuleCommand command, IMediator mediator) =>
         {
@@ -76,7 +77,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/rating/rules/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/rules", async (IMediator mediator) =>
         {
@@ -84,7 +85,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/promotions", async (CreatePromotionCommand command, IMediator mediator) =>
         {
@@ -92,7 +93,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/rating/promotions/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/promotions", async (IMediator mediator) =>
         {
@@ -100,7 +101,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/promotions/{id:guid}/deactivate", async (Guid id, IMediator mediator) =>
         {
@@ -108,7 +109,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/promotions/apply", async (ApplyPromotionCommand command, IMediator mediator) =>
         {
@@ -116,7 +117,7 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/promotions/applicable", async (
             decimal? amount,
@@ -130,6 +131,6 @@ public static class RatingEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
     }
 }

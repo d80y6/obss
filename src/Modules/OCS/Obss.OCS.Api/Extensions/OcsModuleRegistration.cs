@@ -1,28 +1,21 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Obss.OCS.Application.Abstractions;
 using Obss.OCS.Application.Mappings;
-using Obss.OCS.Infrastructure.Persistence;
+using Obss.OCS.Infrastructure.BackgroundJobs;
 using Obss.OCS.Infrastructure.Persistence.Repositories;
 
 namespace Obss.OCS.Api.Extensions;
 
 public static class OcsModuleRegistration
 {
-    public static IServiceCollection AddOcsModule(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOcsModule(this IServiceCollection services)
     {
-        var connectionString = configuration.GetConnectionString("Postgres")
-            ?? throw new InvalidOperationException("Connection string 'Postgres' not found.");
-
-        services.AddDbContext<OcsDbContext>(options =>
-            options.UseNpgsql(connectionString, npgsql =>
-                npgsql.MigrationsHistoryTable("__ef_migrations_history", "ocs"))
-            .UseSnakeCaseNamingConvention());
-
         services.AddScoped<IBalanceRepository, BalanceRepository>();
         services.AddScoped<ICreditPoolRepository, CreditPoolRepository>();
         services.AddScoped<IOcsTransactionRepository, OcsTransactionRepository>();
+        services.AddScoped<IReservationRepository, ReservationRepository>();
+
+        services.AddHostedService<ReservationExpiryJob>();
 
         OcsMappingConfig.Configure();
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using Obss.Notifications.Application.Commands.CreateNotificationTemplate;
 using Obss.Notifications.Application.Commands.UpdateTemplate;
 using Obss.Notifications.Application.Queries.GetNotificationTemplates;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Notifications.Api.Endpoints;
 
@@ -19,7 +20,7 @@ public static class TemplateEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/notifications/templates/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.TemplateManage));
 
         group.MapGet("/templates", async (
             [AsParameters] GetNotificationTemplatesQuery query, IMediator mediator) =>
@@ -28,7 +29,7 @@ public static class TemplateEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.TemplateManage));
 
         group.MapPut("/templates/{id:guid}", async (
             Guid id, UpdateTemplateCommand command, IMediator mediator) =>
@@ -39,6 +40,6 @@ public static class TemplateEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.TemplateManage));
     }
 }

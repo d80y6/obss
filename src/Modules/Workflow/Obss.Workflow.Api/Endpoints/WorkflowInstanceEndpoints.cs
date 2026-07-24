@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.Workflow.Application.Commands.CompleteWorkflowInstance;
 using Obss.Workflow.Application.Commands.ExecuteWorkflowTask;
 using Obss.Workflow.Application.Commands.FailWorkflowInstance;
@@ -22,7 +23,7 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/workflow/instances/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/instances/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -30,7 +31,7 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/instances", async ([AsParameters] GetWorkflowInstancesQuery query, IMediator mediator) =>
         {
@@ -38,7 +39,7 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/tasks/pending", async (IMediator mediator) =>
         {
@@ -46,7 +47,7 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/instances/{id:guid}/execute/{taskId:guid}", async (Guid id, Guid taskId, IMediator mediator) =>
         {
@@ -54,7 +55,7 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/instances/{id:guid}/complete", async (Guid id, IMediator mediator) =>
         {
@@ -62,7 +63,7 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/instances/{id:guid}/fail", async (Guid id, FailWorkflowInstanceCommand command, IMediator mediator) =>
         {
@@ -73,6 +74,6 @@ public static class WorkflowInstanceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
     }
 }

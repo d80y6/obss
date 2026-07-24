@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.ServiceCatalog.Application.Commands.ServiceSpecification.AddCharacteristic;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
 using Obss.ServiceCatalog.Application.Commands.ServiceSpecification.AddCharacteristicValue;
@@ -32,7 +33,7 @@ internal static class ServiceSpecificationEndpoints
         {
             var id = await mediator.Send(command);
             return Results.Created($"/api/v1/service-catalog/service-specifications/{id}", id);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/service-specifications", async ([AsParameters] GetServiceSpecificationsQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -40,40 +41,40 @@ internal static class ServiceSpecificationEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, total);
             return Results.Ok(items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/service-specifications/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetServiceSpecificationByIdQuery(id));
             return result is not null ? Results.Ok(result) : Results.NotFound();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPatch("/service-specifications/{id:guid}", async (Guid id, UpdateServiceSpecificationCommand command, IMediator mediator) =>
         {
             if (id != command.Id) return Results.BadRequest("Id mismatch");
             await mediator.Send(command);
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/service-specifications/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             await mediator.Send(new DeleteServiceSpecificationCommand(id));
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         // Characteristics
         group.MapGet("/service-specifications/{specId:guid}/characteristics", async (Guid specId, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetCharacteristicsQuery(specId));
             return Results.Ok(result);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/service-specifications/{specId:guid}/characteristics", async (Guid specId, AddCharacteristicCommand command, IMediator mediator) =>
         {
             command.GetType().GetProperty("ServiceSpecificationId")?.SetValue(command, specId);
             var id = await mediator.Send(command);
             return Results.Created($"/api/v1/service-catalog/service-specifications/{specId}/characteristics/{id}", id);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPut("/service-specifications/{specId:guid}/characteristics/{charId:guid}", async (Guid specId, Guid charId, UpdateCharacteristicCommand command, IMediator mediator) =>
         {
@@ -81,20 +82,20 @@ internal static class ServiceSpecificationEndpoints
                 return Results.BadRequest("Id mismatch");
             await mediator.Send(command);
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/service-specifications/{specId:guid}/characteristics/{charId:guid}", async (Guid specId, Guid charId, IMediator mediator) =>
         {
             await mediator.Send(new RemoveCharacteristicCommand(specId, charId));
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         // Characteristic Values
         group.MapGet("/service-specifications/{specId:guid}/characteristics/{charId:guid}/values", async (Guid specId, Guid charId, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetCharacteristicValuesQuery(specId, charId));
             return Results.Ok(result);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/service-specifications/{specId:guid}/characteristics/{charId:guid}/values", async (Guid specId, Guid charId, AddCharacteristicValueCommand command, IMediator mediator) =>
         {
@@ -102,7 +103,7 @@ internal static class ServiceSpecificationEndpoints
                 return Results.BadRequest("Id mismatch");
             var id = await mediator.Send(command);
             return Results.Created($"/api/v1/service-catalog/service-specifications/{specId}/characteristics/{charId}/values/{id}", id);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPut("/service-specifications/{specId:guid}/characteristics/{charId:guid}/values/{valueId:guid}", async (Guid specId, Guid charId, Guid valueId, UpdateCharacteristicValueCommand command, IMediator mediator) =>
         {
@@ -110,20 +111,20 @@ internal static class ServiceSpecificationEndpoints
                 return Results.BadRequest("Id mismatch");
             await mediator.Send(command);
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/service-specifications/{specId:guid}/characteristics/{charId:guid}/values/{valueId:guid}", async (Guid specId, Guid charId, Guid valueId, IMediator mediator) =>
         {
             await mediator.Send(new RemoveCharacteristicValueCommand(specId, charId, valueId));
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         // Relationships
         group.MapGet("/service-specifications/{specId:guid}/relationships", async (Guid specId, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetSpecRelationshipsQuery(specId));
             return Results.Ok(result);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/service-specifications/{specId:guid}/relationships", async (Guid specId, AddSpecRelationshipCommand command, IMediator mediator) =>
         {
@@ -131,12 +132,12 @@ internal static class ServiceSpecificationEndpoints
                 return Results.BadRequest("Id mismatch");
             var id = await mediator.Send(command);
             return Results.Created($"/api/v1/service-catalog/service-specifications/{specId}/relationships/{id}", id);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/service-specifications/{specId:guid}/relationships/{relId:guid}", async (Guid specId, Guid relId, IMediator mediator) =>
         {
             await mediator.Send(new RemoveSpecRelationshipCommand(specId, relId));
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
     }
 }

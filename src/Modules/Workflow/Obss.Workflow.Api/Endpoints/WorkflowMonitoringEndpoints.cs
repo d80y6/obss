@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.Workflow.Application.Queries.GetRunningWorkflows;
 using Obss.Workflow.Application.Queries.GetWorkflowDashboard;
 using Obss.Workflow.Application.Queries.GetWorkflowMetrics;
@@ -18,7 +19,7 @@ public static class WorkflowMonitoringEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/metrics", async ([AsParameters] GetWorkflowMetricsQuery query, IMediator mediator) =>
         {
@@ -26,7 +27,7 @@ public static class WorkflowMonitoringEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/instances/running", async (IMediator mediator) =>
         {
@@ -34,6 +35,6 @@ public static class WorkflowMonitoringEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
     }
 }

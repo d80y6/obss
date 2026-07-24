@@ -23,6 +23,7 @@ using Obss.Provisioning.Application.Queries.GetServiceOrderItems;
 using Obss.Provisioning.Domain.Entities;
 using Obss.Provisioning.Infrastructure.Persistence;
 using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Provisioning.Api.Endpoints;
 
@@ -36,7 +37,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/provisioning/jobs/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobWrite));
 
         group.MapGet("/jobs/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -44,7 +45,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobRead));
 
         group.MapGet("/jobs", async ([AsParameters] GetProvisioningJobsQuery query, IMediator mediator) =>
         {
@@ -52,7 +53,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobRead));
 
         group.MapPost("/jobs/{id:guid}/start", async (Guid id, IMediator mediator) =>
         {
@@ -60,7 +61,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobExecute));
 
         group.MapPost("/jobs/{id:guid}/fail", async (Guid id, FailProvisioningJobCommand command, IMediator mediator) =>
         {
@@ -70,7 +71,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobWrite));
 
         group.MapPost("/jobs/{id:guid}/retry", async (Guid id, IMediator mediator) =>
         {
@@ -78,7 +79,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobExecute));
 
         group.MapGet("/jobs/{id:guid}/logs", async (Guid id, ProvisioningDbContext dbContext) =>
         {
@@ -99,7 +100,7 @@ public static class ProvisioningEndpoints
                 })
                 .ToListAsync();
             return (IResult)TypedResults.Ok(tasks);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.JobRead));
 
         group.MapGet("/templates", async (IMediator mediator) =>
         {
@@ -107,7 +108,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.TemplateManage));
 
         group.MapPost("/templates", async (CreateProvisioningTemplateCommand command, IMediator mediator) =>
         {
@@ -115,7 +116,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/provisioning/templates/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.TemplateManage));
 
         group.MapGet("/templates/{id:guid}", async (Guid id, IProvisioningTemplateRepository repository) =>
         {
@@ -123,7 +124,7 @@ public static class ProvisioningEndpoints
             return template is not null
                 ? (IResult)TypedResults.Ok(template.Adapt<ProvisioningTemplateDto>())
                 : (IResult)TypedResults.NotFound();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.TemplateManage));
 
         // ServiceOrder endpoints
         group.MapPost("/service-orders", async (CreateServiceOrderCommand command, IMediator mediator) =>
@@ -132,7 +133,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/provisioning/service-orders/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderWrite));
 
         group.MapGet("/service-orders/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -140,7 +141,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderRead));
 
         group.MapGet("/service-orders", async ([AsParameters] GetServiceOrdersQuery query, IMediator mediator) =>
         {
@@ -148,7 +149,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderRead));
 
         group.MapPatch("/service-orders/{id:guid}", async (Guid id, UpdateServiceOrderCommand command, IMediator mediator) =>
         {
@@ -158,7 +159,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderWrite));
 
         group.MapDelete("/service-orders/{id:guid}", async (Guid id, IServiceOrderRepository repository, IUnitOfWork unitOfWork) =>
         {
@@ -170,7 +171,7 @@ public static class ProvisioningEndpoints
             await repository.DeleteAsync(order);
             await unitOfWork.SaveChangesAsync();
             return (IResult)TypedResults.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderWrite));
 
         group.MapPost("/service-orders/{id:guid}/cancel", async (Guid id, CancelServiceOrderCommand command, IMediator mediator) =>
         {
@@ -180,7 +181,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderWrite));
 
         group.MapGet("/service-orders/{id:guid}/items", async (Guid id, IMediator mediator) =>
         {
@@ -188,7 +189,7 @@ public static class ProvisioningEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderRead));
 
         group.MapGet("/service-orders/{id:guid}/items/{itemId:guid}", async (Guid id, Guid itemId, IServiceOrderRepository repository) =>
         {
@@ -199,6 +200,6 @@ public static class ProvisioningEndpoints
             return item is not null
                 ? (IResult)TypedResults.Ok(item.Adapt<ServiceOrderItemDto>())
                 : (IResult)TypedResults.NotFound();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Provisioning.ServiceOrderRead));
     }
 }

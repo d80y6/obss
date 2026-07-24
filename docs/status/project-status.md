@@ -4,7 +4,7 @@
 |---|---|
 | **Project** | Telecom OSS/BSS Platform |
 | **Market** | Republic of Yemen |
-| **Last Updated** | 2026-07-21 |
+| **Last Updated** | 2026-07-24 |
 | **Owner** | Chief OSS/BSS Architect |
 
 ---
@@ -128,7 +128,7 @@
 | **Total C# Files** | ~1,650 (cumulative) |
 | **Total Code Lines** | ~58,000 (cumulative) |
 | **Total Projects** | 82 (cumulative) |
-| **AAA Module** | Added — RadiusSession, NetworkAccessServer entities; RADIUS accounting flows |
+| **AAA Module** | Added — RadiusSession, NetworkAccessServer entities; real RADIUS (RFC 2865/2866) + Diameter Gy (RFC 4006) + TACACS+ (RFC 8907) protocol adapters; RADIUS server endpoint for BRAS/BNG accounting ingest |
 | **EventManagement Module** | Added — EventSubscription, WebhookEvent entities; webhook delivery |
 | **OCS Module** | Added — Balance, CreditPool, OcsTransaction entities; real-time credit control |
 | **Ticketing Module** | Fully implemented — ticket lifecycle management, escalation rules (time/level-based), automatic assignment, SLA tracking with breach detection |
@@ -137,7 +137,7 @@
 | **Audit Module** | Fully implemented — immutable audit trail, compliance reports (SOX/GDPR/PCI-DSS), configurable data retention policies, audit alert rules with real-time detection |
 | **Cross-module notifications** | Integrated — invoice finalized, payment completed, ticket assigned, subscription renewal alerts, SLA breach alerts, dunning notifications |
 | **Completed Features** | 16 features (F-081–F-096): Ticket Lifecycle, Ticket Escalation, Ticket Assignment, SLA Tracking, Notification Channels, Notification Templates, Notification Preferences, Delivery Tracking, Report Generation, Dashboard Framework, Data Exports, Scheduled Reports, Audit Trail, Compliance Reporting, Data Retention, Audit Alerts |
-| **AAA Module** | Fully implemented — RADIUS accounting, network access server management, authentication session tracking |
+| **AAA Module** | Fully implemented — RADIUS accounting, network access server management, authentication session tracking; real RADIUS, Diameter Credit-Control (Gy), and TACACS+ protocol adapters; RADIUS server endpoint for BRAS/BNG accounting; adapter selection by NAS type |
 | **EventManagement Module** | Fully implemented — event subscriptions, webhook delivery, event publishing |
 | **OCS Module** | Fully implemented — real-time balance management, credit pools, charging transactions, credit reservation |
 | **Modules Implemented** | 22 of 22 (all above + Phase 2–5 modules) |
@@ -178,6 +178,7 @@
 | 2026-07-21 | Huawei vendor adapter with real transport integration |
 | 2026-07-21 | Frontend pages for OCS (6) and EventManagement (4) added |
 | 2026-07-21 | Multi-tenancy ITenantEntity applied to 30+ entity types across 16 modules |
+| 2026-07-24 | Real RADIUS (RFC 2865/2866), Diameter Gy (RFC 4006), TACACS+ (RFC 8907) adapters implemented; RADIUS server endpoint; adapter selection service; AAA test project (14 tests); AAA seed data; FreeRADIUS test container |
 
 ## Upcoming Milestones
 

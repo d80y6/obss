@@ -14,6 +14,7 @@ using Obss.NumberInventory.Application.Commands.SuspendNumber;
 using Obss.NumberInventory.Application.Queries.GetAvailableNumbers;
 using Obss.NumberInventory.Application.Queries.GetNumberById;
 using Obss.NumberInventory.Application.Queries.SearchNumbers;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.NumberInventory.Api.Endpoints;
 
@@ -27,7 +28,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/number-inventory/numbers/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslWrite));
 
         group.MapGet("/numbers/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -35,7 +36,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslRead));
 
         group.MapGet("/numbers", async ([AsParameters] SearchNumbersQuery query, IMediator mediator) =>
         {
@@ -43,7 +44,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslRead));
 
         group.MapGet("/numbers/available", async ([AsParameters] GetAvailableNumbersQuery query, IMediator mediator) =>
         {
@@ -51,7 +52,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslRead));
 
         group.MapPost("/numbers/{id:guid}/assign", async (Guid id, AssignNumberCommand command, IMediator mediator) =>
         {
@@ -61,7 +62,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslWrite));
 
         group.MapPost("/numbers/{id:guid}/release", async (Guid id, IMediator mediator) =>
         {
@@ -69,7 +70,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslWrite));
 
         group.MapPost("/numbers/{id:guid}/reserve", async (Guid id, IMediator mediator) =>
         {
@@ -77,7 +78,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslWrite));
 
         group.MapPost("/numbers/{id:guid}/suspend", async (Guid id, IMediator mediator) =>
         {
@@ -85,7 +86,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceSuspend));
 
         group.MapPost("/numbers/{id:guid}/resume", async (Guid id, IMediator mediator) =>
         {
@@ -93,7 +94,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceResume));
 
         group.MapPost("/numbers/{id:guid}/disconnect", async (Guid id, IMediator mediator) =>
         {
@@ -101,7 +102,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceTerminate));
 
         group.MapPost("/numbers/{id:guid}/port-in", async (Guid id, PortInNumberCommand command, IMediator mediator) =>
         {
@@ -111,7 +112,7 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslWrite));
 
         group.MapPost("/numbers/{id:guid}/port-out", async (Guid id, IMediator mediator) =>
         {
@@ -119,6 +120,6 @@ public static class NumberEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdslWrite));
     }
 }

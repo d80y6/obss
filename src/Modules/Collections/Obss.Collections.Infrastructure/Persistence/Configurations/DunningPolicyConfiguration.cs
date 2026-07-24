@@ -53,7 +53,7 @@ public sealed class DunningPolicyConfiguration : IEntityTypeConfiguration<Dunnin
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                 v => JsonSerializer.Deserialize<Dictionary<int, decimal>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<int, decimal>())
-            .Metadata.SetValueComparer(new ValueComparer<Dictionary<int, decimal>>(
+            .Metadata.SetValueComparer(new ValueComparer<IReadOnlyDictionary<int, decimal>>(
                 (c1, c2) => c1!.SequenceEqual(c2!),
                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key, v.Value)),
                 c => c.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)));

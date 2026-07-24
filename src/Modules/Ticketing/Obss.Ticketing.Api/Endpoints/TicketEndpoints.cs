@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.Ticketing.Application.Commands.AddComment;
 using Obss.Ticketing.Application.Commands.ApplySlaToTicket;
 using Obss.Ticketing.Application.Commands.AssignTicket;
@@ -29,7 +30,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/ticketing/tickets/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/tickets/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -37,7 +38,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/tickets", async ([AsParameters] GetTicketsQuery query, IMediator mediator) =>
         {
@@ -45,7 +46,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/tickets/open", async ([AsParameters] GetOpenTicketsQuery query, IMediator mediator) =>
         {
@@ -53,7 +54,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/tickets/{id:guid}/assign", async (Guid id, AssignTicketCommand command, IMediator mediator) =>
         {
@@ -63,7 +64,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/tickets/{id:guid}/comments", async (Guid id, AddCommentCommand command, IMediator mediator) =>
         {
@@ -73,7 +74,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/ticketing/tickets/{id}/comments/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/tickets/{id:guid}/resolve", async (Guid id, ResolveTicketCommand command, IMediator mediator) =>
         {
@@ -83,7 +84,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/tickets/{id:guid}/close", async (Guid id, IMediator mediator) =>
         {
@@ -91,7 +92,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/tickets/{id:guid}/escalate", async (Guid id, EscalateTicketCommand command, IMediator mediator) =>
         {
@@ -101,7 +102,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPut("/tickets/{id:guid}/apply-sla", async (Guid id, ApplySlaToTicketCommand command, IMediator mediator) =>
         {
@@ -111,7 +112,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/tickets/{id:guid}/sla", async (Guid id, IMediator mediator) =>
         {
@@ -119,7 +120,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.SlaRead));
 
         group.MapPost("/sla-definitions", async (CreateSlaDefinitionCommand command, IMediator mediator) =>
         {
@@ -127,7 +128,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/ticketing/sla-definitions/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/sla-definitions", async ([AsParameters] GetSlaDefinitionsQuery query, IMediator mediator) =>
         {
@@ -135,7 +136,7 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/tickets/sla-breached", async ([AsParameters] GetSlaBreachedTicketsQuery query, IMediator mediator) =>
         {
@@ -143,6 +144,6 @@ public static class TicketEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.SlaRead));
     }
 }

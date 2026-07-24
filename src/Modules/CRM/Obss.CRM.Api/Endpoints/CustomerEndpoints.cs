@@ -41,6 +41,7 @@ using Obss.CRM.Application.Queries.GetSegmentById;
 using Obss.CRM.Application.Queries.SearchCustomers;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.CRM.Api.Endpoints;
 
@@ -54,7 +55,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/crm/customers/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapGet("/customers/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -62,7 +63,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerRead));
 
         group.MapGet("/customers", async ([AsParameters] SearchCustomersQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -73,7 +74,7 @@ public static class CustomerEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerRead));
 
         group.MapPut("/customers/{id:guid}", async (Guid id, UpdateCustomerCommand command, IMediator mediator) =>
         {
@@ -84,7 +85,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/suspend", async (Guid id, SuspendCustomerCommand command, IMediator mediator) =>
         {
@@ -95,7 +96,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/contacts", async (Guid id, AddContactCommand command, IMediator mediator) =>
         {
@@ -106,7 +107,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/crm/customers/{id}/contacts/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/notes", async (Guid id, AddNoteCommand command, IMediator mediator) =>
         {
@@ -117,7 +118,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/crm/customers/{id}/notes/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapGet("/customers/{id:guid}/contacts", async (Guid id, IMediator mediator) =>
         {
@@ -125,7 +126,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerRead));
 
         group.MapGet("/customers/{id:guid}/notes", async (Guid id, IMediator mediator) =>
         {
@@ -133,7 +134,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerRead));
 
         group.MapPost("/segments", async (CreateSegmentCommand command, IMediator mediator) =>
         {
@@ -141,7 +142,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/crm/segments/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerSegmentManage));
 
         group.MapGet("/segments", async (IMediator mediator) =>
         {
@@ -149,7 +150,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerSegmentManage));
 
         group.MapGet("/segments/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -157,7 +158,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerSegmentManage));
 
         group.MapGet("/segments/{id:guid}/assignments", async (Guid id, IMediator mediator) =>
         {
@@ -165,7 +166,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerSegmentManage));
 
         group.MapPost("/segments/{id:guid}/assign/{customerId:guid}", async (Guid id, Guid customerId, Guid assignedBy, IMediator mediator) =>
         {
@@ -173,7 +174,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerSegmentManage));
 
         group.MapDelete("/segments/{id:guid}/customers/{customerId:guid}", async (Guid id, Guid customerId, IMediator mediator) =>
         {
@@ -181,7 +182,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerSegmentManage));
 
         group.MapDelete("/customers/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -189,7 +190,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{customerId:guid}/contacts/{contactId:guid}", async (Guid customerId, Guid contactId, IMediator mediator) =>
         {
@@ -197,7 +198,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPatch("/customers/{id:guid}", async (Guid id, PartialUpdateCustomerCommand command, IMediator mediator) =>
         {
@@ -207,7 +208,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/characteristics", async (Guid id, AddCharacteristicCommand command, IMediator mediator) =>
         {
@@ -217,7 +218,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/characteristics/{key}", async (Guid id, string key, IMediator mediator) =>
         {
@@ -225,7 +226,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/credit-profiles", async (Guid id, AddCreditProfileCommand command, IMediator mediator) =>
         {
@@ -235,7 +236,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapGet("/customers/{id:guid}/credit-profiles", async (Guid id, IMediator mediator) =>
         {
@@ -243,7 +244,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerRead));
 
         group.MapPost("/customers/{id:guid}/related-parties", async (Guid id, AddRelatedPartyCommand command, IMediator mediator) =>
         {
@@ -253,7 +254,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/related-parties/{referredId:guid}", async (Guid id, Guid referredId, IMediator mediator) =>
         {
@@ -261,7 +262,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/kyc-verify", async (Guid id, VerifyCustomerKycCommand command, IMediator mediator) =>
         {
@@ -271,7 +272,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerKycVerify));
 
         group.MapPost("/customers/{id:guid}/hubs", async (Guid id, AddHubCommand command, IMediator mediator) =>
         {
@@ -281,7 +282,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/hubs", async (Guid id, HubType hubType, string identifier, IMediator mediator) =>
         {
@@ -289,7 +290,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/hubs/opt-in", async (Guid id, SetHubOptInCommand command, IMediator mediator) =>
         {
@@ -299,7 +300,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/contact-media", async (Guid id, AddContactMediumCommand command, IMediator mediator) =>
         {
@@ -309,7 +310,7 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/contact-media", async (Guid id, ContactMediumType mediumType, IMediator mediator) =>
         {
@@ -317,45 +318,45 @@ public static class CustomerEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/account-refs", async (Guid id, AddAccountRefCommand command, IMediator mediator) =>
         {
             if (id != command.CustomerId) return (IResult)TypedResults.BadRequest();
             var result = await mediator.Send(command);
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/account-refs/{billingAccountId:guid}", async (Guid id, Guid billingAccountId, IMediator mediator) =>
         {
             var result = await mediator.Send(new RemoveAccountRefCommand(id, billingAccountId));
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/agreement-refs", async (Guid id, AddAgreementRefCommand command, IMediator mediator) =>
         {
             if (id != command.CustomerId) return (IResult)TypedResults.BadRequest();
             var result = await mediator.Send(command);
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/agreement-refs/{agreementId:guid}", async (Guid id, Guid agreementId, IMediator mediator) =>
         {
             var result = await mediator.Send(new RemoveAgreementRefCommand(id, agreementId));
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapPost("/customers/{id:guid}/payment-method-refs", async (Guid id, AddPaymentMethodRefCommand command, IMediator mediator) =>
         {
             if (id != command.CustomerId) return (IResult)TypedResults.BadRequest();
             var result = await mediator.Send(command);
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
 
         group.MapDelete("/customers/{id:guid}/payment-method-refs/{paymentMethodId:guid}", async (Guid id, Guid paymentMethodId, IMediator mediator) =>
         {
             var result = await mediator.Send(new RemovePaymentMethodRefCommand(id, paymentMethodId));
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Customers.CustomerWrite));
     }
 }

@@ -273,6 +273,14 @@ builder.Services.AddAuthorization(options =>
     AddPermissionPolicy(Permissions.Telecom.ReconciliationRead);
     AddPermissionPolicy(Permissions.Telecom.ReconciliationExecute);
     AddPermissionPolicy(Permissions.Telecom.MaintenanceManage);
+
+    AddPermissionPolicy(Permissions.Ocs.BalanceRead);
+    AddPermissionPolicy(Permissions.Ocs.BalanceWrite);
+    AddPermissionPolicy(Permissions.Ocs.BalanceAdjust);
+    AddPermissionPolicy(Permissions.Ocs.ReserveCredit);
+    AddPermissionPolicy(Permissions.Ocs.ReservationDebit);
+    AddPermissionPolicy(Permissions.Ocs.ReservationRelease);
+    AddPermissionPolicy(Permissions.Ocs.CreditPoolRead);
 });
 
 builder.Services.AddApiVersioning(options =>
@@ -427,8 +435,8 @@ builder.Services.AddNumberInventoryModule();
 builder.Services.AddServiceCatalogModule();
 builder.Services.AddEventModule();
 builder.Services.AddServiceQualificationModule();
-builder.Services.AddAaaModule(builder.Configuration);
-builder.Services.AddOcsModule(builder.Configuration);
+builder.Services.AddAaaModule();
+builder.Services.AddOcsModule();
 
 var pgConnString = connectionString;
 var healthChecksBuilder = builder.Services.AddHealthChecks();

@@ -23,6 +23,7 @@ using Obss.ProductCatalog.Application.Commands.AddPriceRange;
 using Obss.ProductCatalog.Application.Commands.UpdatePriceRange;
 using Obss.ProductCatalog.Application.Commands.RemovePriceRange;
 using Obss.ProductCatalog.Application.Queries.GetPriceRanges;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.ProductCatalog.Api.Endpoints;
 
@@ -36,7 +37,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/offers/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapGet("/offers/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -44,7 +45,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferRead));
 
         group.MapGet("/offers", async ([AsParameters] GetActiveOffersQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -55,7 +56,7 @@ public static class OfferEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferRead));
 
         group.MapPut("/offers/{offerId:guid}/pricing/{offerPricingId:guid}", async (Guid offerId, Guid offerPricingId, UpdateOfferPricingCommand command, IMediator mediator) =>
         {
@@ -65,7 +66,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapPut("/offers/{id:guid}", async (Guid id, UpdateOfferCommand command, IMediator mediator) =>
         {
@@ -75,7 +76,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapPatch("/offers/{id:guid}", async (Guid id, PatchOfferCommand command, IMediator mediator) =>
         {
@@ -85,7 +86,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapDelete("/offers/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -93,7 +94,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapGet("/offers/{offerId:guid}/terms", async (Guid offerId, IMediator mediator) =>
         {
@@ -101,7 +102,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferRead));
 
         group.MapPost("/offers/{offerId:guid}/terms", async (Guid offerId, AddProductOfferingTermCommand command, IMediator mediator) =>
         {
@@ -111,7 +112,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/offers/{offerId}/terms/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapPut("/offers/{offerId:guid}/terms/{termId:guid}", async (Guid offerId, Guid termId, UpdateProductOfferingTermCommand command, IMediator mediator) =>
         {
@@ -121,7 +122,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapDelete("/offers/{offerId:guid}/terms/{termId:guid}", async (Guid offerId, Guid termId, IMediator mediator) =>
         {
@@ -129,7 +130,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapGet("/offers/{offerId:guid}/bundled-offerings", async (Guid offerId, IMediator mediator) =>
         {
@@ -137,7 +138,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferRead));
 
         group.MapPost("/offers/{offerId:guid}/bundled-offerings", async (Guid offerId, AddBundledProductOfferingCommand command, IMediator mediator) =>
         {
@@ -147,7 +148,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/offers/{offerId}/bundled-offerings/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapPut("/offers/{offerId:guid}/bundled-offerings/{id:guid}", async (Guid offerId, Guid id, UpdateBundledProductOfferingCommand command, IMediator mediator) =>
         {
@@ -157,7 +158,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapDelete("/offers/{offerId:guid}/bundled-offerings/{id:guid}", async (Guid offerId, Guid id, IMediator mediator) =>
         {
@@ -165,7 +166,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapPost("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges", async (Guid offerId, Guid pricingId, AddPriceRangeCommand command, IMediator mediator) =>
         {
@@ -175,7 +176,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/offers/{offerId}/pricing/{pricingId}/price-ranges/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapGet("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges", async (Guid offerId, Guid pricingId, IMediator mediator) =>
         {
@@ -183,7 +184,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferRead));
 
         group.MapPut("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges/{rangeId:guid}", async (Guid offerId, Guid pricingId, Guid rangeId, UpdatePriceRangeCommand command, IMediator mediator) =>
         {
@@ -193,7 +194,7 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
 
         group.MapDelete("/offers/{offerId:guid}/pricing/{pricingId:guid}/price-ranges/{rangeId:guid}", async (Guid offerId, Guid pricingId, Guid rangeId, IMediator mediator) =>
         {
@@ -201,6 +202,6 @@ public static class OfferEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.OfferWrite));
     }
 }

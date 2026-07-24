@@ -6,6 +6,7 @@ using Obss.NetworkInventory.Application.Commands.CreateSubnet;
 using Obss.NetworkInventory.Application.Commands.UpdateSubnet;
 using Obss.NetworkInventory.Application.Queries.GetSubnetById;
 using Obss.NetworkInventory.Application.Queries.GetSubnets;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.NetworkInventory.Api.Endpoints;
 
@@ -19,7 +20,7 @@ public static class SubnetEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/network/subnets/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementWrite));
 
         group.MapGet("/subnets", async ([AsParameters] GetSubnetsQuery query, IMediator mediator) =>
         {
@@ -27,7 +28,7 @@ public static class SubnetEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementRead));
 
         group.MapGet("/subnets/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -35,7 +36,7 @@ public static class SubnetEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementRead));
 
         group.MapPut("/subnets/{id:guid}", async (Guid id, UpdateSubnetCommand command, IMediator mediator) =>
         {
@@ -45,6 +46,6 @@ public static class SubnetEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementWrite));
     }
 }

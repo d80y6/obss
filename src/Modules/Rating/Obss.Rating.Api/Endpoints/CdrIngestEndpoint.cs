@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Obss.Rating.Application.Services;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Rating.Api.Endpoints;
 
@@ -57,7 +58,7 @@ public static class CdrIngestEndpoint
                 $"Accepted {result.Accepted}, rejected {result.Duplicates + result.Quarantined} records");
 
             return Results.Accepted("/api/v1/rating/cdr/ingest", response);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.CdrIngest));
 
         group.MapPost("/cdr/replay", async (
             ICdrMediationService mediationService,
@@ -71,7 +72,7 @@ public static class CdrIngestEndpoint
                 result.Replayed, result.StillInvalid);
 
             return Results.Ok(result);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.CdrMediate));
     }
 
     private static bool ValidateHmacSignature(HttpContext httpContext, List<CdrIngestRequest> requests)

@@ -32,6 +32,13 @@ namespace Obss.OCS.Infrastructure.Migrations
                         .HasColumnType("decimal(18,4)")
                         .HasColumnName("available_amount");
 
+                    b.Property<long>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("concurrency_stamp");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
@@ -135,6 +142,10 @@ namespace Obss.OCS.Infrastructure.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal>("AfterBalance")
+                        .HasColumnType("decimal(18,4)")
+                        .HasColumnName("after_balance");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,4)")
                         .HasColumnName("amount");
@@ -142,6 +153,15 @@ namespace Obss.OCS.Infrastructure.Migrations
                     b.Property<Guid?>("BalanceId")
                         .HasColumnType("uuid")
                         .HasColumnName("balance_id");
+
+                    b.Property<decimal>("BeforeBalance")
+                        .HasColumnType("decimal(18,4)")
+                        .HasColumnName("before_balance");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("correlation_id");
 
                     b.Property<Guid?>("CreditPoolId")
                         .HasColumnType("uuid")
@@ -158,6 +178,10 @@ namespace Obss.OCS.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("description");
+
+                    b.Property<Guid?>("ReservationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reservation_id");
 
                     b.Property<Guid>("SubscriptionId")
                         .HasColumnType("uuid")
@@ -186,6 +210,66 @@ namespace Obss.OCS.Infrastructure.Migrations
                         .HasDatabaseName("ix_ocs_transactions_subscription_time");
 
                     b.ToTable("ocs_transactions", (string)null);
+                });
+
+            modelBuilder.Entity("Obss.OCS.Domain.Entities.Reservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,4)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid>("BalanceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("balance_id");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<DateTime>("ReservedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reserved_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("status");
+
+                    b.Property<Guid>("SubscriptionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("subscription_id");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_ocs_reservations");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_ocs_reservations_status");
+
+                    b.HasIndex("TenantId", "SubscriptionId")
+                        .HasDatabaseName("ix_ocs_reservations_tenant_subscription");
+
+                    b.ToTable("ocs_reservations", (string)null);
                 });
 
             modelBuilder.Entity("Obss.SharedKernel.Infrastructure.Persistence.InboxMessage", b =>

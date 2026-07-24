@@ -489,9 +489,34 @@ namespace Obss.ServiceCatalog.Infrastructure.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("event_type");
 
+                    b.Property<bool>("IsDeadLettered")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_dead_lettered");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("last_error");
+
+                    b.Property<DateTime?>("LockExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lock_expires_at");
+
+                    b.Property<Guid?>("LockId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("lock_id");
+
+                    b.Property<DateTime?>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("processed_at");
+
+                    b.Property<int>("RetryCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("retry_count");
 
                     b.Property<string>("TenantId")
                         .HasMaxLength(100)
@@ -506,6 +531,9 @@ namespace Obss.ServiceCatalog.Infrastructure.Migrations
 
                     b.HasIndex("ProcessedAt")
                         .HasDatabaseName("ix_outbox_messages_processed_at");
+
+                    b.HasIndex("ProcessedAt", "NextAttemptAt", "IsDeadLettered")
+                        .HasDatabaseName("ix_outbox_messages_pending");
 
                     b.ToTable("outbox_messages", (string)null);
                 });

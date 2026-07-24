@@ -2,15 +2,16 @@ using System.Diagnostics;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Extensions.Logging;
 using Obss.Provisioning.Infrastructure.Transports.Abstractions;
 using Renci.SshNet;
+using Renci.SshNet.Common;
 
 namespace Obss.Provisioning.Infrastructure.Transports.Netconf;
 
 public sealed class NetconfTransport : INetconfTransport
 {
     private static readonly XNamespace NetconfNs = "urn:ietf:params:xml:ns:netconf:base:1.0";
+    private static readonly XNamespace NetconfMonitoringNs = "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring";
     private readonly NetconfTransportConfig _config;
 
     public NetconfTransport(NetconfTransportConfig config)
@@ -98,9 +99,9 @@ public sealed class NetconfTransport : INetconfTransport
     public async Task<TransportResult> GetSchemaAsync(string moduleName, CancellationToken cancellationToken = default)
     {
         return await ExecuteRpcInternalAsync(
-            new XElement(NetconfNs + "get-schema",
-                new XElement("identifier", moduleName),
-                new XElement("version", "1.0")),
+            new XElement(NetconfMonitoringNs + "get-schema",
+                new XElement(NetconfMonitoringNs + "identifier", moduleName),
+                new XElement(NetconfMonitoringNs + "version", "1.0")),
             cancellationToken);
     }
 
@@ -120,14 +121,11 @@ public sealed class NetconfTransport : INetconfTransport
             var rpcBytes = Encoding.UTF8.GetBytes(rpcXml);
             var rpcFrame = FrameMessage(rpcBytes);
 
-            session.SendData(rpcFrame);
-
-            var responseData = new byte[_config.MaxMessageSize];
-            var received = session.ReadData(responseData);
+            await session.SendDataAsync(rpcFrame, cancellationToken);
+            var response = await session.ReadReplyAsync(cancellationToken);
             session.Disconnect();
 
             sw.Stop();
-            var response = Encoding.UTF8.GetString(responseData, 0, received);
             var cleaned = CleanNetconfResponse(response);
 
             if (IsErrorResponse(cleaned))
@@ -148,33 +146,64 @@ public sealed class NetconfTransport : INetconfTransport
 
     private async Task<NetconfSession> OpenSessionAsync(CancellationToken cancellationToken)
     {
-            var session = new NetconfSession(_config);
-            await session.ConnectAsync(cancellationToken);
+        var session = new NetconfSession(_config);
+        await session.ConnectAsync(cancellationToken);
         return session;
     }
 
-    private static byte[] FrameMessage(byte[] message)
+    internal static byte[] FrameMessage(byte[] message)
     {
-        var framing = $"</encoding=\"base64\"/>\n{Convert.ToBase64String(message)}||>";
-        var header = $"#4\n{framing.Length}\n";
-        return Encoding.UTF8.GetBytes(header + framing);
+        var framed = $"\n#{message.Length}\n{Encoding.UTF8.GetString(message)}\n##\n";
+        return Encoding.UTF8.GetBytes(framed);
     }
 
-    private static string CleanNetconfResponse(string raw)
+    internal static string CleanNetconfResponse(string raw)
     {
-        var lines = raw.Split('\n')
-            .SkipWhile(l => l.StartsWith('#'))
-            .SkipWhile(l => l.StartsWith('<'))
-            .Where(l => l.StartsWith('<'));
-        return string.Join(Environment.NewLine, lines);
+        var content = raw;
+
+        var eomIdx = content.IndexOf("\n##\n", StringComparison.Ordinal);
+        if (eomIdx >= 0)
+        {
+            content = content[..eomIdx];
+        }
+
+        content = content.Trim();
+
+        if (content.StartsWith('#'))
+        {
+            var newlineAfterSize = content.IndexOf('\n', 1);
+            if (newlineAfterSize > 0)
+            {
+                content = content[(newlineAfterSize + 1)..];
+            }
+        }
+
+        content = content.Trim();
+
+        if (!content.StartsWith('<'))
+            return content;
+
+        try
+        {
+            var doc = XDocument.Parse(content);
+            var reply = doc.Descendants(NetconfNs + "rpc-reply").FirstOrDefault();
+            if (reply != null)
+                return reply.ToString(SaveOptions.DisableFormatting);
+        }
+        catch (XmlException)
+        {
+            // Not valid XML — return raw content as-is
+        }
+
+        return content;
     }
 
-    private static bool IsErrorResponse(string xml)
+    internal static bool IsErrorResponse(string xml)
     {
         return xml.Contains("<rpc-error>");
     }
 
-    private static string ExtractError(string xml)
+    internal static string ExtractError(string xml)
     {
         try
         {
@@ -195,6 +224,8 @@ public sealed class NetconfTransport : INetconfTransport
     private sealed class NetconfSession : IDisposable
     {
         private readonly SshClient _sshClient;
+        private ShellStream? _shellStream;
+        private bool _disposed;
 
         public NetconfSession(NetconfTransportConfig config)
         {
@@ -215,25 +246,47 @@ public sealed class NetconfTransport : INetconfTransport
         public async Task ConnectAsync(CancellationToken cancellationToken)
         {
             await Task.Run(() => _sshClient.Connect(), cancellationToken);
+            _shellStream = _sshClient.CreateShellStream("netconf", 80, 24, 800, 600, 65536);
 
-            var shellStream = _sshClient.CreateShellStream("netconf", 80, 24, 800, 600, 65536);
-
-            var hello = await ReceiveHelloAsync(shellStream, cancellationToken);
+            var hello = await ReadReplyAsync(cancellationToken);
             ServerCapabilities = ParseCapabilities(hello);
-
-            await SendHelloAsync(shellStream, cancellationToken);
+            await SendHelloAsync(cancellationToken);
         }
 
-        public void SendData(byte[] data)
+        public async Task SendDataAsync(byte[] data, CancellationToken cancellationToken)
         {
-            var shellStream = _sshClient.CreateShellStream("netconf", 80, 24, 800, 600, 65536);
-            shellStream.Write(data);
+            if (_shellStream == null)
+                throw new InvalidOperationException("Session not connected");
+            await _shellStream.WriteAsync(data, cancellationToken);
+            await _shellStream.FlushAsync(cancellationToken);
         }
 
-        public int ReadData(byte[] buffer)
+        public async Task<string> ReadReplyAsync(CancellationToken cancellationToken)
         {
-            var shellStream = _sshClient.CreateShellStream("netconf", 80, 24, 800, 600, 65536);
-            return shellStream.Read(buffer, 0, buffer.Length);
+            if (_shellStream == null)
+                throw new InvalidOperationException("Session not connected");
+
+            using var memoryStream = new MemoryStream();
+            var buffer = new byte[4096];
+
+            while (true)
+            {
+                var bytesRead = await _shellStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
+                if (bytesRead == 0)
+                    break;
+
+                await memoryStream.WriteAsync(buffer, 0, bytesRead, cancellationToken);
+
+                var data = memoryStream.ToArray();
+                if (data.Length >= 4)
+                {
+                    var dataStr = Encoding.UTF8.GetString(data);
+                    if (dataStr.Contains("\n##\n"))
+                        break;
+                }
+            }
+
+            return Encoding.UTF8.GetString(memoryStream.ToArray());
         }
 
         public void Disconnect()
@@ -244,17 +297,15 @@ public sealed class NetconfTransport : INetconfTransport
 
         public void Dispose()
         {
-            _sshClient?.Dispose();
+            if (!_disposed)
+            {
+                _disposed = true;
+                _shellStream?.Dispose();
+                _sshClient?.Dispose();
+            }
         }
 
-        private static async Task<string> ReceiveHelloAsync(ShellStream stream, CancellationToken cancellationToken)
-        {
-            var buffer = new byte[65535];
-            var received = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-            return Encoding.UTF8.GetString(buffer, 0, received);
-        }
-
-        private static async Task SendHelloAsync(ShellStream stream, CancellationToken cancellationToken)
+        private async Task SendHelloAsync(CancellationToken cancellationToken)
         {
             var hello = new XElement(NetconfNs + "hello",
                 new XElement(NetconfNs + "capabilities",
@@ -268,8 +319,7 @@ public sealed class NetconfTransport : INetconfTransport
             var helloBytes = Encoding.UTF8.GetBytes(helloXml);
             var frame = FrameMessage(helloBytes);
 
-            await stream.WriteAsync(frame, cancellationToken);
-            await stream.FlushAsync(cancellationToken);
+            await SendDataAsync(frame, cancellationToken);
         }
 
         private static List<string> ParseCapabilities(string helloXml)

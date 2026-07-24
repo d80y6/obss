@@ -17,6 +17,7 @@ public class AaaDbContext : EfDbContext
 
     public DbSet<NetworkAccessServer> NasDevices => Set<NetworkAccessServer>();
     public DbSet<RadiusSession> RadiusSessions => Set<RadiusSession>();
+    public DbSet<AaaAuditLog> AaaAuditLogs => Set<AaaAuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -36,6 +36,10 @@ const labelMap: Record<string, string> = {
   refunds: "Refunds",
   "dunning-policies": "Dunning Policies",
   aging: "Aging Report",
+  aaa: "AAA",
+  nas: "NAS Devices",
+  sessions: "Sessions",
+  logs: "Audit Logs",
 }
 
 export function BreadcrumbBuilder() {

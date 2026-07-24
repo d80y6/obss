@@ -23,6 +23,7 @@ using Obss.Payments.Application.Queries.GetUnmatchedTransactions;
 using Obss.Payments.Application.DTOs;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Payments.Api.Endpoints;
 
@@ -36,7 +37,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v{{version}}/payments/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentWrite));
 
         group.MapGet("/payments/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -44,7 +45,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentRead));
 
         group.MapGet("/payments", async (
             Guid? customerId,
@@ -60,7 +61,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentRead));
 
         group.MapGet("/payments/by-invoice/{invoiceId:guid}", async (Guid invoiceId, IMediator mediator) =>
         {
@@ -68,7 +69,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentRead));
 
         group.MapPost("/payments/{id:guid}/complete", async (Guid id, IMediator mediator) =>
         {
@@ -76,7 +77,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentWrite));
 
         group.MapPost("/payments/{id:guid}/refund", async (Guid id, RefundPaymentCommand command, IMediator mediator) =>
         {
@@ -87,7 +88,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentRefund));
 
         group.MapGet("/payments/refunds", async (
             Guid? paymentId,
@@ -103,7 +104,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentRead));
 
         group.MapPost("/payments/{id:guid}/allocate", async (Guid id, AllocatePaymentCommand command, IMediator mediator) =>
         {
@@ -114,7 +115,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentWrite));
 
         group.MapGet("/payments/summary", async (IMediator mediator) =>
         {
@@ -122,7 +123,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentRead));
 
         group.MapPost("/payments/gateways", async (RegisterPaymentGatewayCommand command, IMediator mediator) =>
         {
@@ -130,7 +131,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v{{version}}/payments/gateways/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("RegisterPaymentGateway");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentGatewayManage)).WithName("RegisterPaymentGateway");
 
         group.MapGet("/payments/gateways", async (IMediator mediator) =>
         {
@@ -138,7 +139,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentGatewayManage));
 
         group.MapPost("/payments/process", async (ProcessGatewayPaymentCommand command, IMediator mediator) =>
         {
@@ -146,7 +147,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("ProcessGatewayPayment");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentGatewayManage)).WithName("ProcessGatewayPayment");
 
         group.MapGet("/payments/reconciliation", async (
             string? status,
@@ -161,7 +162,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("GetReconciliations");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentReconciliation)).WithName("GetReconciliations");
 
         group.MapPost("/payments/reconciliation/import", async (ImportBankStatementCommand command, IMediator mediator) =>
         {
@@ -169,7 +170,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v{{version}}/payments/reconciliation/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("ImportBankStatement");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentReconciliation)).WithName("ImportBankStatement");
 
         group.MapGet("/payments/reconciliation/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -177,7 +178,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        }).WithName("GetReconciliationStatus");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentReconciliation)).WithName("GetReconciliationStatus");
 
         group.MapGet("/payments/reconciliation/unmatched", async (IMediator mediator) =>
         {
@@ -185,7 +186,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("GetUnmatchedTransactions");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentReconciliation)).WithName("GetUnmatchedTransactions");
 
         group.MapPost("/payments/reconciliation/auto", async (AutoReconcileCommand command, IMediator mediator) =>
         {
@@ -193,7 +194,7 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("AutoReconcile");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentReconciliation)).WithName("AutoReconcile");
 
         group.MapPost("/payments/reconciliation/{reconciliationId:guid}/match", async (
             Guid reconciliationId,
@@ -207,6 +208,6 @@ public static class PaymentEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("ReconcilePayment");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Payments.PaymentReconciliation)).WithName("ReconcilePayment");
     }
 }

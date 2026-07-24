@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.Reporting.Application.Commands.CreateDashboardWidget;
 using Obss.Reporting.Application.Queries.GetDashboardConfig;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Reporting.Api.Endpoints;
 
@@ -17,7 +18,7 @@ public static class DashboardEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/reporting/widgets/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/dashboard", async ([AsParameters] GetDashboardConfigQuery query, IMediator mediator) =>
         {
@@ -25,6 +26,6 @@ public static class DashboardEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
     }
 }

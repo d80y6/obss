@@ -33,6 +33,9 @@ import {
   FileSearch,
   Wallet,
   Radio,
+  Server,
+  Wifi,
+  Activity,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -75,6 +78,7 @@ export function ModuleSidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const [collapsed, setCollapsed] = useState(false)
+  const [aaaOpen, setAaaOpen] = useState(false)
   const [collectionsOpen, setCollectionsOpen] = useState(false)
   const [serviceInventoryOpen, setServiceInventoryOpen] = useState(false)
 
@@ -120,6 +124,70 @@ export function ModuleSidebar() {
           )
         })}
 
+        {!collapsed && (
+          <div>
+            <button
+              onClick={() => setAaaOpen(!aaaOpen)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                pathname.startsWith("/aaa") ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              )}
+            >
+              <Shield className="h-4 w-4 shrink-0" />
+              <span className="flex-1 text-left">AAA</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform",
+                  aaaOpen && "rotate-180"
+                )}
+              />
+            </button>
+            {aaaOpen && (
+              <div className="ml-2 space-y-1 border-l pl-2">
+                <Link
+                  href="/aaa"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname === "/aaa" ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <LayoutDashboard className="h-4 w-4 shrink-0" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/aaa/nas"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname.startsWith("/aaa/nas") ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <Server className="h-4 w-4 shrink-0" />
+                  <span>NAS Devices</span>
+                </Link>
+                <Link
+                  href="/aaa/sessions"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname.startsWith("/aaa/sessions") ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <Wifi className="h-4 w-4 shrink-0" />
+                  <span>Sessions</span>
+                </Link>
+                <Link
+                  href="/aaa/logs"
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    pathname.startsWith("/aaa/logs") ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <ScrollText className="h-4 w-4 shrink-0" />
+                  <span>Audit Logs</span>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
         {!collapsed && (
           <div>
             <button

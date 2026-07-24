@@ -34,6 +34,7 @@ using Obss.Orders.Application.Queries.GetProductOrders;
 using Obss.Orders.Application.Queries.GetProductOrdersByCustomer;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Orders.Api.Endpoints;
 
@@ -47,7 +48,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/productOrder/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         group.MapGet("/orders/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -55,7 +56,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderRead));
 
         group.MapGet("/orders", async ([AsParameters] GetProductOrdersQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -66,7 +67,7 @@ public static class ProductOrderEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderRead));
 
         group.MapGet("/customers/{customerId:guid}/orders", async (Guid customerId, [AsParameters] GetProductOrdersByCustomerQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -80,7 +81,7 @@ public static class ProductOrderEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderRead));
 
         group.MapPost("/orders/{id:guid}/submit", async (Guid id, IMediator mediator) =>
         {
@@ -88,7 +89,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         group.MapPost("/orders/{id:guid}/approve", async (Guid id, IMediator mediator) =>
         {
@@ -96,7 +97,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderApprove));
 
         group.MapPost("/orders/{id:guid}/cancel", async (Guid id, CancelProductOrderCommand command, IMediator mediator) =>
         {
@@ -107,7 +108,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderCancel));
 
         group.MapPost("/orders/{id:guid}/items", async (Guid id, AddProductOrderItemCommand command, IMediator mediator) =>
         {
@@ -118,7 +119,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         group.MapDelete("/orders/{orderId:guid}/items/{itemId:guid}", async (Guid orderId, Guid itemId, IMediator mediator) =>
         {
@@ -126,7 +127,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         group.MapGet("/orders/{id:guid}/fulfillment", async (Guid id, IMediator mediator) =>
         {
@@ -134,7 +135,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderFulfill));
 
         group.MapPost("/orders/{id:guid}/fulfillment/complete", async (Guid id, CompleteOrderFulfillmentCommand command, IMediator mediator) =>
         {
@@ -144,7 +145,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderFulfill));
 
         group.MapPost("/orders/{id:guid}/validate", async (Guid id, IMediator mediator) =>
         {
@@ -152,7 +153,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         group.MapPatch("/orders/{id:guid}", async (Guid id, PatchProductOrderCommand command, IMediator mediator) =>
         {
@@ -163,7 +164,7 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         group.MapDelete("/orders/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -171,105 +172,105 @@ public static class ProductOrderEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite));
 
         // Item state transitions
         group.MapPost("/{id:guid}/items/{itemId:guid}/acknowledge", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new AcknowledgeProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("AcknowledgeProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("AcknowledgeProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/start", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new StartProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("StartProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("StartProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/hold", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new HoldProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("HoldProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("HoldProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/resume", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new ResumeProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("ResumeProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("ResumeProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/assess", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new AssessProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("AssessProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("AssessProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/reject", async (Guid id, Guid itemId, RejectProductOrderItemCommand command, ISender sender) =>
         {
             var result = await sender.Send(new RejectProductOrderItemCommand(id, itemId, command.Reason));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("RejectProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("RejectProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/complete", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new CompleteProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("CompleteProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("CompleteProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/fail", async (Guid id, Guid itemId, FailProductOrderItemCommand command, ISender sender) =>
         {
             var result = await sender.Send(new FailProductOrderItemCommand(id, itemId, command.Error));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("FailProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("FailProductOrderItem");
 
         group.MapPost("/{id:guid}/items/{itemId:guid}/cancel", async (Guid id, Guid itemId, ISender sender) =>
         {
             var result = await sender.Send(new CancelProductOrderItemCommand(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("CancelProductOrderItem");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("CancelProductOrderItem");
 
         // Relationships
         group.MapGet("/{id:guid}/relationships", async (Guid id, Guid? itemId, ISender sender) =>
         {
             var result = await sender.Send(new GetProductOrderItemRelationshipsQuery(id, itemId));
             return result.IsSuccess ? (IResult)TypedResults.Ok(result.Value) : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("GetProductOrderRelationships");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderRead)).WithName("GetProductOrderRelationships");
 
         group.MapPost("/{id:guid}/relationships", async (Guid id, AddItemRelationshipCommand command, ISender sender) =>
         {
             var result = await sender.Send(new AddItemRelationshipCommand(id, command.ItemId, command.TargetItemId, command.Type));
             return result.IsSuccess ? Results.Created($"/api/v1/productOrder/{id}/relationships", null) : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("AddProductOrderRelationship");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("AddProductOrderRelationship");
 
         group.MapDelete("/{id:guid}/relationships/{relationshipId:guid}", async (Guid id, Guid relationshipId, ISender sender) =>
         {
             var result = await sender.Send(new RemoveItemRelationshipCommand(id, relationshipId));
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("RemoveProductOrderRelationship");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("RemoveProductOrderRelationship");
 
         // Milestones
         group.MapGet("/{id:guid}/milestones", async (Guid id, ISender sender) =>
         {
             var result = await sender.Send(new GetProductOrderMilestonesQuery(id));
             return result.IsSuccess ? (IResult)TypedResults.Ok(result.Value) : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("GetProductOrderMilestones");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderRead)).WithName("GetProductOrderMilestones");
 
         group.MapPost("/{id:guid}/milestones", async (Guid id, CreateMilestoneCommand command, ISender sender) =>
         {
             var result = await sender.Send(new CreateMilestoneCommand(id, command.Name, command.Description, command.MilestoneDate));
             return result.IsSuccess ? Results.Created($"/api/v1/productOrder/{id}/milestones", null) : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("CreateProductOrderMilestone");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("CreateProductOrderMilestone");
 
         group.MapPatch("/{id:guid}/milestones/{milestoneId:guid}", async (Guid id, Guid milestoneId, UpdateMilestoneCommand command, ISender sender) =>
         {
             var result = await sender.Send(new UpdateMilestoneCommand(id, milestoneId, command.Status, command.MilestoneDate));
             return result.IsSuccess ? (IResult)TypedResults.Ok() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("UpdateProductOrderMilestone");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("UpdateProductOrderMilestone");
 
         group.MapDelete("/{id:guid}/milestones/{milestoneId:guid}", async (Guid id, Guid milestoneId, ISender sender) =>
         {
             var result = await sender.Send(new RemoveMilestoneCommand(id, milestoneId));
             return result.IsSuccess ? (IResult)TypedResults.NoContent() : (IResult)TypedResults.BadRequest(result.Error);
-        }).WithName("RemoveProductOrderMilestone");
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Orders.OrderWrite)).WithName("RemoveProductOrderMilestone");
     }
 }

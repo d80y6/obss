@@ -123,116 +123,62 @@ for i in $(seq 1 $RETRIES); do
     sleep "$RETRY_DELAY"
 done
 
-# ── Step 4: Run EF Core Migrations ──────────────────────────────────────────
+# ── Step 4: Run EF Core Migrations (all 25 modules) ─────────────────────────
 print_header "Running EF Core Migrations"
 
-log_info "Applying IAM module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/IAM/Obss.IAM.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c IamDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "IAM migrations applied."
+# Each module uses its own database (obss_{db_name}) matching the runtime DbConn pattern
+MIGRATIONS=(
+  "IAM/Obss.IAM.Infrastructure:IamDbContext:iam"
+  "CRM/Obss.CRM.Infrastructure:CrmDbContext:crm"
+  "ProductCatalog/Obss.ProductCatalog.Infrastructure:CatalogDbContext:catalog"
+  "Orders/Obss.Orders.Infrastructure:OrderDbContext:orders"
+  "Subscriptions/Obss.Subscriptions.Infrastructure:SubscriptionDbContext:subscriptions"
+  "Rating/Obss.Rating.Infrastructure:RatingDbContext:rating"
+  "Billing/Obss.Billing.Infrastructure:BillingDbContext:billing"
+  "Invoices/Obss.Invoices.Infrastructure:InvoiceDbContext:invoices"
+  "Payments/Obss.Payments.Infrastructure:PaymentDbContext:payments"
+  "Collections/Obss.Collections.Infrastructure:CollectionDbContext:collections"
+  "ServiceInventory/Obss.ServiceInventory.Infrastructure:ServiceDbContext:service_inventory"
+  "NetworkInventory/Obss.NetworkInventory.Infrastructure:NetworkDbContext:network_inventory"
+  "NumberInventory/Obss.NumberInventory.Infrastructure:NumberDbContext:number_inventory"
+  "Provisioning/Obss.Provisioning.Infrastructure:ProvisioningDbContext:provisioning"
+  "Workflow/Obss.Workflow.Infrastructure:WorkflowDbContext:workflow"
+  "Ticketing/Obss.Ticketing.Infrastructure:TicketDbContext:ticketing"
+  "Notifications/Obss.Notifications.Infrastructure:NotificationDbContext:notifications"
+  "Reporting/Obss.Reporting.Infrastructure:ReportDbContext:reporting"
+  "Audit/Obss.Audit.Infrastructure:AuditDbContext:audit"
+  "ApiGateway/Obss.ApiGateway.Infrastructure:GatewayDbContext:gateway"
+  "ServiceCatalog/Obss.ServiceCatalog.Infrastructure:ServiceCatalogDbContext:service_catalog"
+  "EventManagement/Obss.EventManagement.Infrastructure:EventDbContext:event_management"
+  "ServiceQualification/Obss.ServiceQualification.Infrastructure:ServiceQualificationDbContext:service_qualification"
+  "AAA/Obss.AAA.Infrastructure:AaaDbContext:aaa"
+  "OCS/Obss.OCS.Infrastructure:OcsDbContext:ocs"
+)
 
-log_info "Applying CRM module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/CRM/Obss.CRM.Infrastructure" \
+for entry in "${MIGRATIONS[@]}"; do
+  IFS=':' read -r proj ctx db <<< "$entry"
+  log_info "Applying ${proj%%/*} module migrations (obss_${db})..."
+  dotnet ef database update \
+    -p "$ROOT_DIR/src/Modules/${proj}" \
     -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c CrmDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
+    -c "${ctx}" \
+    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=obss_${db};Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
     2>&1 | while IFS= read -r line; do
     log_info "  ef: $line"
+  done
+  log_ok "${proj%%/*} migrations applied."
 done
-log_ok "CRM migrations applied."
-
-log_info "Applying ProductCatalog module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/ProductCatalog/Obss.ProductCatalog.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c CatalogDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "ProductCatalog migrations applied."
-
-log_info "Applying Billing module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/Billing/Obss.Billing.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c BillingDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "Billing migrations applied."
-
-log_info "Applying Collections module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/Collections/Obss.Collections.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c CollectionsDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "Collections migrations applied."
-
-log_info "Applying Ticketing module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/Ticketing/Obss.Ticketing.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c TicketDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "Ticketing migrations applied."
-
-log_info "Applying NetworkInventory module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/NetworkInventory/Obss.NetworkInventory.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c NetworkDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=$POSTGRES_DB;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "NetworkInventory migrations applied."
-
-log_info "Applying ServiceQualification module migrations..."
-dotnet ef database update \
-    -p "$ROOT_DIR/src/Modules/ServiceQualification/Obss.ServiceQualification.Infrastructure" \
-    -s "$ROOT_DIR/src/Host/Obss.Host" \
-    -c ServiceQualificationDbContext \
-    --connection "Host=$POSTGRES_HOST;Port=$POSTGRES_PORT;Database=obss_service_qualification;Username=$POSTGRES_USER;Password=$POSTGRES_PASSWORD" \
-    2>&1 | while IFS= read -r line; do
-    log_info "  ef: $line"
-done
-log_ok "ServiceQualification migrations applied."
 
 # ── Step 5: Apply Seed Data ──────────────────────────────────────────────────
 print_header "Applying Seed Data"
 
-SEED_SCRIPT="$ROOT_DIR/infrastructure/database/seed/seed-data.sql"
-if [ -f "$SEED_SCRIPT" ]; then
-    log_info "Loading seed data into PostgreSQL..."
-    docker exec -i obss-postgres \
-        psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < "$SEED_SCRIPT"
-    log_ok "Seed data applied successfully."
+SEEDER="$ROOT_DIR/scripts/seed-databases.sh"
+if [ -f "$SEEDER" ]; then
+    log_info "Seeding per-module databases..."
+    bash "$SEEDER"
+    log_ok "All databases seeded."
 else
-    log_warn "Seed script not found at $SEED_SCRIPT. Skipping."
-fi
-
-# ── Apply Yemen PTC Catalog ───────────────────────────────────────────────────
-YEMEN_CATALOG="$ROOT_DIR/infrastructure/database/seed/yemen-ptc-catalog.sql"
-if [ -f "$YEMEN_CATALOG" ]; then
-    log_info "Loading Yemen PTC catalog..."
-    docker exec -i obss-postgres psql -U "$POSTGRES_USER" -d obss_catalog < "$YEMEN_CATALOG"
-    log_ok "Yemen PTC catalog applied."
+    log_warn "Seeder script not found at $SEEDER. Skipping."
 fi
 
 # ── Step 6: Build Solution ───────────────────────────────────────────────────

@@ -10,6 +10,7 @@ using Obss.Reporting.Application.Queries.GetReportDefinitionById;
 using Obss.Reporting.Application.Queries.GetReportExecutions;
 using Obss.Reporting.Application.Queries.GetScheduledReportById;
 using Obss.Reporting.Application.Queries.GetScheduledReports;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Reporting.Api.Endpoints;
 
@@ -23,7 +24,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/reporting/definitions/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/definitions", async (IMediator mediator) =>
         {
@@ -31,7 +32,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/definitions/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -39,7 +40,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/schedule/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -47,7 +48,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/definitions/{id:guid}/execute", async (Guid id, IMediator mediator) =>
         {
@@ -55,7 +56,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/schedule", async (ScheduleReportCommand command, IMediator mediator) =>
         {
@@ -63,7 +64,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/reporting/schedule/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/definitions/{id:guid}/executions", async (Guid id, IMediator mediator) =>
         {
@@ -71,7 +72,7 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/schedule", async ([AsParameters] GetScheduledReportsQuery query, IMediator mediator) =>
         {
@@ -79,6 +80,6 @@ public static class ReportEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
     }
 }

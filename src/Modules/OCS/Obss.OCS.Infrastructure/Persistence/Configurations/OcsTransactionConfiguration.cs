@@ -19,6 +19,10 @@ public sealed class OcsTransactionConfiguration : IEntityTypeConfiguration<OcsTr
         builder.Property(t => t.Amount).HasColumnName("amount").HasColumnType("decimal(18,4)").IsRequired();
         builder.Property(t => t.Currency).HasColumnName("currency").HasMaxLength(3).IsRequired();
         builder.Property(t => t.Description).HasColumnName("description").HasMaxLength(500);
+        builder.Property(t => t.CorrelationId).HasColumnName("correlation_id").HasMaxLength(100);
+        builder.Property(t => t.ReservationId).HasColumnName("reservation_id");
+        builder.Property(t => t.BeforeBalance).HasColumnName("before_balance").HasColumnType("decimal(18,4)");
+        builder.Property(t => t.AfterBalance).HasColumnName("after_balance").HasColumnType("decimal(18,4)");
         builder.Property(t => t.Timestamp).HasColumnName("timestamp").IsRequired();
         builder.HasIndex(t => new { t.TenantId, t.SubscriptionId, t.Timestamp }).HasDatabaseName("ix_ocs_transactions_subscription_time");
     }

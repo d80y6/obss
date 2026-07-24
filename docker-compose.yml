@@ -53,7 +53,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-obss}
       POSTGRES_USER: ${POSTGRES_USER:-obss_admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-obss_s3cur3_p@ss}
-      POSTGRES_MULTIPLE_DATABASES: obss_keycloak,obss_audit,obss_iam,obss_crm,obss_catalog,obss_orders,obss_subscriptions,obss_rating,obss_billing,obss_invoices,obss_payments,obss_collections,obss_service_inventory,obss_network_inventory,obss_provisioning,obss_workflow,obss_ticketing,obss_notifications,obss_reporting,obss_gateway,obss_number_inventory,obss_service_catalog,obss_service_qualification,obss_event_management
+      POSTGRES_MULTIPLE_DATABASES: obss_keycloak,obss_audit,obss_iam,obss_crm,obss_catalog,obss_orders,obss_subscriptions,obss_rating,obss_billing,obss_invoices,obss_payments,obss_collections,obss_service_inventory,obss_network_inventory,obss_provisioning,obss_workflow,obss_ticketing,obss_notifications,obss_reporting,obss_gateway,obss_number_inventory,obss_service_catalog,obss_service_qualification,obss_event_management,obss_aaa,obss_ocs
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
@@ -353,10 +353,54 @@ services:
       resources:
         limits:
           cpus: "1.0"
-          memory: 256M
+          memory: 512M
         reservations:
           cpus: "0.2"
           memory: 128M
+
+  # ── FreeRADIUS (RADIUS Auth/Accounting Server for testing) ─────────────
+  freeradius:
+    image: freeradius/freeradius-server:latest
+    container_name: obss-freeradius
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "1812:1812/udp"
+      - "1813:1813/udp"
+    volumes:
+      - ./infrastructure/radius/clients.conf:/etc/raddb/clients.conf:ro
+      - ./infrastructure/radius/users:/etc/raddb/users:ro
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
+
+  # ── TACACS+ Server (for device admin testing) ─────────────────────────
+  tacacs:
+    image: ghcr.io/kitsunix/tac_plus:latest
+    container_name: obss-tacacs
+    restart: unless-stopped
+    networks:
+      - obss-network
+    ports:
+      - "4949:49"
+    volumes:
+      - ./infrastructure/tacacs/tac_plus.conf:/etc/tac_plus/tac_plus.conf:ro
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+        reservations:
+          cpus: "0.1"
+          memory: 64M
 
   # ── .NET OBSS Host (Modular Monolith) ─────────────────────────────────
   obss-host:

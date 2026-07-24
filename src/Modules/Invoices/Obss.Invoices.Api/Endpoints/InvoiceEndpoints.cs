@@ -23,6 +23,7 @@ using Obss.Invoices.Application.Queries.GetInvoicesByCustomer;
 using Obss.Invoices.Application.Queries.GetOverdueInvoices;
 using Obss.Invoices.Application.Services;
 using Obss.Invoices.Infrastructure.Persistence;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Invoices.Api.Endpoints;
 
@@ -36,7 +37,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v{{version}}/invoices/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceWrite));
 
         group.MapGet("/invoices/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -44,7 +45,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices", async (
             Guid? customerId,
@@ -65,7 +66,7 @@ public static class InvoiceEndpoints
             return allResult.IsSuccess
                 ? (IResult)TypedResults.Ok(allResult.Value)
                 : (IResult)TypedResults.BadRequest(allResult.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapPost("/invoices/{id:guid}/finalize", async (Guid id, IMediator mediator) =>
         {
@@ -73,7 +74,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceFinalize));
 
         group.MapPost("/invoices/{id:guid}/send", async (Guid id, IMediator mediator) =>
         {
@@ -81,7 +82,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceSend));
 
         group.MapPost("/invoices/{id:guid}/pay", async (Guid id, RecordInvoicePaymentCommand command, IMediator mediator) =>
         {
@@ -92,7 +93,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceWrite));
 
         group.MapPost("/invoices/{id:guid}/cancel", async (Guid id, CancelInvoiceCommand command, IMediator mediator) =>
         {
@@ -103,7 +104,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceWrite));
 
         group.MapPost("/invoices/{id:guid}/credit-note", async (Guid id, IssueCreditNoteCommand command, IMediator mediator) =>
         {
@@ -114,7 +115,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v{{version}}/invoices/{id}/credit-notes/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceCreditNote));
 
         group.MapGet("/invoices/overdue", async (IMediator mediator) =>
         {
@@ -122,7 +123,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/summary", async (IMediator mediator) =>
         {
@@ -130,7 +131,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/{id:guid}/view", async (Guid id, IMediator mediator) =>
         {
@@ -138,7 +139,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/{id:guid}/pdf", async (Guid id, IInvoicePresenter presenter, IInvoiceRepository repository) =>
         {
@@ -148,7 +149,7 @@ public static class InvoiceEndpoints
 
             var pdf = await presenter.GeneratePdfAsync(invoice);
             return (IResult)TypedResults.File(pdf, "application/pdf", $"invoice-{id}.pdf");
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/{id:guid}/html", async (Guid id, IInvoicePresenter presenter, IInvoiceRepository repository) =>
         {
@@ -158,7 +159,7 @@ public static class InvoiceEndpoints
 
             var html = await presenter.GenerateHtmlAsync(invoice);
             return (IResult)TypedResults.Content(html, "text/html");
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapPost("/invoices/{id:guid}/disputes", async (Guid id, OpenDisputeCommand command, IMediator mediator) =>
         {
@@ -169,7 +170,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v{{version}}/invoices/disputes/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceDisputeManage));
 
         group.MapGet("/invoices/{id:guid}/disputes", async (Guid id, string? status, IMediator mediator) =>
         {
@@ -177,7 +178,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/disputes", async (string? status, IMediator mediator) =>
         {
@@ -185,7 +186,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/{id:guid}/credit-notes", async (Guid id, InvoiceDbContext dbContext) =>
         {
@@ -194,7 +195,7 @@ public static class InvoiceEndpoints
                 .OrderByDescending(c => c.IssuedAt)
                 .ToListAsync();
             return (IResult)TypedResults.Ok(creditNotes);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/credit-notes", async (Guid? customerId, string? status, InvoiceDbContext dbContext) =>
         {
@@ -205,7 +206,7 @@ public static class InvoiceEndpoints
                 query = query.Where(c => c.Status.ToString() == status);
             var creditNotes = await query.OrderByDescending(c => c.IssuedAt).ToListAsync();
             return (IResult)TypedResults.Ok(creditNotes);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapGet("/invoices/disputes/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -213,7 +214,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceRead));
 
         group.MapPost("/invoices/disputes/{id:guid}/resolve", async (Guid id, ResolveDisputeCommand command, IMediator mediator) =>
         {
@@ -224,7 +225,7 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceDisputeManage));
 
         group.MapPost("/invoices/disputes/{id:guid}/reject", async (Guid id, RejectDisputeCommand command, IMediator mediator) =>
         {
@@ -235,6 +236,6 @@ public static class InvoiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Invoices.InvoiceDisputeManage));
     }
 }

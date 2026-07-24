@@ -6,6 +6,7 @@ using Obss.NetworkInventory.Application.Commands.CreateConnectivityLink;
 using Obss.NetworkInventory.Application.Commands.UpdateLinkStatus;
 using Obss.NetworkInventory.Application.Queries.GetDegradedLinks;
 using Obss.NetworkInventory.Application.Queries.GetElementConnections;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.NetworkInventory.Api.Endpoints;
 
@@ -19,7 +20,7 @@ public static class LinkEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/network/links/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementWrite));
 
         group.MapGet("/elements/{id:guid}/connections", async (Guid id, IMediator mediator) =>
         {
@@ -27,7 +28,7 @@ public static class LinkEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementRead));
 
         group.MapGet("/links/degraded", async (IMediator mediator) =>
         {
@@ -35,7 +36,7 @@ public static class LinkEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementRead));
 
         group.MapPatch("/links/{id:guid}/status", async (Guid id, UpdateLinkStatusCommand command, IMediator mediator) =>
         {
@@ -45,6 +46,6 @@ public static class LinkEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementWrite));
     }
 }

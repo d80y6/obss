@@ -1,32 +1,23 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Obss.AAA.Application.Abstractions;
 using Obss.AAA.Application.Mappings;
-using Obss.AAA.Infrastructure.Persistence;
+using Obss.AAA.Domain.Events;
+using Obss.AAA.Infrastructure.EventHandlers;
 using Obss.AAA.Infrastructure.Persistence.Repositories;
-using Obss.AAA.Infrastructure.Services.Adapters;
 
 namespace Obss.AAA.Api.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAaaModule(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddAaaModule(this IServiceCollection services)
     {
-        var connectionString = configuration.GetConnectionString("Postgres")
-            ?? throw new InvalidOperationException("Connection string 'Postgres' not found.");
-
-        services.AddDbContext<AaaDbContext>(options =>
-            options.UseNpgsql(connectionString, npgsql =>
-                npgsql.MigrationsHistoryTable("__ef_migrations_history", "aaa"))
-            .UseSnakeCaseNamingConvention());
-
         services.AddScoped<INasRepository, NasRepository>();
         services.AddScoped<IRadiusSessionRepository, RadiusSessionRepository>();
+        services.AddScoped<IAaaAuditLogRepository, AaaAuditLogRepository>();
 
-        services.AddScoped<IAaaAdapter, RadiusAdapterStub>();
-        services.AddScoped<IAaaAdapter, DiameterAdapterStub>();
-        services.AddScoped<IAaaAdapter, TacacsPlusAdapterStub>();
+        services.AddScoped<INotificationHandler<RadiusSessionStartedDomainEvent>, LogSessionStartedHandler>();
+        services.AddScoped<INotificationHandler<RadiusSessionStoppedDomainEvent>, LogSessionStoppedHandler>();
 
         AaaMappingConfig.Configure();
 
@@ -40,6 +31,8 @@ public static class ServiceCollectionExtensions
 
         NasEndpoints.Map(group);
         SessionEndpoints.Map(group);
+        MetricsEndpoints.Map(group);
+        AuditLogEndpoints.Map(group);
 
         return app;
     }

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using Obss.NetworkInventory.Application.Commands.CreateVLAN;
 using Obss.NetworkInventory.Application.Queries.GetNetworkElementById;
 using Obss.NetworkInventory.Application.Queries.GetNetworkElements;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.NetworkInventory.Api.Endpoints;
 
@@ -18,7 +19,7 @@ public static class VLANEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/network/vlans/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementWrite));
 
         group.MapGet("/vlans", async ([AsParameters] GetNetworkElementsQuery query, IMediator mediator) =>
         {
@@ -27,7 +28,7 @@ public static class VLANEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementRead));
 
         group.MapGet("/vlans/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -35,6 +36,6 @@ public static class VLANEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementRead));
     }
 }

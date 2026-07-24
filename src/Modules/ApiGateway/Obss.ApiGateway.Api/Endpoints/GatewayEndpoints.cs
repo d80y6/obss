@@ -9,6 +9,7 @@ using Obss.ApiGateway.Application.Commands.RevokeApiKey;
 using Obss.ApiGateway.Application.Queries.GetApiKeys;
 using Obss.ApiGateway.Application.Queries.GetApiRoutes;
 using Obss.ApiGateway.Application.Queries.GetPartners;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.ApiGateway.Api.Endpoints;
 
@@ -22,7 +23,7 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/gateway/routes/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterManage));
 
         group.MapGet("/routes", async (IMediator mediator) =>
         {
@@ -30,7 +31,7 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterRead));
 
         group.MapPost("/api-keys", async (CreateApiKeyCommand command, IMediator mediator) =>
         {
@@ -38,7 +39,7 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/gateway/api-keys/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterManage));
 
         group.MapGet("/api-keys", async (IMediator mediator) =>
         {
@@ -46,7 +47,7 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterRead));
 
         group.MapPost("/api-keys/{id:guid}/revoke", async (Guid id, IMediator mediator) =>
         {
@@ -54,7 +55,7 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterManage));
 
         group.MapPost("/partners", async (RegisterPartnerCommand command, IMediator mediator) =>
         {
@@ -62,7 +63,7 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/gateway/partners/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterManage));
 
         group.MapGet("/partners", async (IMediator mediator) =>
         {
@@ -70,6 +71,6 @@ public static class GatewayEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.AdapterRead));
     }
 }

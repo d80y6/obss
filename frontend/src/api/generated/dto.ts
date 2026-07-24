@@ -1497,3 +1497,60 @@ export interface ProblemDetails {
 export interface ValidationProblemDetails extends ProblemDetails {
   errors: Record<string, string[]> | null;
 }
+
+// ── AAA ────────────────────────────────────────────────────────────────
+export interface NasDto {
+  id: string;
+  tenantId: string;
+  name: string;
+  nasIpAddress: string;
+  nasType: string;
+  status: string;
+  location: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RadiusSessionDto {
+  id: string;
+  tenantId: string;
+  sessionId: string;
+  nasId: string;
+  username: string;
+  framedIpAddress: string | null;
+  calledStationId: string;
+  callingStationId: string;
+  acctSessionTime: number;
+  inputOctets: number;
+  outputOctets: number;
+  sessionStatus: string;
+  startedAt: string;
+  stoppedAt: string | null;
+  updatedAt: string;
+}
+
+export interface AaaMetricsDto {
+  totalNas: number;
+  activeNas: number;
+  inactiveNas: number;
+  activeSessions: number;
+  sessionsToday: number;
+  totalInputOctets: number;
+  totalOutputOctets: number;
+}
+
+export interface AaaAuditLogDto {
+  id: string;
+  tenantId: string;
+  eventType: string;
+  username: string | null;
+  nasId: string | null;
+  nasIpAddress: string | null;
+  detail: string | null;
+  timestamp: string;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+}

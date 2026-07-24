@@ -16,6 +16,7 @@ using Obss.CRM.Application.Queries.GetQuoteById;
 using Obss.CRM.Application.Queries.GetQuotes;
 using Obss.CRM.Application.Queries.GetQuotesByCustomer;
 using Obss.SharedKernel.Application.Contracts;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.CRM.Api.Endpoints;
 
@@ -29,7 +30,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/crm/quotes/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapGet("/quotes/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -37,7 +38,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteRead));
 
         group.MapGet("/quotes", async (IMediator mediator) =>
         {
@@ -45,7 +46,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteRead));
 
         group.MapGet("/customers/{customerId:guid}/quotes", async (Guid customerId, IMediator mediator) =>
         {
@@ -53,7 +54,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteRead));
 
         group.MapPatch("/quotes/{id:guid}", async (Guid id, UpdateQuoteCommand command, IMediator mediator) =>
         {
@@ -63,7 +64,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapPost("/quotes/{id:guid}/submit", async (Guid id, IMediator mediator) =>
         {
@@ -71,7 +72,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapPost("/quotes/{id:guid}/approve", async (Guid id, IMediator mediator) =>
         {
@@ -79,7 +80,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteApprove));
 
         group.MapPost("/quotes/{id:guid}/accept", async (Guid id, IMediator mediator) =>
         {
@@ -87,7 +88,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapPost("/quotes/{id:guid}/reject", async (Guid id, IMediator mediator) =>
         {
@@ -95,7 +96,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapPost("/quotes/{id:guid}/cancel", async (Guid id, IMediator mediator) =>
         {
@@ -103,7 +104,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapPost("/quotes/{id:guid}/items", async (Guid id, AddQuoteItemCommand command, IMediator mediator) =>
         {
@@ -113,7 +114,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapPatch("/quotes/{id:guid}/items/{itemId:guid}", async (Guid id, Guid itemId, UpdateQuoteItemCommand command, IMediator mediator) =>
         {
@@ -123,7 +124,7 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
 
         group.MapDelete("/quotes/{id:guid}/items/{itemId:guid}", async (Guid id, Guid itemId, IMediator mediator) =>
         {
@@ -131,6 +132,6 @@ public static class QuoteEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Crm.QuoteWrite));
     }
 }

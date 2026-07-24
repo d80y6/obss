@@ -12,6 +12,7 @@ using Obss.Notifications.Application.Queries.GetNotificationById;
 using Obss.Notifications.Application.Queries.GetNotifications;
 using Obss.Notifications.Domain.Entities;
 using Obss.SharedKernel.Application.Abstractions;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Notifications.Api.Endpoints;
 
@@ -25,7 +26,7 @@ public static class NotificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/notifications/notifications/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.NotificationSend));
 
         group.MapPost("/notifications/from-template", async (
             SendNotificationFromTemplateCommand command, IMediator mediator) =>
@@ -34,7 +35,7 @@ public static class NotificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/notifications/notifications/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.NotificationSend));
 
         group.MapGet("/notifications", async (
             [AsParameters] GetNotificationsQuery query, IMediator mediator) =>
@@ -43,7 +44,7 @@ public static class NotificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.NotificationRead));
 
         group.MapGet("/notifications/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -51,7 +52,7 @@ public static class NotificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.NotificationRead));
 
         group.MapPost("/notifications/{id:guid}/read", async (Guid id, IMediator mediator) =>
         {
@@ -60,7 +61,7 @@ public static class NotificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok()
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.PreferenceManage));
 
         group.MapPost("/preferences", async (
             UpdateNotificationPreferenceCommand command, IMediator mediator) =>
@@ -69,12 +70,12 @@ public static class NotificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.PreferenceManage));
 
         group.MapGet("/preferences", async (IRepository<NotificationPreference> repository) =>
         {
             var preferences = await repository.GetAllAsync();
             return (IResult)TypedResults.Ok(preferences.Adapt<IReadOnlyList<NotificationPreferenceDto>>());
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Notifications.PreferenceManage));
     }
 }

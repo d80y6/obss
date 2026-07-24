@@ -14,6 +14,7 @@ using Obss.ProductCatalog.Application.Queries.GetProductById;
 using Obss.ProductCatalog.Application.Queries.GetProductConfiguration;
 using Obss.ProductCatalog.Application.Queries.GetProducts;
 using Obss.ProductCatalog.Application.Queries.ValidateConfiguration;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.ProductCatalog.Api.Endpoints;
 
@@ -27,7 +28,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/products/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductWrite));
 
         group.MapGet("/products/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -35,7 +36,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductRead));
 
         group.MapGet("/products", async ([AsParameters] GetProductsQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -46,7 +47,7 @@ public static class ProductEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductRead));
 
         group.MapPut("/products/{id:guid}", async (Guid id, UpdateProductCommand command, IMediator mediator) =>
         {
@@ -56,7 +57,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductWrite));
 
         group.MapPost("/products/{id:guid}/configuration-rules", async (Guid id, AddConfigurationRuleCommand command, IMediator mediator) =>
         {
@@ -66,7 +67,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/products/{id}/configuration-rules/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductWrite));
 
         group.MapPost("/products/{id:guid}/options", async (Guid id, CreateProductOptionCommand command, IMediator mediator) =>
         {
@@ -76,7 +77,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/products/{id}/options/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductWrite));
 
         group.MapGet("/products/{id:guid}/configuration", async (Guid id, IMediator mediator) =>
         {
@@ -84,7 +85,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductRead));
 
         group.MapPost("/products/{id:guid}/validate-configuration", async (Guid id, ValidateConfigurationQuery query, IMediator mediator) =>
         {
@@ -94,7 +95,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductRead));
 
         group.MapPatch("/products/{id:guid}", async (Guid id, PatchProductCommand command, IMediator mediator) =>
         {
@@ -104,7 +105,7 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductWrite));
 
         group.MapDelete("/products/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -112,6 +113,6 @@ public static class ProductEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.ProductWrite));
     }
 }

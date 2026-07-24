@@ -2,6 +2,7 @@ using MediatR;
 using Obss.ServiceQualification.Application.Commands.CheckServiceQualification;
 using Obss.ServiceQualification.Application.Queries.GetServiceQualificationById;
 using Obss.ServiceQualification.Application.Queries.GetServiceQualifications;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.ServiceQualification.Api.Endpoints;
 
@@ -15,7 +16,7 @@ public static class ServiceQualificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/service-qualification/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceQualify));
 
         group.MapGet("/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -23,7 +24,7 @@ public static class ServiceQualificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/", async (
             Guid? customerId,
@@ -35,6 +36,6 @@ public static class ServiceQualificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
     }
 }

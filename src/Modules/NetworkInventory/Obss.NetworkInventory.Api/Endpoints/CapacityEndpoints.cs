@@ -6,6 +6,7 @@ using Obss.NetworkInventory.Application.Commands.RecordCapacity;
 using Obss.NetworkInventory.Application.Queries.GetCapacityAlerts;
 using Obss.NetworkInventory.Application.Queries.GetElementCapacity;
 using Obss.NetworkInventory.Application.Queries.GetOverallNetworkCapacity;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.NetworkInventory.Api.Endpoints;
 
@@ -21,7 +22,7 @@ public static class CapacityEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/network/elements/{id}/capacity/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.ElementWrite));
 
         group.MapGet("/elements/{id:guid}/capacity", async (Guid id, IMediator mediator) =>
         {
@@ -29,7 +30,7 @@ public static class CapacityEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.CapacityRead));
 
         group.MapGet("/capacity/alerts", async (IMediator mediator) =>
         {
@@ -37,7 +38,7 @@ public static class CapacityEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.CapacityRead));
 
         group.MapGet("/capacity/overview", async (IMediator mediator) =>
         {
@@ -45,6 +46,6 @@ public static class CapacityEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.CapacityRead));
     }
 }

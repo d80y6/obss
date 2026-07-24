@@ -2,7 +2,9 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.AAA.Application.Commands.DeleteNas;
 using Obss.AAA.Application.Commands.RegisterNas;
+using Obss.AAA.Application.Commands.UpdateNas;
 using Obss.AAA.Application.Commands.UpdateNasStatus;
 using Obss.AAA.Application.Queries.GetAllNasDevices;
 using Obss.AAA.Application.Queries.GetNasById;
@@ -40,6 +42,23 @@ public static class NasEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapPut("/nas/{id:guid}", async (Guid id, UpdateNasCommand command, IMediator mediator, CancellationToken ct) =>
+        {
+            command = command with { Id = id };
+            var result = await mediator.Send(command, ct);
+            return result.IsSuccess
+                ? (IResult)TypedResults.Ok(result.Value)
+                : (IResult)TypedResults.BadRequest(result.Error);
+        });
+
+        group.MapDelete("/nas/{id:guid}", async (Guid id, IMediator mediator, CancellationToken ct) =>
+        {
+            var result = await mediator.Send(new DeleteNasCommand(id), ct);
+            return result.IsSuccess
+                ? (IResult)TypedResults.NoContent()
+                : (IResult)TypedResults.NotFound();
         });
     }
 }

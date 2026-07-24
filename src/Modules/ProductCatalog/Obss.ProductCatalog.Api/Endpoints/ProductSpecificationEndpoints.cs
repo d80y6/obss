@@ -18,6 +18,7 @@ using Obss.ProductCatalog.Application.Commands.UpdateCharacteristicValue;
 using Obss.ProductCatalog.Application.Commands.UpdateProductSpecification;
 using Obss.ProductCatalog.Application.Queries.GetProductSpecificationById;
 using Obss.ProductCatalog.Application.Queries.GetProductSpecifications;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.ProductCatalog.Api.Endpoints;
 
@@ -32,7 +33,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/product-specifications/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapGet("/product-specifications/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -40,7 +41,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationRead));
 
         group.MapGet("/product-specifications", async ([AsParameters] GetProductSpecificationsQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -51,7 +52,7 @@ public static class ProductSpecificationEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationRead));
 
         group.MapPut("/product-specifications/{id:guid}", async (Guid id, UpdateProductSpecificationCommand command, IMediator mediator) =>
         {
@@ -61,7 +62,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapPatch("/product-specifications/{id:guid}", async (Guid id, PatchProductSpecificationCommand command, IMediator mediator) =>
         {
@@ -71,7 +72,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapDelete("/product-specifications/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -79,7 +80,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         // --- Characteristics ---
         group.MapGet("/product-specifications/{specId:guid}/characteristics", async (Guid specId, IMediator mediator) =>
@@ -88,7 +89,7 @@ public static class ProductSpecificationEndpoints
             if (!result.IsSuccess)
                 return (IResult)TypedResults.NotFound(result.Error);
             return (IResult)TypedResults.Ok(result.Value.Characteristics);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationRead));
 
         group.MapPost("/product-specifications/{specId:guid}/characteristics", async (Guid specId, AddCharacteristicCommand command, IMediator mediator) =>
         {
@@ -98,7 +99,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/product-specifications/{specId}/characteristics/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapPut("/product-specifications/{specId:guid}/characteristics/{charId:guid}", async (Guid specId, Guid charId, UpdateCharacteristicCommand command, IMediator mediator) =>
         {
@@ -108,7 +109,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapDelete("/product-specifications/{specId:guid}/characteristics/{charId:guid}", async (Guid specId, Guid charId, IMediator mediator) =>
         {
@@ -116,7 +117,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         // --- Characteristic Values ---
         group.MapGet("/product-specifications/{specId:guid}/characteristics/{charId:guid}/values", async (Guid specId, Guid charId, IMediator mediator) =>
@@ -130,7 +131,7 @@ public static class ProductSpecificationEndpoints
                 return (IResult)TypedResults.NotFound();
 
             return (IResult)TypedResults.Ok(characteristic.Values);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationRead));
 
         group.MapPost("/product-specifications/{specId:guid}/characteristics/{charId:guid}/values", async (Guid specId, Guid charId, AddCharacteristicValueCommand command, IMediator mediator) =>
         {
@@ -140,7 +141,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/product-specifications/{specId}/characteristics/{charId}/values/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapPut("/product-specifications/{specId:guid}/characteristics/{charId:guid}/values/{valueId:guid}", async (Guid specId, Guid charId, Guid valueId, UpdateCharacteristicValueCommand command, IMediator mediator) =>
         {
@@ -150,7 +151,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapDelete("/product-specifications/{specId:guid}/characteristics/{charId:guid}/values/{valueId:guid}", async (Guid specId, Guid charId, Guid valueId, IMediator mediator) =>
         {
@@ -158,7 +159,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         // --- Relationships ---
         group.MapGet("/product-specifications/{specId:guid}/relationships", async (Guid specId, IMediator mediator) =>
@@ -167,7 +168,7 @@ public static class ProductSpecificationEndpoints
             if (!result.IsSuccess)
                 return (IResult)TypedResults.NotFound(result.Error);
             return (IResult)TypedResults.Ok(result.Value.Relationships);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationRead));
 
         group.MapPost("/product-specifications/{specId:guid}/relationships", async (Guid specId, AddSpecificationRelationshipCommand command, IMediator mediator) =>
         {
@@ -177,7 +178,7 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/catalog/product-specifications/{specId}/relationships/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
 
         group.MapDelete("/product-specifications/{specId:guid}/relationships/{relId:guid}", async (Guid specId, Guid relId, IMediator mediator) =>
         {
@@ -185,6 +186,6 @@ public static class ProductSpecificationEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Catalog.SpecificationWrite));
     }
 }

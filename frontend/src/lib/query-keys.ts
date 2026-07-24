@@ -524,4 +524,28 @@ export const queryKeys = {
         [...queryKeys.eventManagement.events.lists(), filters] as const,
     },
   },
+  aaa: {
+    metrics: () => ["aaa", "metrics"] as const,
+    nas: {
+      all: () => ["aaa", "nas"] as const,
+      lists: () => [...queryKeys.aaa.nas.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.aaa.nas.lists(), filters] as const,
+      details: () => [...queryKeys.aaa.nas.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.aaa.nas.details(), id] as const,
+    },
+    sessions: {
+      all: () => ["aaa", "sessions"] as const,
+      lists: () => [...queryKeys.aaa.sessions.all(), "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.aaa.sessions.lists(), filters] as const,
+      details: () => [...queryKeys.aaa.sessions.all(), "detail"] as const,
+      detail: (id: string) => [...queryKeys.aaa.sessions.details(), id] as const,
+    },
+    logs: {
+      lists: () => ["aaa", "logs", "list"] as const,
+      list: (filters: Record<string, string> = {}) =>
+        [...queryKeys.aaa.logs.lists(), filters] as const,
+    },
+  },
 } as const

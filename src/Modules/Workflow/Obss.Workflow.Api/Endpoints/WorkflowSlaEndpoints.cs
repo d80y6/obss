@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.Workflow.Application.Commands.ApplyWorkflowSla;
 using Obss.Workflow.Application.Commands.CreateWorkflowSla;
 using Obss.Workflow.Application.Queries.GetSlaBreachedWorkflows;
@@ -20,7 +21,7 @@ public static class WorkflowSlaEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/workflow/slas/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/slas", async ([AsParameters] GetWorkflowSlasQuery query, IMediator mediator) =>
         {
@@ -28,7 +29,7 @@ public static class WorkflowSlaEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/instances/{id:guid}/apply-sla", async (Guid id, ApplyWorkflowSlaCommand command, IMediator mediator) =>
         {
@@ -39,7 +40,7 @@ public static class WorkflowSlaEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/sla/breached", async (IMediator mediator) =>
         {
@@ -47,7 +48,7 @@ public static class WorkflowSlaEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.SlaRead));
 
         group.MapGet("/sla/status/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -55,6 +56,6 @@ public static class WorkflowSlaEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.SlaRead));
     }
 }

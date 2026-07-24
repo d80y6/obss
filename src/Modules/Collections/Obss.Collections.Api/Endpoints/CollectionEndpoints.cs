@@ -16,6 +16,7 @@ using Obss.Collections.Application.Queries.GetCollectionCaseById;
 using Obss.Collections.Application.Queries.GetCollectionCases;
 using Obss.Collections.Application.Queries.GetDunningPolicies;
 using Obss.Collections.Application.Queries.GetDunningPolicyById;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Collections.Api.Endpoints;
 
@@ -29,7 +30,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/collections/cases/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.CaseWrite));
 
         group.MapGet("/cases/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -37,7 +38,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.CaseRead));
 
         group.MapGet("/cases", async ([AsParameters] GetCollectionCasesQuery query, IMediator mediator) =>
         {
@@ -45,7 +46,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.CaseRead));
 
         group.MapPost("/cases/{id:guid}/actions", async (Guid id, AddCollectionActionCommand command, IMediator mediator) =>
         {
@@ -55,7 +56,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.CaseWrite));
 
         group.MapPost("/cases/{id:guid}/arrangements", async (Guid id, CreatePaymentArrangementCommand command, IMediator mediator) =>
         {
@@ -65,7 +66,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/collections/cases/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.ArrangementManage));
 
         group.MapPost("/arrangements/{arrangementId:guid}/payments", async (Guid arrangementId, RecordArrangementPaymentCommand command, IMediator mediator) =>
         {
@@ -75,7 +76,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.ArrangementManage));
 
         group.MapPost("/cases/{id:guid}/resolve", async (Guid id, IMediator mediator) =>
         {
@@ -83,7 +84,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.CaseWrite));
 
         group.MapPost("/cases/{id:guid}/dunning", async (Guid id, IMediator mediator) =>
         {
@@ -91,7 +92,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.DunningManage));
 
         group.MapGet("/reports/aging", async ([AsParameters] GetAgingReportQuery query, IMediator mediator) =>
         {
@@ -99,7 +100,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.CaseRead));
 
         group.MapGet("/dunning-policies", async ([AsParameters] GetDunningPoliciesQuery query, IMediator mediator) =>
         {
@@ -107,7 +108,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.DunningManage));
 
         group.MapGet("/dunning-policies/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -115,7 +116,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.DunningManage));
 
         group.MapPost("/dunning-policies", async (CreateDunningPolicyCommand command, IMediator mediator) =>
         {
@@ -123,7 +124,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/collections/dunning-policies/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.DunningManage));
 
         group.MapPut("/dunning-policies/{id:guid}", async (Guid id, UpdateDunningPolicyCommand command, IMediator mediator) =>
         {
@@ -133,7 +134,7 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.DunningManage));
 
         group.MapDelete("/dunning-policies/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -141,6 +142,6 @@ public static class CollectionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Collections.DunningManage));
     }
 }

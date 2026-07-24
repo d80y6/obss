@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Routing;
 using Obss.NetworkInventory.Application.Commands.SaveTopologyMap;
 using Obss.NetworkInventory.Application.Queries.GetNetworkTopology;
 using Obss.NetworkInventory.Application.Queries.GetTopologyMaps;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.NetworkInventory.Api.Endpoints;
 
@@ -18,7 +19,7 @@ public static class TopologyEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.TopologyRead));
 
         group.MapPost("/topology/maps", async (SaveTopologyMapCommand command, IMediator mediator) =>
         {
@@ -26,7 +27,7 @@ public static class TopologyEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/network/topology/maps/{result.Value}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.TopologyRead));
 
         group.MapGet("/topology/maps", async (IMediator mediator) =>
         {
@@ -34,6 +35,6 @@ public static class TopologyEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Network.TopologyRead));
     }
 }

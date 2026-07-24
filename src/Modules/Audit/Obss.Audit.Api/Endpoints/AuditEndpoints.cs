@@ -22,6 +22,7 @@ using Obss.Audit.Application.Queries.GetComplianceSummary;
 using Obss.Audit.Application.Queries.GetEntityAuditTrail;
 using Obss.Audit.Application.Queries.GetSensitiveOperations;
 using Obss.Audit.Application.Queries.GetUnacknowledgedAlerts;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Audit.Api.Endpoints;
 
@@ -35,7 +36,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/audit/entries/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditWrite));
 
         group.MapGet("/entries/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -43,7 +44,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/entries", async ([AsParameters] GetAuditEntriesQuery query, IMediator mediator) =>
         {
@@ -51,7 +52,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/entities/{entityType}/{entityId}", async (string entityType, string entityId, IMediator mediator) =>
         {
@@ -59,7 +60,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/summary", async (IMediator mediator) =>
         {
@@ -67,7 +68,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapPost("/policies", async (CreateAuditPolicyCommand command, IMediator mediator) =>
         {
@@ -75,7 +76,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/audit/policies/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditPolicyManage));
 
         group.MapPost("/purge", async (IMediator mediator) =>
         {
@@ -83,7 +84,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(new { DeletedCount = result.Value })
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditPurge));
 
         group.MapGet("/compliance/summary", async (IMediator mediator) =>
         {
@@ -91,7 +92,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/compliance/report", async (IMediator mediator) =>
         {
@@ -99,7 +100,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/sensitive-operations", async ([AsParameters] GetSensitiveOperationsQuery query, IMediator mediator) =>
         {
@@ -107,7 +108,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/alerts", async ([AsParameters] GetAlertsQuery query, IMediator mediator) =>
         {
@@ -115,7 +116,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/alerts/unacknowledged", async (IMediator mediator) =>
         {
@@ -123,7 +124,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapPost("/alerts/{id:guid}/acknowledge", async (Guid id, IMediator mediator) =>
         {
@@ -131,7 +132,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditAlertManage));
 
         group.MapPost("/alert-rules", async (CreateAlertRuleCommand command, IMediator mediator) =>
         {
@@ -139,7 +140,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/audit/alert-rules/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditAlertManage));
 
         group.MapGet("/alert-rules", async (IMediator mediator) =>
         {
@@ -147,7 +148,7 @@ public static class AuditEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
 
         group.MapGet("/alert-rules/{id:guid}", async (Guid id, IRepository<AuditAlertRule> repository) =>
         {
@@ -155,6 +156,6 @@ public static class AuditEndpoints
             return rule is not null
                 ? (IResult)TypedResults.Ok(rule.Adapt<AuditAlertRuleDto>())
                 : (IResult)TypedResults.NotFound();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Audit.AuditRead));
     }
 }

@@ -29,6 +29,7 @@ using Obss.Subscriptions.Application.Commands.CancelProduct;
 using Obss.Subscriptions.Application.Queries.GetProductById;
 using Obss.Subscriptions.Application.Queries.GetProducts;
 using Obss.Subscriptions.Application.Queries.GetProductsByCustomer;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.Subscriptions.Api.Endpoints;
 
@@ -42,7 +43,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/subscriptions/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapGet("/subscriptions/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -50,7 +51,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionRead));
 
         group.MapGet("/subscriptions", async ([AsParameters] GetSubscriptionsQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -61,7 +62,7 @@ public static class SubscriptionEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, result.Value.TotalCount);
             return (IResult)TypedResults.Ok(result.Value.Items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionRead));
 
         group.MapGet("/customers/{customerId:guid}/subscriptions", async (Guid customerId, IMediator mediator) =>
         {
@@ -69,7 +70,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionRead));
 
         group.MapPost("/subscriptions/{id:guid}/activate", async (Guid id, IMediator mediator) =>
         {
@@ -77,7 +78,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionActivate));
 
         group.MapPost("/subscriptions/{id:guid}/suspend", async (Guid id, SuspendSubscriptionCommand command, IMediator mediator) =>
         {
@@ -87,7 +88,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionSuspend));
 
         group.MapPost("/subscriptions/{id:guid}/resume", async (Guid id, IMediator mediator) =>
         {
@@ -95,7 +96,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapPost("/subscriptions/{id:guid}/cancel", async (Guid id, CancelSubscriptionCommand command, IMediator mediator) =>
         {
@@ -105,7 +106,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionCancel));
 
         group.MapPut("/subscriptions/{id:guid}/offer", async (Guid id, ChangeOfferCommand command, IMediator mediator) =>
         {
@@ -115,7 +116,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapPost("/subscriptions/{id:guid}/renew", async (Guid id, IMediator mediator) =>
         {
@@ -123,7 +124,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapGet("/subscriptions/{id:guid}/entitlements", async (Guid id, IMediator mediator) =>
         {
@@ -131,7 +132,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionRead));
 
         group.MapPost("/subscriptions/{id:guid}/entitlements", async (Guid id, SetSubscriptionEntitlementsCommand command, IMediator mediator) =>
         {
@@ -141,7 +142,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapPost("/subscriptions/{id:guid}/entitlements/usage", async (Guid id, UpdateEntitlementUsageCommand command, IMediator mediator) =>
         {
@@ -151,7 +152,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapPost("/subscriptions/{id:guid}/entitlements/override", async (Guid id, OverrideEntitlementLimitCommand command, IMediator mediator) =>
         {
@@ -161,7 +162,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapGet("/subscriptions/{id:guid}/entitlements/check", async (Guid id, string type, decimal amount, IMediator mediator) =>
         {
@@ -169,7 +170,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionRead));
 
         group.MapGet("/subscriptions/{id:guid}/entitlements/usage", async (Guid id, string type, IMediator mediator) =>
         {
@@ -177,7 +178,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionRead));
 
         group.MapPut("/subscriptions/{id:guid}/quantity", async (Guid id, ChangeQuantityCommand command, IMediator mediator) =>
         {
@@ -187,7 +188,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         group.MapPut("/subscriptions/{id:guid}/end-date", async (Guid id, ExtendEndDateCommand command, IMediator mediator) =>
         {
@@ -197,7 +198,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.SubscriptionWrite));
 
         // Product endpoints
         group.MapPost("/products", async (CreateProductCommand command, IMediator mediator) =>
@@ -206,7 +207,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/subscriptions/products/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductWrite));
 
         group.MapGet("/products/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -214,7 +215,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductRead));
 
         group.MapGet("/products", async (IMediator mediator) =>
         {
@@ -222,7 +223,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductRead));
 
         group.MapGet("/customers/{customerId:guid}/products", async (Guid customerId, IMediator mediator) =>
         {
@@ -230,7 +231,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductRead));
 
         group.MapPatch("/products/{id:guid}", async (Guid id, UpdateProductCommand command, IMediator mediator) =>
         {
@@ -240,7 +241,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductWrite));
 
         group.MapPost("/products/{id:guid}/activate", async (Guid id, IMediator mediator) =>
         {
@@ -248,7 +249,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductWrite));
 
         group.MapPost("/products/{id:guid}/suspend", async (Guid id, IMediator mediator) =>
         {
@@ -256,7 +257,7 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductWrite));
 
         group.MapPost("/products/{id:guid}/cancel", async (Guid id, IMediator mediator) =>
         {
@@ -264,6 +265,6 @@ public static class SubscriptionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Subscriptions.ProductWrite));
     }
 }

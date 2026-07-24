@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Obss.ServiceCatalog.Application.Commands.ServiceCandidate.CreateServiceCandidate;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.SharedKernel.Application.Contracts;
 using Obss.SharedKernel.Infrastructure;
 using Obss.ServiceCatalog.Application.Commands.ServiceCandidate.DeleteServiceCandidate;
@@ -20,7 +21,7 @@ internal static class ServiceCandidateEndpoints
         {
             var id = await mediator.Send(command);
             return Results.Created($"/api/v1/service-catalog/service-candidates/{id}", id);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/service-candidates", async ([AsParameters] GetServiceCandidatesQuery query, IMediator mediator, HttpContext httpContext) =>
         {
@@ -28,25 +29,25 @@ internal static class ServiceCandidateEndpoints
             var paginationRequest = new TmfPaginationRequest { Offset = query.Offset, Limit = query.Limit };
             httpContext.Response.SetPaginationHeaders(paginationRequest, total);
             return Results.Ok(items);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/service-candidates/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             var result = await mediator.Send(new GetServiceCandidateByIdQuery(id));
             return result is not null ? Results.Ok(result) : Results.NotFound();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPatch("/service-candidates/{id:guid}", async (Guid id, UpdateServiceCandidateCommand command, IMediator mediator) =>
         {
             if (id != command.Id) return Results.BadRequest("Id mismatch");
             await mediator.Send(command);
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/service-candidates/{id:guid}", async (Guid id, IMediator mediator) =>
         {
             await mediator.Send(new DeleteServiceCandidateCommand(id));
             return Results.NoContent();
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
     }
 }

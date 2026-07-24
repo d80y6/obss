@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Obss.SharedKernel.Application.Authorization;
 using Obss.Workflow.Application.Commands.AddWorkflowStep;
 using Obss.Workflow.Application.Commands.CreateWorkflowDefinition;
 using Obss.Workflow.Application.Commands.RemoveWorkflowStep;
@@ -20,7 +21,7 @@ public static class WorkflowDefinitionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/workflow/definitions/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/definitions/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -28,7 +29,7 @@ public static class WorkflowDefinitionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/definitions", async ([AsParameters] GetWorkflowDefinitionsQuery query, IMediator mediator) =>
         {
@@ -36,7 +37,7 @@ public static class WorkflowDefinitionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/definitions/{id:guid}/steps", async (Guid id, AddWorkflowStepCommand command, IMediator mediator) =>
         {
@@ -47,7 +48,7 @@ public static class WorkflowDefinitionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/definitions/{id:guid}/steps/{stepId:guid}", async (Guid id, Guid stepId, IMediator mediator) =>
         {
@@ -55,6 +56,6 @@ public static class WorkflowDefinitionEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
     }
 }

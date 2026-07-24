@@ -26,6 +26,7 @@ using Obss.ServiceInventory.Application.Queries.GetServices;
 using Obss.ServiceInventory.Application.Queries.GetServicesBySubscription;
 using Obss.ServiceInventory.Application.Queries.GetUnmatchedResources;
 using Obss.ServiceInventory.Application.Queries.GetUpstreamServices;
+using Obss.SharedKernel.Application.Authorization;
 
 namespace Obss.ServiceInventory.Api.Endpoints;
 
@@ -39,7 +40,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/service-inventory/services/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/services/{id:guid}", async (Guid id, IMediator mediator) =>
         {
@@ -47,7 +48,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/services", async (HttpContext httpContext, [AsParameters] GetServicesQuery query, IMediator mediator, IServiceRepository serviceRepository) =>
         {
@@ -66,7 +67,7 @@ public static class ServiceEndpoints
             var totalCount = await serviceRepository.CountFilteredAsync(query.CustomerId, serviceType, status);
             httpContext.Response.Headers["x-total-count"] = totalCount.ToString();
             return (IResult)TypedResults.Ok(result.Value);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/subscriptions/{subscriptionId:guid}/services", async (Guid subscriptionId, IMediator mediator) =>
         {
@@ -74,7 +75,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/services/{id:guid}/activate", async (Guid id, IMediator mediator) =>
         {
@@ -82,7 +83,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceActivate));
 
         group.MapPost("/services/{id:guid}/suspend", async (Guid id, SuspendServiceCommand command, IMediator mediator) =>
         {
@@ -93,7 +94,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceSuspend));
 
         group.MapPost("/services/{id:guid}/decommission", async (Guid id, IMediator mediator) =>
         {
@@ -101,7 +102,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceTerminate));
 
         group.MapPost("/services/{id:guid}/resume", async (Guid id, IMediator mediator) =>
         {
@@ -109,7 +110,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceResume));
 
         group.MapPatch("/services/{id:guid}", async (Guid id, UpdateServiceCommand command, IMediator mediator) =>
         {
@@ -120,7 +121,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceChange));
 
         group.MapDelete("/services/topology/{topologyId:guid}/links/{linkId:guid}", async (Guid topologyId, Guid linkId, IMediator mediator) =>
         {
@@ -128,7 +129,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.NoContent()
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/services/{id:guid}/topology", async (Guid id, CreateTopologyCommand command, IMediator mediator) =>
         {
@@ -139,7 +140,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/service-inventory/services/{id}/topology", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/services/{id:guid}/topology", async (Guid id, IMediator mediator) =>
         {
@@ -147,7 +148,7 @@ public static class ServiceEndpoints
             if (result.IsSuccess)
                 return (IResult)TypedResults.Ok(result.Value);
             return (IResult)TypedResults.Ok<object?>(null);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/services/{id:guid}/topology/upstream", async (Guid id, IMediator mediator) =>
         {
@@ -155,7 +156,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/services/{id:guid}/topology/downstream", async (Guid id, IMediator mediator) =>
         {
@@ -163,7 +164,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.NotFound(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/services/{id:guid}/resources", async (Guid id, IMediator mediator) =>
         {
@@ -171,7 +172,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPost("/services/{id:guid}/resources", async (Guid id, AllocateResourceCommand command, IMediator mediator) =>
         {
@@ -181,7 +182,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapDelete("/services/{serviceId:guid}/resources/{resourceId:guid}", async (Guid serviceId, Guid resourceId, IMediator mediator) =>
         {
@@ -189,7 +190,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/services/topology/{topologyId:guid}/links", async (Guid topologyId, AddTopologyLinkCommand command, IMediator mediator) =>
         {
@@ -200,7 +201,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/service-inventory/services/topology/{topologyId}/links", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapPost("/services/discovery", async (StartDiscoveryJobCommand command, IMediator mediator) =>
         {
@@ -208,7 +209,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Created($"/api/v1/service-inventory/services/discovery/jobs/{result.Value.Id}", result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
 
         group.MapGet("/services/discovery/jobs", async ([AsParameters] GetDiscoveryJobsQuery query, IMediator mediator) =>
         {
@@ -216,7 +217,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapGet("/services/discovery/unmatched", async ([AsParameters] GetUnmatchedResourcesQuery query, IMediator mediator) =>
         {
@@ -224,7 +225,7 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceRead));
 
         group.MapPut("/services/discovery/jobs/{jobId:guid}/complete", async (Guid jobId, CompleteDiscoveryJobCommand command, IMediator mediator) =>
         {
@@ -235,6 +236,6 @@ public static class ServiceEndpoints
             return result.IsSuccess
                 ? (IResult)TypedResults.Ok(result.Value)
                 : (IResult)TypedResults.BadRequest(result.Error);
-        });
+        }).RequireAuthorization(Permissions.PolicyName(Permissions.Telecom.ServiceWrite));
     }
 }

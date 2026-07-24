@@ -27,6 +27,9 @@ public class Balance : AggregateRoot<Guid>, ITenantEntity
     public string Currency { get; private set; } = string.Empty;
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+#pragma warning disable S1144
+    public uint ConcurrencyStamp { get; private set; }
+#pragma warning restore S1144
 
     public static Balance Create(string tenantId, Guid subscriptionId, string currency)
     {
