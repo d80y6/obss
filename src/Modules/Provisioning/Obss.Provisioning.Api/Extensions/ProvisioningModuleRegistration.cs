@@ -13,6 +13,8 @@ using Obss.Provisioning.Application.Services;
 using Obss.Provisioning.Infrastructure.Adapters.Common;
 using Obss.Provisioning.Infrastructure.Adapters.Cisco;
 using Obss.Provisioning.Infrastructure.Adapters.Huawei;
+using Obss.Provisioning.Infrastructure.Adapters.Juniper;
+using Obss.Provisioning.Infrastructure.Adapters.Nokia;
 using Obss.Provisioning.Infrastructure.Persistence;
 using Obss.Provisioning.Infrastructure.Persistence.Repositories;
 using Obss.Provisioning.Infrastructure.Services;
@@ -44,6 +46,8 @@ public static class ProvisioningModuleRegistration
 
         RegisterHuaweiAdapter(services, configuration);
         RegisterCiscoAdapter(services, configuration);
+        RegisterJuniperAdapter(services, configuration);
+        RegisterNokiaAdapter(services, configuration);
 
         services.AddScoped<IProvisioningAdapter, NetworkProvisioningAdapter>();
         services.AddScoped<IProvisioningAdapter, DnsSetupAdapter>();
@@ -143,6 +147,74 @@ public static class ProvisioningModuleRegistration
         }
 
         services.AddScoped<IProvisioningAdapter, CiscoProvisioningAdapter>();
+    }
+
+    private static void RegisterJuniperAdapter(IServiceCollection services, IConfiguration? configuration)
+    {
+        var config = new JuniperAdapterConfig();
+
+        if (configuration is not null)
+        {
+            var section = configuration.GetSection("Provisioning:Juniper");
+            if (section.Exists())
+            {
+                section.Bind(config);
+            }
+        }
+
+        services.AddSingleton(config);
+
+        if (config.UseSimulator)
+        {
+            services.AddSingleton<IJuniperRouterAdapter>(_ => new JuniperRouterSimulator());
+        }
+        else
+        {
+            services.AddSingleton<IJuniperRouterAdapter>(_ =>
+            {
+                var restconfTransport = new RestconfTransport(new RestconfTransportConfig
+                {
+                    BaseUri = config.BaseUri
+                });
+                return new JuniperRouterAdapter(config, restconfTransport);
+            });
+        }
+
+        services.AddScoped<IProvisioningAdapter, JuniperProvisioningAdapter>();
+    }
+
+    private static void RegisterNokiaAdapter(IServiceCollection services, IConfiguration? configuration)
+    {
+        var config = new NokiaAdapterConfig();
+
+        if (configuration is not null)
+        {
+            var section = configuration.GetSection("Provisioning:Nokia");
+            if (section.Exists())
+            {
+                section.Bind(config);
+            }
+        }
+
+        services.AddSingleton(config);
+
+        if (config.UseSimulator)
+        {
+            services.AddSingleton<INokiaRouterAdapter>(_ => new NokiaRouterSimulator());
+        }
+        else
+        {
+            services.AddSingleton<INokiaRouterAdapter>(_ =>
+            {
+                var restconfTransport = new RestconfTransport(new RestconfTransportConfig
+                {
+                    BaseUri = config.BaseUri
+                });
+                return new NokiaRouterAdapter(config, restconfTransport);
+            });
+        }
+
+        services.AddScoped<IProvisioningAdapter, NokiaProvisioningAdapter>();
     }
 
     public static IEndpointRouteBuilder MapProvisioningEndpoints(this IEndpointRouteBuilder app)
